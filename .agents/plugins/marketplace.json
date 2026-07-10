@@ -1,0 +1,20 @@
+{
+  "name": "polygres",
+  "interface": {
+    "displayName": "Polygres"
+  },
+  "plugins": [
+    {
+      "name": "polygres",
+      "source": {
+        "source": "local",
+        "path": "./plugins/polygres"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

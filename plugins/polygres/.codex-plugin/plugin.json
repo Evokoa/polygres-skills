@@ -1,0 +1,39 @@
+{
+  "name": "polygres",
+  "version": "0.1.0",
+  "description": "Operate managed Polygres projects safely through the Polygres CLI.",
+  "author": {
+    "name": "Polygres",
+    "email": "support@evokoa.com",
+    "url": "https://polygres.com"
+  },
+  "homepage": "https://docs.evokoa.com/polygres/cli",
+  "repository": "https://github.com/Evokoa/polygres-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "polygres",
+    "postgres",
+    "database",
+    "data-import",
+    "retrieval",
+    "developer-tools"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Polygres",
+    "shortDescription": "Operate Polygres projects safely",
+    "longDescription": "Use the Polygres CLI to authenticate, select projects, import data, apply migrations, manage Runtime API keys, configure retrieval, and diagnose readiness or failures.",
+    "developerName": "Polygres",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://polygres.com",
+    "defaultPrompt": [
+      "Log in to Polygres and help me select a project.",
+      "Import this JSON file into Polygres safely.",
+      "Diagnose why my latest Polygres import failed."
+    ]
+  }
+}

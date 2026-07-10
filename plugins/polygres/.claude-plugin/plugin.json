@@ -1,0 +1,20 @@
+{
+  "name": "polygres",
+  "version": "0.1.0",
+  "description": "Operate managed Polygres projects safely through the Polygres CLI.",
+  "author": {
+    "name": "Polygres",
+    "email": "support@evokoa.com",
+    "url": "https://polygres.com"
+  },
+  "homepage": "https://docs.evokoa.com/polygres/cli",
+  "repository": "https://github.com/Evokoa/polygres-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "polygres",
+    "postgres",
+    "database",
+    "data-import",
+    "retrieval"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "polygres",
+  "owner": {
+    "name": "Polygres",
+    "url": "https://polygres.com"
+  },
+  "metadata": {
+    "description": "Polygres skills for operating managed Postgres projects with coding agents."
+  },
+  "plugins": [
+    {
+      "name": "polygres",
+      "source": "./plugins/polygres",
+      "description": "Authenticate, select projects, import data, apply migrations, configure retrieval, and troubleshoot Polygres.",
+      "version": "0.1.0"
+    }
+  ]
+}
