@@ -1,7 +1,7 @@
 {
   "name": "polygres",
-  "version": "0.1.0",
-  "description": "Operate managed Polygres projects safely through the Polygres CLI.",
+  "version": "0.2.0",
+  "description": "Operate, design, build, and troubleshoot Polygres through public CLI and SDK workflows.",
   "author": {
     "name": "Polygres",
     "email": "support@evokoa.com",

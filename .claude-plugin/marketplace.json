@@ -5,14 +5,14 @@
     "url": "https://polygres.com"
   },
   "metadata": {
-    "description": "Polygres skills for operating managed Postgres projects with coding agents."
+    "description": "Polygres skills for operations, retrieval design, Python applications, and troubleshooting."
   },
   "plugins": [
     {
       "name": "polygres",
       "source": "./plugins/polygres",
-      "description": "Authenticate, select projects, import data, apply migrations, configure retrieval, and troubleshoot Polygres.",
-      "version": "0.1.0"
+      "description": "Operate projects, design and build retrieval, and diagnose failures through public Polygres interfaces.",
+      "version": "0.2.0"
     }
   ]
 }

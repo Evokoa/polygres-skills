@@ -1,0 +1,4 @@
+interface:
+  display_name: "Polygres Retrieval Design"
+  short_description: "Plan Polygres retrieval before implementation"
+  default_prompt: "Use $polygres-retrieval-design to produce a reviewable retrieval plan."

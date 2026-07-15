@@ -49,7 +49,7 @@ def test_codex_manifest_and_marketplace_are_consistent() -> None:
     entry = marketplace["plugins"][0]
 
     assert manifest["name"] == "polygres"
-    assert manifest["version"] == "0.1.0"
+    assert manifest["version"] == "0.2.0"
     assert manifest["skills"] == "./skills/"
     assert (PLUGIN_ROOT / manifest["skills"]).is_dir()
     assert entry["name"] == manifest["name"]
@@ -66,13 +66,11 @@ def test_codex_manifest_and_marketplace_are_consistent() -> None:
 
 def test_claude_manifest_and_marketplace_are_consistent() -> None:
     manifest = json.loads((PLUGIN_ROOT / ".claude-plugin" / "plugin.json").read_text())
-    marketplace = json.loads(
-        (PACKAGE_ROOT / ".claude-plugin" / "marketplace.json").read_text()
-    )
+    marketplace = json.loads((PACKAGE_ROOT / ".claude-plugin" / "marketplace.json").read_text())
     entry = marketplace["plugins"][0]
 
     assert manifest["name"] == "polygres"
-    assert manifest["version"] == "0.1.0"
+    assert manifest["version"] == "0.2.0"
     assert entry["name"] == manifest["name"]
     assert entry["version"] == manifest["version"]
     assert entry["source"] == "./plugins/polygres"

@@ -1,7 +1,7 @@
 {
   "name": "polygres",
-  "version": "0.1.0",
-  "description": "Operate managed Polygres projects safely through the Polygres CLI.",
+  "version": "0.2.0",
+  "description": "Operate, design, build, and troubleshoot Polygres through public CLI and SDK workflows.",
   "author": {
     "name": "Polygres",
     "email": "support@evokoa.com",
@@ -22,7 +22,7 @@
   "interface": {
     "displayName": "Polygres",
     "shortDescription": "Operate Polygres projects safely",
-    "longDescription": "Use the Polygres CLI to authenticate, select projects, import data, apply migrations, manage Runtime API keys, configure retrieval, and diagnose readiness or failures.",
+    "longDescription": "Operate projects with the public CLI, design reviewable retrieval plans, build applications with the Python SDK, and diagnose failures from public read-only evidence.",
     "developerName": "Polygres",
     "category": "Developer Tools",
     "capabilities": [
@@ -31,9 +31,9 @@
     ],
     "websiteURL": "https://polygres.com",
     "defaultPrompt": [
-      "Log in to Polygres and help me select a project.",
-      "Import this JSON file into Polygres safely.",
-      "Diagnose why my latest Polygres import failed."
+      "Review and safely apply this Polygres import or migration through the CLI.",
+      "Design and implement Polygres retrieval in my application.",
+      "Diagnose this Polygres project or retrieval failure safely."
     ]
   }
 }

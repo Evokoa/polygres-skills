@@ -1,0 +1,4 @@
+interface:
+  display_name: "Polygres SDK"
+  short_description: "Build retrieval applications with Polygres"
+  default_prompt: "Use $polygres-sdk to add safe Polygres retrieval to this Python application."
