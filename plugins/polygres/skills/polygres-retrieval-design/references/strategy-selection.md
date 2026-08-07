@@ -10,6 +10,7 @@ Choose the smallest strategy that answers the representative questions.
 | Lexical relevance | TSVector | language configuration, ranking, indexed source columns |
 | Typo-tolerant names or short labels | fuzzy | threshold, normalization, candidate cap, false positives |
 | Multiple evidence modes | hybrid | stage order, provenance, deduplication, token budget |
+| Managed AI Search collection with point lifecycle, registered filters, recall checks, or Context plus graph/text composition | pgContext | native Context vectors, source mode, reconciliation, capability status, preview contract |
 
 ## Decision procedure
 
@@ -23,6 +24,15 @@ Choose the smallest strategy that answers the representative questions.
 5. Select hybrid only when a single mode demonstrably misses required
    evidence. Define which stage supplies candidates and which stage reranks or
    expands them.
+6. Select pgContext when collection identity, native Context vectors, durable
+   point reconciliation, registered filters, recall validation, or Context
+   graph/text composition are requirements. Prefer the existing pgvector-backed
+   vector surface for a simple established pgvector configuration that does not
+   need those collection semantics.
+
+A pgvector configuration ID cannot be used as a pgContext collection. Record a
+migration or coexistence plan when both surfaces are present; do not imply an
+automatic conversion or fallback.
 
 If the request requires an unsupported strategy, mark it as unsupported and
 offer the nearest public alternative. If there is an empty sample, missing

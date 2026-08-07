@@ -1,6 +1,6 @@
 ---
 name: polygres-retrieval-design
-description: Design and review Polygres retrieval plans across relational, graph, vector, text, and hybrid strategies. Use when a user needs to choose a retrieval approach, model graph or embedding inputs, plan grounded RAG, or review retrieval architecture before configuration or application implementation. Do not use to mutate a project, run configuration commands, or write application code.
+description: Design and review Polygres retrieval plans across relational, graph, pgvector, text, hybrid, and pgContext AI Search strategies. Use when a user must choose between retrieval surfaces, model graph or embedding inputs, plan Context collections or grounded RAG, or review retrieval architecture before configuration or implementation. Do not mutate a project, run configuration commands, or write application code.
 ---
 
 # Polygres Retrieval Design
@@ -21,11 +21,13 @@ This skill is advisory: it must not mutate a project directly.
 4. For graph retrieval, apply `references/graph-modeling.md`. For vector,
    TSVector, or fuzzy retrieval, apply
    `references/vector-and-text-design.md`.
-5. For multi-stage retrieval or RAG, apply
+5. For pgContext collections, point synchronization, registered filters, or
+   Context retrieval modes, apply `references/context-design.md`.
+6. For multi-stage retrieval or RAG, apply
    `references/hybrid-and-rag-plan.md`.
-6. Write the result with `references/plan-template.md`. Separate known facts,
+7. Write the result with `references/plan-template.md`. Separate known facts,
    assumptions, decisions, risks, validation, and handoff work.
-7. After explicit approval, delegate supported project configuration to
+8. After explicit approval, delegate supported project configuration to
    `$polygres-cli` and application code to `$polygres-sdk`. Do not silently
    switch from planning to execution.
 
@@ -33,13 +35,15 @@ This skill is advisory: it must not mutate a project directly.
 
 - Prefer relational retrieval for exact predicates, joins, aggregates, and
   transactions that do not need a retrieval index.
-- Treat graph, vector, and text indexes as derived project resources whose
-  readiness and refresh behavior must be validated.
+- Treat graph, vector, text, and Context indexes and point mappings as derived
+  project resources whose readiness and refresh behavior must be validated.
 - Use exact schema identifiers and stable row ID values from verified data.
   Do not use invented row IDs or fuzzy-match schema names.
 - Bound graph direction, depth, fan-out, result count, and cycle behavior.
 - Record the embedding model, dimensions, metric, input construction, and
   response to a dimension mismatch or empty embedding.
+- Record whether pgvector configuration or pgContext collection semantics are
+  required. Never treat those resources as interchangeable.
 - State TSVector language/configuration choices and fuzzy thresholds.
 - For hybrid retrieval, define stage order, provenance, deduplication,
   authorization, and token budget.

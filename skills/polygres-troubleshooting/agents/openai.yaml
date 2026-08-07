@@ -1,4 +1,4 @@
 interface:
   display_name: "Polygres Troubleshooting"
-  short_description: "Diagnose failures from public Polygres evidence"
-  default_prompt: "Use $polygres-troubleshooting to diagnose this Polygres failure safely."
+  short_description: "Diagnose Polygres and pgContext safely"
+  default_prompt: "Use $polygres-troubleshooting to diagnose this pgContext failure without mutation."

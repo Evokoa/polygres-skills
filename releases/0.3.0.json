@@ -1,0 +1,38 @@
+{
+  "$schema": "./schema.json",
+  "version": "0.3.0",
+  "release_date": "2026-08-06",
+  "compatibility": {
+    "polygres_cli": {
+      "minimum_supported": "0.2.0",
+      "maximum_tested": "0.2.0"
+    },
+    "polygres_sdk": {
+      "minimum_supported": "0.2.0",
+      "maximum_tested": "0.2.0"
+    },
+    "codex": {
+      "tested": "0.144.2"
+    },
+    "claude_code": {
+      "tested": "2.1.81"
+    },
+    "skills_cli": {
+      "tested": null
+    }
+  },
+  "content_digest": "sha256:0c6f665210a399afe3bf7368efa736622569b722aaca63fdf455ecb5a386ac9f",
+  "installation_channels_verified": [
+    "codex-plugin-validator",
+    "claude-plugin-validator"
+  ],
+  "behavioral_evaluations": [
+    "Read-only retrieval-design evaluation",
+    "Read-only troubleshooting evaluation"
+  ],
+  "known_limitations": [
+    "Clean-machine installation from the remote public repository has not been verified.",
+    "Automatic skill activation has not been verified across all supported agents.",
+    "The skills CLI version and installation channel have not been verified."
+  ]
+}

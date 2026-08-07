@@ -1,6 +1,6 @@
 ---
 name: polygres-cli
-description: Use the Polygres CLI to authenticate, select and inspect projects, obtain safe Postgres connection information, open psql, manage Runtime API keys, import CSV, TSV, JSON, or JSONL data through safe local preparation and the CSV import API, apply migrations, configure graph, vector, or text retrieval, and check project or retrieval readiness. Use whenever a user asks an AI coding agent to set up, operate, automate, or troubleshoot a managed Polygres project.
+description: Use the Polygres CLI to authenticate, select and inspect projects, obtain safe Postgres connection information, manage Runtime API keys, import data, apply migrations, configure graph, vector, text, or pgContext AI Search, manage Context collections and durable operations, and check readiness. Use when an agent must set up, operate, automate, or recover a documented managed-project operation through public CLI workflows. Use polygres-troubleshooting instead for evidence-first diagnosis of an unexplained failure.
 ---
 
 # Polygres CLI
@@ -37,7 +37,8 @@ Read only the references needed for the task:
 | Environment, Postgres metadata, `psql`, Runtime API keys | `references/database-and-keys.md` |
 | CSV, TSV, JSON, JSONL/NDJSON, import jobs | `references/data-imports.md` |
 | Migration list/apply and SQL safety | `references/migrations.md` |
-| Graph, vector, text, retrieval readiness | `references/retrieval.md` |
+| Graph, pgvector, text, and general retrieval readiness | `references/retrieval.md` |
+| pgContext AI Search collections, filters, points, operations, and retrieval | `references/context.md` |
 | JSON output, polling, exit codes, retry and recovery | `references/automation-and-errors.md` |
 
 ## Execute an operation
@@ -64,10 +65,17 @@ Obtain explicit user approval before:
 - creating a generated TSVector column;
 - revoking a Runtime API key;
 - deleting vector or text configurations;
+- every durable pgContext mutation, including collection create, update,
+  set-default, reindex, or delete; filter registration; point reconciliation;
+  and operation cancellation or retry;
+- pgContext point upsert or delete when it will become a durable operation or
+  when deleting mappings is destructive for the user's serving behavior;
 - any command that uses `--yes`;
 - any other operation that is destructive or difficult to reverse.
 
 Add `--yes` only after approval for that exact operation and target.
+Before approval for `add-column` or `new-table` collection creation, also show
+the preflight DDL, affected schema objects, and ownership boundaries.
 
 ## Protect secrets
 

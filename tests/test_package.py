@@ -9,6 +9,7 @@ import pytest
 
 PACKAGE_ROOT = Path(__file__).parents[1]
 PLUGIN_ROOT = PACKAGE_ROOT / "plugins" / "polygres"
+PACKAGE_VERSION = (PACKAGE_ROOT / "VERSION").read_text().strip()
 SKILL_ROOT = PLUGIN_ROOT / "skills" / "polygres-cli"
 MONOREPO_ROOT = PACKAGE_ROOT.parents[1]
 CLI_SOURCE = MONOREPO_ROOT / "packages" / "python-cli" / "src"
@@ -31,6 +32,7 @@ def test_skill_frontmatter_and_required_resources() -> None:
     expected = {
         "authentication-and-projects.md",
         "automation-and-errors.md",
+        "context.md",
         "data-imports.md",
         "database-and-keys.md",
         "migrations.md",
@@ -49,7 +51,7 @@ def test_codex_manifest_and_marketplace_are_consistent() -> None:
     entry = marketplace["plugins"][0]
 
     assert manifest["name"] == "polygres"
-    assert manifest["version"] == "0.2.0"
+    assert manifest["version"] == PACKAGE_VERSION
     assert manifest["skills"] == "./skills/"
     assert (PLUGIN_ROOT / manifest["skills"]).is_dir()
     assert entry["name"] == manifest["name"]
@@ -70,7 +72,7 @@ def test_claude_manifest_and_marketplace_are_consistent() -> None:
     entry = marketplace["plugins"][0]
 
     assert manifest["name"] == "polygres"
-    assert manifest["version"] == "0.2.0"
+    assert manifest["version"] == PACKAGE_VERSION
     assert entry["name"] == manifest["name"]
     assert entry["version"] == manifest["version"]
     assert entry["source"] == "./plugins/polygres"
@@ -108,6 +110,7 @@ def test_documented_command_shapes_parse_with_current_cli() -> None:
         sys.path.pop(0)
 
     parser = build_parser()
+    context_id = "00000000-0000-0000-0000-000000000000"
     samples = [
         ["login"],
         ["logout"],
@@ -168,6 +171,154 @@ def test_documented_command_shapes_parse_with_current_cli() -> None:
             "body_tsv",
         ],
         ["text", "configs", "delete", "00000000-0000-0000-0000-000000000000", "--yes"],
+        ["context", "capabilities"],
+        ["context", "sources", "discover", "--schema", "public"],
+        ["context", "sources", "preflight", "--file", "context.json"],
+        ["context", "collections", "list"],
+        ["context", "collections", "get", context_id],
+        ["context", "collections", "status", context_id],
+        ["context", "collections", "verify", context_id],
+        ["context", "collections", "diagnostics", context_id],
+        [
+            "context",
+            "collections",
+            "create",
+            "support_docs",
+            "--source",
+            "existing",
+            "--schema",
+            "public",
+            "--table",
+            "documents",
+            "--source-key-column",
+            "id",
+            "--vector-column",
+            "embedding",
+            "--dimensions",
+            "768",
+            "--metric",
+            "cosine",
+            "--text-column",
+            "content",
+            "--result-column",
+            "title",
+            "--filter-column",
+            "tenant_id",
+            "--no-wait",
+            "--idempotency-key",
+            context_id,
+        ],
+        ["context", "collections", "update", context_id, "--max-search-limit", "500"],
+        ["context", "collections", "set-default", context_id, "--no-wait"],
+        ["context", "collections", "reindex", context_id, "--no-wait"],
+        ["context", "collections", "delete", context_id, "--yes", "--no-wait"],
+        ["context", "filters", "list", context_id],
+        [
+            "context",
+            "filters",
+            "add-column",
+            context_id,
+            "--key",
+            "tenant_id",
+            "--column",
+            "tenant_id",
+            "--no-wait",
+        ],
+        [
+            "context",
+            "filters",
+            "add-jsonb-path",
+            context_id,
+            "--key",
+            "topic",
+            "--column",
+            "metadata",
+            "--path",
+            "topic",
+            "--no-wait",
+        ],
+        ["context", "points", "upsert", context_id, "doc_1", "doc_2"],
+        ["context", "points", "delete", context_id, "doc_1"],
+        ["context", "points", "status", context_id],
+        ["context", "points", "reconcile", context_id, "--no-wait"],
+        ["context", "points", "scroll", context_id, "--limit", "50", "--cursor", "opaque"],
+        ["context", "operations", "list", "--collection-id", context_id],
+        ["context", "operations", "get", context_id],
+        ["context", "operations", "wait", context_id, "--timeout", "1800"],
+        ["context", "operations", "cancel", context_id, "--no-wait"],
+        ["context", "operations", "retry", context_id, "--no-wait"],
+        ["context", "count", "support_docs", "--filter-json", "{}"],
+        ["context", "facets", "support_docs", "category", "--limit", "10"],
+        ["context", "search", "support_docs", "--embedding-file", "embedding.json"],
+        [
+            "context",
+            "text-hybrid",
+            "support_docs",
+            "--embedding-file",
+            "embedding.json",
+            "--query",
+            "current guidance",
+        ],
+        [
+            "context",
+            "graph-first",
+            "support_docs",
+            "--embedding-file",
+            "embedding.json",
+            "--start-schema",
+            "public",
+            "--start-table",
+            "accounts",
+            "--start-id",
+            "acct_123",
+        ],
+        [
+            "context",
+            "vector-first",
+            "support_docs",
+            "--embedding-file",
+            "embedding.json",
+        ],
+        [
+            "context",
+            "rank-fusion",
+            "support_docs",
+            "--embedding-file",
+            "embedding.json",
+            "--start-schema",
+            "public",
+            "--start-table",
+            "accounts",
+            "--start-id",
+            "acct_123",
+        ],
+        [
+            "context",
+            "joint",
+            "support_docs",
+            "--embedding-file",
+            "embedding.json",
+            "--query",
+            "current guidance",
+        ],
+        [
+            "context",
+            "grouped-search",
+            "support_docs",
+            "--embedding-file",
+            "embedding.json",
+            "--group-by",
+            "tenant_id",
+        ],
+        [
+            "context",
+            "recall-check",
+            "support_docs",
+            "--embedding-file",
+            "embedding.json",
+            "--minimum-recall",
+            "0.95",
+        ],
         ["ready"],
         ["config", "path"],
     ]

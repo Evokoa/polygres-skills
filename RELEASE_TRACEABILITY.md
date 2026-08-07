@@ -1,24 +1,50 @@
 # Polygres Agent Skills release traceability
 
-Date: 2026-07-14
+Date: 2026-08-06
 
-Scope: complete the useful public skill expansion supported by the current
-documented CLI and SDK contracts. This increment adds
-`polygres-retrieval-design` and `polygres-troubleshooting`. CLI parity,
-database workflows, and the native installer remain gated by absent public
-source-of-truth contracts. A separate `polygres-organizations` skill is
-intentionally excluded; organization guidance belongs in product documentation
-or an existing skill when directly relevant.
+Scope: extend the four role-based public skills with pgContext guidance backed by the released CLI and SDK contracts. Release `0.3.0` keeps operations, application development, retrieval design, and troubleshooting separate while covering one coherent Context lifecycle. Broader database workflows and the native skill installer remain gated by absent public source-of-truth contracts. A separate `polygres-organizations` skill remains intentionally excluded; organization guidance belongs in product documentation or an existing skill when directly relevant.
+
+## Release identity
+
+Release `0.3.0` uses `VERSION` as its canonical version and validates matching Codex, Claude, marketplace, release-record, and `polygres-skills-vX.Y.Z` tag values. The structured record is `releases/0.3.0.json`. Its deterministic installable-payload digest is `sha256:554a4223067463d0dd7fde6cb0c8119bffc5a6de5c99f98d40fbb1981c6491c1`.
+
+The release record identifies CLI `0.2.0` and SDK `0.2.0` as both the minimum supported and maximum tested package versions. The skills CLI installation channel remains explicitly unverified rather than claiming an unknown tool version.
+
+## pgContext guidance expansion
+
+Release `0.3.0` adds pgContext AI Search to every applicable role-based skill without adding an overlapping feature-specific skill:
+
+- `polygres-retrieval-design` distinguishes pgContext collection semantics from the pgvector configuration surface and plans embeddings, ownership, synchronization, retrieval modes, and preview compatibility;
+- `polygres-cli` guides capability discovery, source discovery, preflight, approval-gated creation, filters, point synchronization, retrieval, durable operations, diagnostics, and deletion;
+- `polygres-sdk` covers Context capabilities, automated collection setup, point mutation union responses, every retrieval mode, trusted authorization filters, typed results, and recovery-safe idempotency;
+- `polygres-troubleshooting` diagnoses Context capability, collection, index, point, operation, recall, text, graph, Joint, admission, and timeout failures from public read-only evidence.
+
+Verification for this increment:
+
+| Check | Result |
+| --- | --- |
+| Non-heavy package tests | 63 passed, 7 deselected |
+| Heavy CLI and SDK source-contract tests | 7 passed, 63 deselected |
+| Package validator | Validated 4 skills |
+| Release contract | Version, manifests, release record, digest, and `polygres-skills-v0.3.0` tag matched |
+| Release-record schema | Valid against `releases/schema.json` |
+| Skill Creator quick validation | All 4 skills valid |
+| Ruff lint and touched-test format check | Passed |
+| CLI documentation verifier | Passed |
+| Deterministic public export | Exported twice with no differences |
+
+No live Polygres project was mutated while validating the skill update.
 
 ## Verification commands
 
 | ID | Exact command | Result |
 | --- | --- | --- |
-| U | `packages/python-sdk/.venv/bin/python -m pytest packages/agent-skills/tests -m 'not heavy' -q` | 51 passed, 6 deselected |
-| H | `packages/python-sdk/.venv/bin/python -m pytest packages/agent-skills/tests -m heavy -q` | 6 passed, 51 deselected |
+| U | `packages/python-sdk/.venv/bin/python -m pytest packages/agent-skills/tests -m 'not heavy' -q` | 63 passed, 7 deselected |
+| H | `packages/python-sdk/.venv/bin/python -m pytest packages/agent-skills/tests -m heavy -q` | 7 passed, 63 deselected |
 | L | `packages/python-sdk/.venv/bin/python -m ruff check packages/agent-skills` | Passed |
-| F | `packages/python-sdk/.venv/bin/python -m ruff format --check packages/agent-skills/scripts packages/agent-skills/tests/test_package.py packages/agent-skills/tests/test_sdk_skill.py packages/agent-skills/tests/test_remaining_skills.py packages/agent-skills/tests/heavy/test_remaining_skill_contracts.py` | 6 files already formatted |
+| F | `packages/python-sdk/.venv/bin/python -m ruff format --check packages/agent-skills/tests/test_package.py packages/agent-skills/tests/test_sdk_skill.py packages/agent-skills/tests/test_remaining_skills.py packages/agent-skills/tests/heavy/test_remaining_skill_contracts.py packages/agent-skills/tests/heavy/test_sdk_skill_contract.py` | 5 files already formatted |
 | P | `packages/python-sdk/.venv/bin/python packages/agent-skills/scripts/validate_package.py packages/agent-skills` | Validated 4 skills |
+| X | `packages/python-sdk/.venv/bin/python packages/agent-skills/scripts/release_version.py check --tag polygres-skills-v0.3.0` | Version, manifests, release record, digest, and tag matched |
 | E | `packages/python-sdk/.venv/bin/python packages/agent-skills/scripts/export_public.py packages/agent-skills /tmp/polygres-skills-export-check-a`; repeat to `-b`; `diff -qr /tmp/polygres-skills-export-check-a /tmp/polygres-skills-export-check-b` | Exported 4 skills twice; no differences |
 | Q | `.venv/bin/python /Users/damienlim/.codex/skills/.system/skill-creator/scripts/quick_validate.py <skill-directory>` for all four skills | All valid |
 | V | `.venv/bin/python /Users/damienlim/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py packages/agent-skills/plugins/polygres` | Passed |
@@ -29,24 +55,17 @@ or an existing skill when directly relevant.
 | R | Isolated read-only forward evaluation using `polygres-retrieval-design` with an underspecified support-ticket hybrid retrieval prompt | Passed; no live calls or mutation |
 | T | Isolated read-only forward evaluation using `polygres-troubleshooting` with ambiguous projects, a timed-out import, `read_only`, dimension mismatch, and supplied credential placeholders | Passed; stopped on ambiguity, redacted secrets, retained IDs, no mutation |
 
-Initial red baseline: U produced 14 expected failures, 37 passes, and 6
-deselections before implementation. H produced 6 passes and 51 deselections,
-confirming the audited public contract gates. Ruff formatted the new and
-already-touched tests before this final red baseline. Test behavior and
-assertions were frozen after the baseline and were not changed during
-implementation.
+Initial red baseline: U produced 14 expected failures, 37 passes, and 6 deselections before implementation. H produced 6 passes and 51 deselections, confirming the audited public contract gates. Ruff formatted the new and already-touched tests before this final red baseline. Test behavior and assertions were frozen after the baseline and were not changed during implementation.
 
-Tool versions: Python 3.14.5, pytest 9.1.1, Ruff 0.15.19, Node.js 22.12.0,
-npm 10.9.0, Claude Code 2.1.81, and Codex CLI 0.144.2. Source baseline:
-`ca527f05`.
+Version-contract verification used Python 3.14.6, pytest 9.1.1, and Ruff 0.15.22. The behavioral evaluations used Claude Code 2.1.81 and Codex CLI 0.144.2. Source baseline: `ca527f05`.
 
 ## Expansion acceptance criteria
 
 | Acceptance criterion | Implementation file(s) | Test file(s) | Verification | Status |
 | --- | --- | --- | --- | --- |
-| Priority 1 SDK skill remains separate from CLI operations and covers public Runtime API retrieval, setup, readiness, pagination, errors, provenance, and RAG. | `plugins/polygres/skills/polygres-sdk/SKILL.md`; SDK references | `tests/test_sdk_skill.py`; `tests/heavy/test_sdk_skill_contract.py` | U, H, Q, S | done |
-| Priority 2 extends CLI guidance only for implemented, tested, documented, released commands. | No command additions; current `polygres-cli` skill retained. | `tests/test_package.py`; `tests/heavy/test_remaining_skill_contracts.py` | U, H, C, D | intentionally out of scope |
-| Retrieval design chooses among relational, graph, vector, TSVector, fuzzy, and hybrid strategies and rejects unsupported or underspecified choices. | `polygres-retrieval-design/SKILL.md`; `references/strategy-selection.md`; `references/plan-template.md` | `tests/test_remaining_skills.py` | U, Q, R | done |
+| Priority 1 SDK skill remains separate from CLI operations and covers public Runtime API retrieval, pgContext lifecycle and durable operations, setup, readiness, pagination, errors, provenance, and RAG. | `plugins/polygres/skills/polygres-sdk/SKILL.md`; SDK references | `tests/test_sdk_skill.py`; `tests/heavy/test_sdk_skill_contract.py` | U, H, Q, S | done |
+| Priority 2 CLI guidance covers implemented, tested, documented, and released pgContext commands without inventing unsupported flags or legacy configuration IDs. | `polygres-cli/SKILL.md`; `references/context.md` | `tests/test_package.py`; `tests/heavy/test_remaining_skill_contracts.py` | U, H, C, D | done |
+| Retrieval design chooses among relational, graph, pgvector, TSVector, fuzzy, hybrid, and pgContext strategies and rejects unsupported or underspecified choices. | `polygres-retrieval-design/SKILL.md`; `references/strategy-selection.md`; `references/context-design.md`; `references/plan-template.md` | `tests/test_remaining_skills.py` | U, Q, R | done |
 | Retrieval design covers nodes, stable row IDs, relationships, direction, bounded depth, fan-out, cycles, and graph provenance without invented identifiers. | `polygres-retrieval-design/references/graph-modeling.md` | `tests/test_remaining_skills.py` | U, Q, R | done |
 | Retrieval design covers embedding model and dimensions, vector properties and filters, TSVector configuration, fuzzy fields, malformed input, empty input, and reindex policy. | `polygres-retrieval-design/references/vector-and-text-design.md` | `tests/test_remaining_skills.py` | U, Q, R | done |
 | Retrieval design covers hybrid stage order, readiness, rebuild, authorization, provenance, deduplication, partial failure, and token budgets. | `polygres-retrieval-design/references/hybrid-and-rag-plan.md` | `tests/test_remaining_skills.py` | U, Q, R | done |

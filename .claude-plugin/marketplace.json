@@ -5,14 +5,14 @@
     "url": "https://polygres.com"
   },
   "metadata": {
-    "description": "Polygres skills for operations, retrieval design, Python applications, and troubleshooting."
+    "description": "Polygres skills for operations, pgContext and retrieval design, Python applications, and troubleshooting."
   },
   "plugins": [
     {
       "name": "polygres",
       "source": "./plugins/polygres",
-      "description": "Operate projects, design and build retrieval, and diagnose failures through public Polygres interfaces.",
-      "version": "0.2.0"
+      "description": "Operate projects, design and build pgContext retrieval, and diagnose failures through public Polygres interfaces.",
+      "version": "0.3.0"
     }
   ]
 }

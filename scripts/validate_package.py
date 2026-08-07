@@ -8,6 +8,8 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from release_version import verify_release
+
 SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 REFERENCE = re.compile(r"`(references/[^`]+\.md)`")
 FORBIDDEN_PLACEHOLDERS = ("TO" + "DO", "FIX" + "ME", "[TO" + "DO:")
@@ -138,6 +140,7 @@ def validate_package(package_root: Path) -> list[SkillMetadata]:
         _validate_skill_files(metadata)
     _validate_descriptions(skills)
     _validate_manifests(package_root, plugin_root)
+    verify_release(package_root)
     return skills
 
 

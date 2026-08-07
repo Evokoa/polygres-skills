@@ -1,4 +1,4 @@
 interface:
   display_name: "Polygres CLI"
-  short_description: "Operate Polygres projects safely with the CLI"
-  default_prompt: "Use $polygres-cli to import this JSON file into a Polygres table safely."
+  short_description: "Operate Polygres projects and pgContext safely"
+  default_prompt: "Use $polygres-cli to set up this pgContext AI Search collection safely."

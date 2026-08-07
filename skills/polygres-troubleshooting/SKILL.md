@@ -1,6 +1,6 @@
 ---
 name: polygres-troubleshooting
-description: Diagnose Polygres CLI, Runtime API, control-plane, Postgres, job, migration, and retrieval failures using public read-only evidence. Use when a user reports an error, timeout, partial failure, readiness problem, ambiguous project, import or migration issue, or broken graph, vector, text, or hybrid retrieval. Do not use private observability systems, undocumented endpoints, or mutating repair actions while diagnosing.
+description: Diagnose Polygres CLI, Runtime API, control-plane, Postgres, job, migration, retrieval, and pgContext failures using public read-only evidence. Use for errors, timeouts, partial failures, readiness problems, ambiguous projects, failed Context collections or operations, stale point mappings, or broken graph, vector, text, hybrid, or Joint retrieval. Do not use private observability, undocumented endpoints, or mutating repair actions.
 ---
 
 # Polygres Troubleshooting
@@ -22,7 +22,9 @@ while diagnosing.
    `references/projects-and-database.md`.
 5. For import job or migration failures, use
    `references/jobs-and-migrations.md`. For graph, vector, text, hybrid, or
-   readiness failures, use `references/retrieval.md`.
+   general readiness failures, use `references/retrieval.md`. For pgContext
+   capability, collection, point, operation, recall, or Joint failures, use
+   `references/context.md`.
 6. Classify the fault as CLI/local configuration, control-plane, Runtime API,
    Postgres/database or pooler, or asynchronous job state. Use
    `references/errors-and-escalation.md` for typed SDK errors and escalation.
@@ -58,8 +60,9 @@ while diagnosing.
 
 ## Boundaries
 
-- Do not mutate while diagnosing, rotate credentials, retry jobs, apply
-  migrations, rebuild graph resources, or start a vector reindex.
+- Do not mutate while diagnosing, rotate credentials, retry jobs or Context
+  operations, apply migrations, reconcile points, rebuild graph resources, or
+  start a vector or Context reindex.
 - Do not call an undocumented or private route and do not query a private
   observability system.
 - Do not claim root cause when evidence supports only a likely boundary.

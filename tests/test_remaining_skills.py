@@ -6,6 +6,7 @@ from pathlib import Path
 
 PACKAGE_ROOT = Path(__file__).parents[1]
 PLUGIN_ROOT = PACKAGE_ROOT / "plugins" / "polygres"
+PACKAGE_VERSION = (PACKAGE_ROOT / "VERSION").read_text().strip()
 SKILLS_ROOT = PLUGIN_ROOT / "skills"
 DESIGN_ROOT = SKILLS_ROOT / "polygres-retrieval-design"
 TROUBLESHOOTING_ROOT = SKILLS_ROOT / "polygres-troubleshooting"
@@ -51,6 +52,7 @@ def test_retrieval_design_skill_structure_and_metadata() -> None:
         {
             "graph-modeling.md",
             "hybrid-and-rag-plan.md",
+            "context-design.md",
             "plan-template.md",
             "strategy-selection.md",
             "vector-and-text-design.md",
@@ -65,6 +67,7 @@ def test_troubleshooting_skill_structure_and_metadata() -> None:
         "description: Diagnose Polygres",
         {
             "context-and-connectivity.md",
+            "context.md",
             "errors-and-escalation.md",
             "jobs-and-migrations.md",
             "projects-and-database.md",
@@ -101,6 +104,7 @@ def test_retrieval_design_covers_strategy_and_bad_input_paths() -> None:
         "TSVector",
         "fuzzy",
         "hybrid",
+        "pgContext",
         "stable row ID",
         "direction",
         "bounded depth",
@@ -172,6 +176,12 @@ def test_troubleshooting_covers_public_diagnostic_surface() -> None:
         "vector configs list",
         "text configs list",
         "polygres --json --project <project> ready",
+        "context capabilities",
+        "context collections status",
+        "context collections verify",
+        "context collections diagnostics",
+        "context points status",
+        "context operations get",
         "polygres config path",
     )
     for command in commands:
@@ -211,6 +221,9 @@ def test_troubleshooting_covers_failures_secrets_and_partial_state() -> None:
         "rate limit",
         "timeout",
         "partial failure",
+        "point reconciliation",
+        "idempotency conflict",
+        "recall unavailable",
         "request_id",
         "job ID",
         "cursor",
@@ -250,11 +263,12 @@ def test_plugin_and_docs_present_all_four_skills() -> None:
         PACKAGE_ROOT.parents[1] / "apps" / "polygres_docs" / "src" / "content" / "agent-skills.mdx"
     ).read_text()
 
-    assert codex["version"] == "0.2.0"
-    assert claude["version"] == "0.2.0"
+    assert codex["version"] == PACKAGE_VERSION
+    assert claude["version"] == PACKAGE_VERSION
     prompts = "\n".join(codex["interface"]["defaultPrompt"])
     assert "design" in prompts.lower()
     assert "diagnos" in prompts.lower()
+    assert "pgcontext" in prompts.lower()
     for name in (
         "polygres-cli",
         "polygres-sdk",

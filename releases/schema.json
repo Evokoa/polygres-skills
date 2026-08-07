@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Evokoa/polygres-skills/releases/schema.json",
+  "title": "Polygres skills release record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "release_date",
+    "compatibility",
+    "content_digest",
+    "installation_channels_verified",
+    "behavioral_evaluations",
+    "known_limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "release_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["polygres_cli", "polygres_sdk", "codex", "claude_code", "skills_cli"],
+      "properties": {
+        "polygres_cli": { "$ref": "#/$defs/packageCompatibility" },
+        "polygres_sdk": { "$ref": "#/$defs/packageCompatibility" },
+        "codex": { "$ref": "#/$defs/toolCompatibility" },
+        "claude_code": { "$ref": "#/$defs/toolCompatibility" },
+        "skills_cli": { "$ref": "#/$defs/toolCompatibility" }
+      }
+    },
+    "content_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "installation_channels_verified": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "behavioral_evaluations": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "known_limitations": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "packageCompatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum_supported", "maximum_tested"],
+      "properties": {
+        "minimum_supported": { "type": "string" },
+        "maximum_tested": { "type": "string" }
+      }
+    },
+    "toolCompatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tested"],
+      "properties": {
+        "tested": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

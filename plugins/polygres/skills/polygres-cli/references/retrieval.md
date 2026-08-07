@@ -1,5 +1,12 @@
 # Retrieval configuration
 
+## Contents
+
+- [Graph](#graph)
+- [Vector](#vector)
+- [Text](#text)
+- [General readiness](#general-readiness)
+
 ## Graph
 
 ```bash
@@ -67,3 +74,8 @@ polygres ready
 
 This reports graph, vector, and hybrid readiness. It does not report text
 readiness in the current launch surface. Check text separately.
+
+pgContext AI Search has its own capability, collection, point, operation, and
+retrieval lifecycle. Read `context.md` from this skill when the request mentions
+Context, pgContext, AI Search, collections, Joint retrieval, or point
+reconciliation. A pgvector configuration is never a pgContext collection.

@@ -55,11 +55,12 @@ failure.
 ## Typed results
 
 Prefer the exported typed models (`GraphResult`, `VectorResult`, `TextResult`,
-`HybridResult`, `GraphPathResponse`, `GraphConnectionResponse`, and `Page`) over
-guessing dictionary shapes. Use `to_dict()` only at serialization boundaries.
-`Project` and the graph, vector, text, and hybrid namespace classes are not
-exported from `polygres`; do not import them for application annotations. Use
-type inference or an application-owned `Protocol` for dependency injection.
+`HybridResult`, `ContextOperation`, `ContextJointResponse`,
+`GraphPathResponse`, `GraphConnectionResponse`, and `Page`) over guessing
+dictionary shapes. Use `to_dict()` only at serialization boundaries.
+`Project` and the graph, vector, text, hybrid, and Context namespace classes are
+not exported from `polygres`; do not import them for application annotations.
+Use type inference or an application-owned `Protocol` for dependency injection.
 
 ## Focused tests
 

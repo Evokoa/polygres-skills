@@ -53,6 +53,7 @@ def test_sdk_skill_has_required_structure_and_metadata() -> None:
     assert (SDK_SKILL_ROOT / "agents" / "openai.yaml").is_file()
     assert {path.name for path in (SDK_SKILL_ROOT / "references").glob("*.md")} == {
         "client-setup.md",
+        "context.md",
         "errors-pagination-testing.md",
         "graph-retrieval.md",
         "hybrid-and-rag.md",
@@ -66,6 +67,7 @@ def test_sdk_skill_routes_every_reference_and_avoids_deep_links() -> None:
 
     assert references == {
         "references/client-setup.md",
+        "references/context.md",
         "references/errors-pagination-testing.md",
         "references/graph-retrieval.md",
         "references/hybrid-and-rag.md",
@@ -96,6 +98,15 @@ def test_sdk_skill_covers_the_complete_priority_one_surface() -> None:
         "project.hybrid.graph_first(",
         "project.hybrid.vector_first(",
         "project.hybrid.joint(",
+        "project.context.get_capabilities()",
+        "project.context.preflight(",
+        "project.context.create_collection(",
+        "project.context.wait_for_operation(",
+        "project.context.get_collection_status(",
+        "project.context.verify_collection(",
+        "project.context.upsert_points(",
+        "project.context.search(",
+        "project.context.joint(",
         ".auto_paging_iter()",
     }
 
@@ -124,6 +135,8 @@ def test_sdk_skill_preserves_endpoint_and_secret_boundaries() -> None:
     assert "POLYGRES_API_KEY" in all_text
     assert "POLYGRES_RUNTIME_URL" in all_text
     assert "control-plane" in all_text
+    assert "pgvector configuration" in all_text
+    assert "does not\ngenerate" in all_text or "does not generate" in all_text
     assert "passwordless" in all_text
     assert "Never log" in all_text or "never log" in all_text
     assert "private endpoint" in all_text or "private route" in all_text
