@@ -21,7 +21,7 @@
       "tested": null
     }
   },
-  "content_digest": "sha256:0c6f665210a399afe3bf7368efa736622569b722aaca63fdf455ecb5a386ac9f",
+  "content_digest": "sha256:5fcfb69f26e27fd2c48fd6a1e5b467b2dc69116ade389068fa0109d9e55c3e76",
   "installation_channels_verified": [
     "codex-plugin-validator",
     "claude-plugin-validator"

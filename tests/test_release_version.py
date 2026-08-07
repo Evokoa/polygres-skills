@@ -158,6 +158,21 @@ def test_payload_change_requires_a_version_increase(tmp_path: Path) -> None:
     RELEASE.verify_version_change("HEAD~1", package)
 
 
+def test_readme_change_does_not_require_a_version_increase(tmp_path: Path) -> None:
+    package = _copy_package(tmp_path)
+    subprocess.run(["git", "init", "-q"], cwd=package, check=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=package, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=package, check=True)
+    subprocess.run(["git", "add", "."], cwd=package, check=True)
+    subprocess.run(["git", "commit", "-qm", "baseline"], cwd=package, check=True)
+    readme = package / "README.md"
+    readme.write_text(readme.read_text() + "\nDocumentation correction.\n")
+    subprocess.run(["git", "add", "README.md"], cwd=package, check=True)
+    subprocess.run(["git", "commit", "-qm", "correct readme"], cwd=package, check=True)
+
+    RELEASE.verify_version_change("HEAD~1", package)
+
+
 def test_version_change_check_bootstraps_from_existing_manifest(tmp_path: Path) -> None:
     package = _copy_package(tmp_path)
     version_contents = (package / "VERSION").read_text()

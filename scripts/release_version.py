@@ -327,18 +327,20 @@ def verify_version_change(base_ref: str, package_root: Path = PACKAGE_ROOT) -> N
         text=True,
     ).stdout.splitlines()
     prefix = "" if relative_root == Path(".") else f"{relative_root.as_posix()}/"
-    payload_changed = any(
-        path.removeprefix(prefix) in {"README.md", "LICENSE"}
+    installable_payload_changed = any(
+        path.removeprefix(prefix) == "LICENSE"
         or path.removeprefix(prefix).startswith("plugins/polygres/")
         or path.removeprefix(prefix) == ".agents/plugins/marketplace.json"
         or path.removeprefix(prefix) == ".claude-plugin/marketplace.json"
         for path in changed
     )
-    if payload_changed and parse_version(current_version) <= parse_version(base_version):
+    if installable_payload_changed and parse_version(current_version) <= parse_version(
+        base_version
+    ):
         raise ReleaseValidationError(
             "installable skills content changed without increasing VERSION"
         )
-    if not payload_changed and current_version != base_version:
+    if not installable_payload_changed and current_version != base_version:
         raise ReleaseValidationError("VERSION changed without an installable payload change")
 
 
