@@ -1,6 +1,6 @@
 ---
 name: polygres-cli
-description: Use the Polygres CLI to authenticate, select and inspect projects, obtain safe Postgres connection information, manage Runtime API keys, import data, apply migrations, configure graph, vector, text, or pgContext AI Search, manage Context collections and durable operations, and check readiness. Use when an agent must set up, operate, automate, or recover a documented managed-project operation through public CLI workflows. Use polygres-troubleshooting instead for evidence-first diagnosis of an unexplained failure.
+description: Use the Polygres CLI to authenticate, select and inspect projects, obtain safe Postgres connection information, manage Runtime API keys, import data, apply migrations, configure graph, text, or Polygres AI Context retrieval, manage existing vector configurations, Context collections, and durable operations, and check readiness. Use when an agent must set up, operate, automate, or recover a documented managed-project operation through public CLI workflows. Use polygres-troubleshooting instead for evidence-first diagnosis of an unexplained failure.
 ---
 
 # Polygres CLI
@@ -11,17 +11,26 @@ control-plane routes or infer undocumented request payloads.
 
 ## Start safely
 
-1. Run `polygres --version` and `polygres --help` when availability or command
-   compatibility is unknown.
+1. Run `polygres --version` and `polygres --help` before live or end-to-end
+   testing, and whenever availability or command compatibility is unknown.
 2. If the command is missing, tell the user how to install `polygres-cli` and
    let them approve or perform the installation. Do not install packages
    silently.
-3. Run `polygres whoami` before a mutation when identity or active organization
+3. For live tests from a Polygres source checkout, create an isolated test
+   environment, reinstall both `polygres-cli` and `polygres-sdk` from that
+   checkout under its dependency-installation policy, and verify their versions
+   and import origins before testing. Do not substitute PyPI packages for the
+   checkout under test.
+4. Outside a source checkout, compare installed CLI and SDK versions with the
+   versions required by the application or current skill compatibility record.
+   Do not call an installation current merely because the command exists.
+   Obtain approval before changing installed packages.
+5. Run `polygres whoami` before a mutation when identity or active organization
    is uncertain. Use `polygres login` when authentication is required.
-4. Resolve the project with `polygres projects list`, an explicit `--project`,
+6. Resolve the project with `polygres projects list`, an explicit `--project`,
    or `polygres projects use <project>`. State the resolved project before a
    destructive, secret-producing, or schema-mutating operation.
-5. Prefer `polygres --json ...` for output the agent must parse. Treat stdout as
+7. Prefer `polygres --json ...` for output the agent must parse. Treat stdout as
    the JSON channel and stderr as diagnostics.
 
 If bundled examples differ from the installed `--help`, follow the installed
@@ -37,8 +46,8 @@ Read only the references needed for the task:
 | Environment, Postgres metadata, `psql`, Runtime API keys | `references/database-and-keys.md` |
 | CSV, TSV, JSON, JSONL/NDJSON, import jobs | `references/data-imports.md` |
 | Migration list/apply and SQL safety | `references/migrations.md` |
-| Graph, pgvector, text, and general retrieval readiness | `references/retrieval.md` |
-| pgContext AI Search collections, filters, points, operations, and retrieval | `references/context.md` |
+| Graph, text, existing vector configurations, and general retrieval readiness | `references/retrieval.md` |
+| Polygres AI Context collections, filters, points, operations, and retrieval | `references/context.md` |
 | JSON output, polling, exit codes, retry and recovery | `references/automation-and-errors.md` |
 
 ## Execute an operation
@@ -64,10 +73,11 @@ Obtain explicit user approval before:
 - applying a SQL migration;
 - creating a generated TSVector column;
 - revoking a Runtime API key;
-- deleting vector or text configurations;
+- deleting existing vector or text configurations;
 - every durable pgContext mutation, including collection create, update,
-  set-default, reindex, or delete; filter registration; point reconciliation;
-  and operation cancellation or retry;
+  set-default, vector addition, default-vector change, reindex, or delete;
+  filter registration; point
+  reconciliation; and operation cancellation or retry;
 - pgContext point upsert or delete when it will become a durable operation or
   when deleting mappings is destructive for the user's serving behavior;
 - any command that uses `--yes`;

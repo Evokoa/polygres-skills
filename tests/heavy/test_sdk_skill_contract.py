@@ -149,11 +149,24 @@ def test_documented_sdk_methods_exist_with_the_expected_parameters() -> None:
                 "idempotency_key",
                 "timeout",
             },
+            "add_vector": {
+                "collection_id",
+                "column_name",
+                "dimensions",
+                "name",
+                "mode",
+                "metric",
+                "index_kind",
+                "set_default",
+                "idempotency_key",
+                "timeout",
+            },
             "update_collection": {
                 "collection_id",
                 "text_column",
                 "result_columns",
                 "max_search_limit",
+                "default_vector_name",
                 "idempotency_key",
                 "timeout",
             },
@@ -193,10 +206,18 @@ def test_documented_sdk_methods_exist_with_the_expected_parameters() -> None:
             "retry_operation": {"operation_id", "idempotency_key", "timeout"},
             "count": {"collection", "filter", "timeout"},
             "facets": {"collection", "field", "filter", "limit", "timeout"},
-            "search": {"collection", "embedding", "filter", "limit", "timeout"},
+            "search": {
+                "collection",
+                "embedding",
+                "vector_name",
+                "filter",
+                "limit",
+                "timeout",
+            },
             "grouped_search": {
                 "collection",
                 "embedding",
+                "vector_name",
                 "group_by",
                 "group_limit",
                 "limit",
@@ -205,15 +226,24 @@ def test_documented_sdk_methods_exist_with_the_expected_parameters() -> None:
             "recall_check": {
                 "collection",
                 "embedding",
+                "vector_name",
                 "filter",
                 "minimum_recall",
                 "limit",
                 "timeout",
             },
-            "text_hybrid": {"collection", "embedding", "query", "limit", "timeout"},
+            "text_hybrid": {
+                "collection",
+                "embedding",
+                "vector_name",
+                "query",
+                "limit",
+                "timeout",
+            },
             "graph_first": {
                 "collection",
                 "embedding",
+                "vector_name",
                 "start",
                 "max_depth",
                 "graph_limit",
@@ -226,6 +256,7 @@ def test_documented_sdk_methods_exist_with_the_expected_parameters() -> None:
             "vector_first": {
                 "collection",
                 "embedding",
+                "vector_name",
                 "context_limit",
                 "max_depth",
                 "graph_limit",
@@ -238,6 +269,7 @@ def test_documented_sdk_methods_exist_with_the_expected_parameters() -> None:
             "rank_fusion": {
                 "collection",
                 "embedding",
+                "vector_name",
                 "start",
                 "context_limit",
                 "max_depth",
@@ -253,6 +285,7 @@ def test_documented_sdk_methods_exist_with_the_expected_parameters() -> None:
             "joint": {
                 "collection",
                 "embedding",
+                "vector_name",
                 "query",
                 "starts",
                 "filter",
@@ -295,12 +328,34 @@ def test_context_sdk_defaults_and_return_unions_match_the_skill() -> None:
     assert create.parameters["index_kind"].default == "hnsw"
     assert create.parameters["max_search_limit"].default == 1_000
     assert create.parameters["idempotency_key"].default is None
+
+    add_vector = inspect.signature(ContextNamespace.add_vector)
+    assert add_vector.parameters["name"].default is None
+    assert add_vector.parameters["mode"].default == "existing"
+    assert add_vector.parameters["metric"].default == "cosine"
+    assert add_vector.parameters["index_kind"].default == "hnsw"
+    assert add_vector.parameters["set_default"].default is False
+    assert add_vector.parameters["idempotency_key"].default is None
+
     assert inspect.signature(ContextNamespace.list_collections).parameters["limit"].default == 50
     assert (
         inspect.signature(ContextNamespace.wait_for_operation).parameters["timeout"].default
         == 1_800.0
     )
     assert inspect.signature(ContextNamespace.search).parameters["limit"].default == 10
+
+    for method_name in (
+        "search",
+        "grouped_search",
+        "recall_check",
+        "text_hybrid",
+        "graph_first",
+        "vector_first",
+        "rank_fusion",
+        "joint",
+    ):
+        signature = inspect.signature(getattr(ContextNamespace, method_name))
+        assert signature.parameters["vector_name"].default is None
 
     joint = inspect.signature(ContextNamespace.joint)
     assert joint.parameters["context_limit"].default == 50
@@ -321,6 +376,7 @@ def test_context_sdk_defaults_and_return_unions_match_the_skill() -> None:
         == point_mutation_union
     )
     assert get_type_hints(ContextNamespace.create_collection)["return"] is ContextOperation
+    assert get_type_hints(ContextNamespace.add_vector)["return"] is ContextOperation
     assert get_type_hints(ContextNamespace.search)["return"] is RankedResponse
 
 

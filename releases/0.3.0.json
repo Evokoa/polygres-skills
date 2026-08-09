@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "0.3.0",
-  "release_date": "2026-08-06",
+  "release_date": "2026-08-08",
   "compatibility": {
     "polygres_cli": {
       "minimum_supported": "0.2.0",
@@ -21,7 +21,7 @@
       "tested": null
     }
   },
-  "content_digest": "sha256:5fcfb69f26e27fd2c48fd6a1e5b467b2dc69116ade389068fa0109d9e55c3e76",
+  "content_digest": "sha256:60561751666b11dea9bc9af2e1d42d4c82ecf4d11a1aa581b505087c0324ee99",
   "installation_channels_verified": [
     "codex-plugin-validator",
     "claude-plugin-validator"

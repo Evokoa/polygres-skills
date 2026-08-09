@@ -1,10 +1,39 @@
 # Client setup
 
+## Contents
+
+- [Install and configure](#install-and-configure)
+- [Select the correct endpoint](#select-the-correct-endpoint)
+- [Readiness and connection information](#readiness-and-connection-information)
+- [Lifecycle](#lifecycle)
+
 ## Install and configure
 
 `polygres-sdk` is the application package. `polygres-cli` is a separate
 operational package. Add only the SDK to an application environment and follow
 the repository's dependency-installation policy.
+
+Before a live or end-to-end test, record both installed distribution versions:
+
+```console
+polygres --version
+python -c 'from importlib.metadata import version; print(version("polygres-cli")); print(version("polygres-sdk"))'
+```
+
+When testing a Polygres source checkout, use a disposable environment and
+reinstall both packages from `packages/python-cli` and `packages/python-sdk` in
+that checkout. Follow the checkout's dependency-installation wrapper and do not
+install either package from PyPI. Confirm imports resolve to the disposable test
+environment before making live calls:
+
+```console
+python -c 'import polygres, polygres_cli; print(polygres.__file__); print(polygres_cli.__file__)'
+```
+
+Outside a source checkout, compare the installed versions with the application's
+declared requirements or the current skill release compatibility record. If
+they are missing or stale, obtain approval and update them before testing. A
+successful import alone does not prove that either package is current.
 
 Keep credentials in server-side environment configuration:
 
@@ -37,9 +66,9 @@ Use the per-project Runtime API URL from the project's Connect surface.
 - Do not derive or probe a private endpoint or private route.
 - Require HTTPS outside an explicitly isolated local test.
 
-The Runtime API already identifies the project, so `client.project()` is the
-normal form. Pass a project ID only when the deployed API contract requires it
-and the ID was resolved from trusted application context.
+The Runtime API already identifies the routed project, so `client.project()` is
+the normal form. An optional `project_id` is trusted local identity metadata for
+the SDK object; it does not reroute a Runtime API request to another project.
 
 ## Readiness and connection information
 

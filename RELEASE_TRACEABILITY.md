@@ -1,12 +1,12 @@
 # Polygres Agent Skills release traceability
 
-Date: 2026-08-06
+Date: 2026-08-08
 
-Scope: extend the four role-based public skills with pgContext guidance backed by the released CLI and SDK contracts. Release `0.3.0` keeps operations, application development, retrieval design, and troubleshooting separate while covering one coherent Context lifecycle. Broader database workflows and the native skill installer remain gated by absent public source-of-truth contracts. A separate `polygres-organizations` skill remains intentionally excluded; organization guidance belongs in product documentation or an existing skill when directly relevant.
+Scope: extend the four role-based public skills with pgContext guidance backed by the released CLI and SDK contracts. Release `0.3.0` keeps operations, application development, retrieval design, and troubleshooting separate while covering one coherent Context lifecycle. It also prevents temporary pgGraph fixtures from enabling RLS unless RLS behavior is the explicit test target, and requires live tests to verify current CLI and SDK versions and source origins. Broader database workflows and the native skill installer remain gated by absent public source-of-truth contracts. A separate `polygres-organizations` skill remains intentionally excluded; organization guidance belongs in product documentation or an existing skill when directly relevant.
 
 ## Release identity
 
-Release `0.3.0` uses `VERSION` as its canonical version and validates matching Codex, Claude, marketplace, release-record, and `polygres-skills-vX.Y.Z` tag values. The structured record is `releases/0.3.0.json`. Its deterministic installable-payload digest is `sha256:554a4223067463d0dd7fde6cb0c8119bffc5a6de5c99f98d40fbb1981c6491c1`.
+Release `0.3.0` uses `VERSION` as its canonical version and validates matching Codex, Claude, marketplace, release-record, and `polygres-skills-vX.Y.Z` tag values. The structured record is `releases/0.3.0.json`. Its deterministic installable-payload digest is `sha256:afb56a14fa7515f6d97ff63fd9df086bb7633a9dc8fd9f4e0b04ebadb097cbda`.
 
 The release record identifies CLI `0.2.0` and SDK `0.2.0` as both the minimum supported and maximum tested package versions. The skills CLI installation channel remains explicitly unverified rather than claiming an unknown tool version.
 
@@ -14,9 +14,9 @@ The release record identifies CLI `0.2.0` and SDK `0.2.0` as both the minimum su
 
 Release `0.3.0` adds pgContext AI Search to every applicable role-based skill without adding an overlapping feature-specific skill:
 
-- `polygres-retrieval-design` distinguishes pgContext collection semantics from the pgvector configuration surface and plans embeddings, ownership, synchronization, retrieval modes, and preview compatibility;
+- `polygres-retrieval-design` prefers pgContext collections for new semantic retrieval, distinguishes them from existing pgvector configurations, and plans embeddings, ownership, synchronization, retrieval modes, migration, and preview compatibility;
 - `polygres-cli` guides capability discovery, source discovery, preflight, approval-gated creation, filters, point synchronization, retrieval, durable operations, diagnostics, and deletion;
-- `polygres-sdk` covers Context capabilities, automated collection setup, point mutation union responses, every retrieval mode, trusted authorization filters, typed results, and recovery-safe idempotency;
+- `polygres-sdk` covers Context capabilities, automated collection setup, point mutation union responses, every retrieval mode, trusted authorization filters, typed results, recovery-safe idempotency, and compatibility reads through existing vector configurations;
 - `polygres-troubleshooting` diagnoses Context capability, collection, index, point, operation, recall, text, graph, Joint, admission, and timeout failures from public read-only evidence.
 
 Verification for this increment:
@@ -26,7 +26,7 @@ Verification for this increment:
 | Non-heavy package tests | 63 passed, 7 deselected |
 | Heavy CLI and SDK source-contract tests | 7 passed, 63 deselected |
 | Package validator | Validated 4 skills |
-| Release contract | Version, manifests, release record, digest, and `polygres-skills-v0.3.0` tag matched |
+| Release contract | Version, manifests, release record, digest, and proposed `polygres-skills-v0.3.0` tag value matched |
 | Release-record schema | Valid against `releases/schema.json` |
 | Skill Creator quick validation | All 4 skills valid |
 | Ruff lint and touched-test format check | Passed |
@@ -44,7 +44,7 @@ No live Polygres project was mutated while validating the skill update.
 | L | `packages/python-sdk/.venv/bin/python -m ruff check packages/agent-skills` | Passed |
 | F | `packages/python-sdk/.venv/bin/python -m ruff format --check packages/agent-skills/tests/test_package.py packages/agent-skills/tests/test_sdk_skill.py packages/agent-skills/tests/test_remaining_skills.py packages/agent-skills/tests/heavy/test_remaining_skill_contracts.py packages/agent-skills/tests/heavy/test_sdk_skill_contract.py` | 5 files already formatted |
 | P | `packages/python-sdk/.venv/bin/python packages/agent-skills/scripts/validate_package.py packages/agent-skills` | Validated 4 skills |
-| X | `packages/python-sdk/.venv/bin/python packages/agent-skills/scripts/release_version.py check --tag polygres-skills-v0.3.0` | Version, manifests, release record, digest, and tag matched |
+| X | `packages/python-sdk/.venv/bin/python packages/agent-skills/scripts/release_version.py check --tag polygres-skills-v0.3.0` | Version, manifests, release record, digest, and proposed tag value matched; no public tag was created |
 | E | `packages/python-sdk/.venv/bin/python packages/agent-skills/scripts/export_public.py packages/agent-skills /tmp/polygres-skills-export-check-a`; repeat to `-b`; `diff -qr /tmp/polygres-skills-export-check-a /tmp/polygres-skills-export-check-b` | Exported 4 skills twice; no differences |
 | Q | `.venv/bin/python /Users/damienlim/.codex/skills/.system/skill-creator/scripts/quick_validate.py <skill-directory>` for all four skills | All valid |
 | V | `.venv/bin/python /Users/damienlim/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py packages/agent-skills/plugins/polygres` | Passed |

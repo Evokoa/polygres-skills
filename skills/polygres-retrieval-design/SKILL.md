@@ -1,6 +1,6 @@
 ---
 name: polygres-retrieval-design
-description: Design and review Polygres retrieval plans across relational, graph, pgvector, text, hybrid, and pgContext AI Search strategies. Use when a user must choose between retrieval surfaces, model graph or embedding inputs, plan Context collections or grounded RAG, or review retrieval architecture before configuration or implementation. Do not mutate a project, run configuration commands, or write application code.
+description: Design and review Polygres retrieval plans across relational, graph, text, hybrid, Polygres AI Context, and existing pgvector-backed strategies. Use when a user must choose between retrieval surfaces, model graph or embedding inputs, plan Context collections or grounded RAG, migrate or coexist with an existing vector configuration, or review retrieval architecture before configuration or implementation. Do not mutate a project, run configuration commands, or write application code.
 ---
 
 # Polygres Retrieval Design
@@ -18,8 +18,8 @@ This skill is advisory: it must not mutate a project directly.
 3. Select the smallest sufficient strategy using
    `references/strategy-selection.md`. Reject an unsupported strategy rather
    than inventing a capability.
-4. For graph retrieval, apply `references/graph-modeling.md`. For vector,
-   TSVector, or fuzzy retrieval, apply
+4. For graph retrieval, apply `references/graph-modeling.md`. For an existing
+   vector configuration, TSVector, or fuzzy retrieval, apply
    `references/vector-and-text-design.md`.
 5. For pgContext collections, point synchronization, registered filters, or
    Context retrieval modes, apply `references/context-design.md`.
@@ -42,8 +42,11 @@ This skill is advisory: it must not mutate a project directly.
 - Bound graph direction, depth, fan-out, result count, and cycle behavior.
 - Record the embedding model, dimensions, metric, input construction, and
   response to a dimension mismatch or empty embedding.
-- Record whether pgvector configuration or pgContext collection semantics are
-  required. Never treat those resources as interchangeable.
+- Default new semantic retrieval plans to a Polygres AI Context collection.
+  Decide explicitly whether distinct embeddings belong as named vectors in one
+  collection or require separate collection-level source and policy settings.
+  Record any existing pgvector configuration that must remain compatible or
+  needs a migration plan. Never treat those resources as interchangeable.
 - State TSVector language/configuration choices and fuzzy thresholds.
 - For hybrid retrieval, define stage order, provenance, deduplication,
   authorization, and token budget.

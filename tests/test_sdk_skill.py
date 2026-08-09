@@ -135,7 +135,8 @@ def test_sdk_skill_preserves_endpoint_and_secret_boundaries() -> None:
     assert "POLYGRES_API_KEY" in all_text
     assert "POLYGRES_RUNTIME_URL" in all_text
     assert "control-plane" in all_text
-    assert "pgvector configuration" in all_text
+    assert "legacy pgvector configuration" in all_text
+    assert "use `project.context` for new semantic retrieval setup" in all_text
     assert "does not\ngenerate" in all_text or "does not generate" in all_text
     assert "passwordless" in all_text
     assert "Never log" in all_text or "never log" in all_text
@@ -155,6 +156,30 @@ def test_sdk_references_cover_invalid_ambiguous_and_fuzzy_inputs() -> None:
     assert "empty" in vector_text.lower() and "fuzzy" in vector_text.lower()
     assert "timeout" in errors.lower() and "request_id" in errors
     assert "malformed" in errors.lower() and "mock" in errors.lower()
+
+
+def test_sdk_live_pggraph_fixtures_do_not_enable_rls() -> None:
+    graph = (SDK_SKILL_ROOT / "references" / "graph-retrieval.md").read_text()
+
+    assert "at least one real relationship" in graph
+    assert "relrowsecurity = false" in graph
+    assert "relforcerowsecurity = false" in graph
+    assert "fixture/setup incompatibility" in graph
+    assert "pre-existing user table without explicit approval" in graph
+
+
+def test_sdk_live_testing_refreshes_cli_and_sdk_from_checkout() -> None:
+    skill = (SDK_SKILL_ROOT / "SKILL.md").read_text()
+    setup = (SDK_SKILL_ROOT / "references" / "client-setup.md").read_text()
+
+    assert "reinstall both packages from that checkout" in skill
+    assert "Do not substitute PyPI packages" in skill
+    assert 'version("polygres-cli")' in setup
+    assert 'version("polygres-sdk")' in setup
+    assert "packages/python-cli" in setup
+    assert "packages/python-sdk" in setup
+    assert "polygres.__file__" in setup
+    assert "polygres_cli.__file__" in setup
 
 
 def test_plugin_metadata_exposes_distinct_cli_and_sdk_prompts() -> None:

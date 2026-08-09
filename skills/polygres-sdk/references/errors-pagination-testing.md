@@ -10,8 +10,12 @@ Catch the narrowest useful SDK exception:
 - `PolygresPermissionError`: stop and correct authorization or project scope.
 - `PolygresNotFoundError`: verify the exact resource or real row ID.
 - `PolygresRateLimitError`: honor retry guidance and back off.
+- `PolygresMaintenanceError`: stop normal retries and surface the maintenance
+  state or retry guidance supplied by the service.
 - `PolygresRuntimeError`: preserve the `request_id`; retry only when the
   operation is safe and within the application's bounded retry policy.
+- `PolygresAPIError`: preserve status, code, details, and `request_id` for any
+  public API failure not represented by a narrower subclass.
 
 ```python
 from polygres import PolygresRateLimitError, PolygresRuntimeError

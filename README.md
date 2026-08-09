@@ -9,7 +9,7 @@ User guide: [Polygres Agent Skills](https://docs.polygres.com/agent-skills)
 | Skill | Use it for |
 | --- | --- |
 | `polygres-cli` | Sign in, select projects, import data, apply migrations, manage Runtime API keys, and configure retrieval. |
-| `polygres-sdk` | Build Python applications with graph, vector, text, and hybrid retrieval. |
+| `polygres-sdk` | Build Python applications with Polygres AI Context, graph, text, hybrid, and existing vector retrieval. |
 | `polygres-retrieval-design` | Compare retrieval approaches and produce an implementation plan without changing a project. |
 | `polygres-troubleshooting` | Diagnose CLI, API, PostgreSQL, job, migration, and retrieval failures using read-only evidence. |
 
@@ -66,8 +66,8 @@ conversion choices before changing data.
 ```
 
 ```text
-Configure vector retrieval for documents.embedding with 1536 dimensions and
-verify readiness.
+Configure Polygres AI Context retrieval for documents.embedding with 1536
+dimensions and verify readiness.
 ```
 
 ```text
@@ -76,8 +76,14 @@ and build deduplicated context with source references.
 ```
 
 ```text
-Design a retrieval plan for this schema. Compare relational, graph, vector,
-text, and hybrid options without changing the project.
+Design a retrieval plan for this schema. Compare relational, graph, text,
+hybrid, Polygres AI Context, and any existing vector configuration without
+changing the project.
+```
+
+```text
+Diagnose why this pgContext collection is blocked. Use read-only evidence and
+recommend the safest next action.
 ```
 
 ## What the skills protect
@@ -151,11 +157,11 @@ For Claude Code:
 
 ## Compatibility
 
-The current published Agent Skills release is [`0.2.0`](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.2.0). It supports `polygres-cli >= 0.1.0` and `polygres-sdk >= 0.1.0`; the latest published versions are CLI `0.1.2` and SDK `0.1.0`. If an example differs from your installed version, follow the installed CLI help or SDK method signature.
+Package version: [`0.3.0`](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.3.0). It supports and was tested with `polygres-cli 0.2.0` and `polygres-sdk 0.2.0`. If an example differs from your installed version, follow the installed CLI help or SDK method signature.
 
 ## Changelog
 
-See the [Agent Skills 0.2.0 release notes](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.2.0) for published changes.
+See the [Agent Skills 0.3.0 release notes](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.3.0) for release changes.
 
 ## License
 

@@ -4,10 +4,15 @@ Model only relationships that are explicit in verified data.
 
 ## Nodes
 
-- Name each source table and the stable row ID column used by Runtime API
-  results. A stable row ID is an existing durable value, not a generated guess.
+- Name each source table and its ordered, non-empty `id_columns` used by Runtime
+  API results. One column is a simple identity; multiple columns form a
+  composite identity whose order is part of the contract. Every component must
+  be an existing durable value, not a generated guess.
+- Treat singular `id_column` as a deprecated compatibility input for exactly
+  one identifier column. New plans use `id_columns` and never send both forms.
 - List display, filter, and provenance columns separately from the identifier.
-- Reject invented row IDs, ambiguous tables, and missing columns.
+- Reject invented identities, ambiguous tables, empty identifier lists, and
+  missing columns.
 
 ## Relationships
 
@@ -25,5 +30,6 @@ used for RAG.
 Specify the readiness evidence needed before application use and the events
 that require a rebuild. Validate known one-hop paths, reverse direction,
 missing nodes, cyclic paths, authorization exclusions, and bounded high-degree
-nodes. Preserve node table, stable row ID, relationship, depth, and path as
-provenance.
+nodes. Include a composite-identity case when any node has multiple
+`id_columns`. Preserve node table, ordered identity, relationship, depth, and
+path as provenance.

@@ -133,6 +133,14 @@ def test_retrieval_design_covers_strategy_and_bad_input_paths() -> None:
         assert unsafe_assumption in text
 
 
+def test_retrieval_design_prefers_context_for_new_semantic_retrieval() -> None:
+    text = _all_skill_text(DESIGN_ROOT)
+
+    assert "default design surface for new semantic" in text
+    assert "Semantic similarity for new setup | pgContext dense retrieval" in text
+    assert "already registered configuration" in text
+
+
 def test_retrieval_plan_has_a_complete_review_contract() -> None:
     template = (DESIGN_ROOT / "references" / "plan-template.md").read_text()
     for heading in (
@@ -236,6 +244,26 @@ def test_troubleshooting_covers_failures_secrets_and_partial_state() -> None:
     assert "API key" in text
     assert "POLYGRES_ACCESS_TOKEN" not in text
     assert "PGPASSWORD" not in text
+
+
+def test_troubleshooting_rules_out_test_fixture_rls_before_pggraph() -> None:
+    retrieval = (TROUBLESHOOTING_ROOT / "references" / "retrieval.md").read_text()
+
+    assert "relrowsecurity" in retrieval
+    assert "relforcerowsecurity" in retrieval
+    assert "fixture/setup incompatibility rather than a\npgGraph defect" in retrieval
+    assert "pre-existing user table\nwithout explicit approval" in retrieval
+
+
+def test_troubleshooting_verifies_cli_and_sdk_versions_and_origins() -> None:
+    context = (TROUBLESHOOTING_ROOT / "references" / "context-and-connectivity.md").read_text()
+
+    assert "polygres --version" in context
+    assert 'version("polygres-cli")' in context
+    assert 'version("polygres-sdk")' in context
+    assert "reinstalled from that checkout" in context
+    assert "confirm their import origins" in context
+    assert "stale PyPI packages" in context
 
 
 def test_troubleshooting_report_has_required_evidence_fields() -> None:

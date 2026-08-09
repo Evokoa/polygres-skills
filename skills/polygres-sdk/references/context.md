@@ -21,15 +21,25 @@ Do not create collection handles, bound operations, an async client, or a
 separate management client. Existing `project.graph`, `project.vector`,
 `project.text`, and `project.hybrid` methods remain independent.
 
-Context collections never accept pgvector configuration IDs. Polygres does not
+Context collections never accept legacy pgvector configuration IDs. Treat
+`project.vector` as compatibility for previously registered configurations and
+use `project.context` for new semantic retrieval setup. Polygres does not
 generate source or query embeddings. The application owns the embedding model,
 input construction, dimensions, update timing, and protection of any external
-embedding credential. Query embeddings must match the collection dimensions
+embedding credential. One collection can own multiple named vectors over the
+same source table. Query embeddings must match the selected vector's dimensions
 and metric requirements.
 
 Use `$polygres-cli` for interactive collection setup and operator workflows.
 Use SDK collection mutations only when the application deliberately owns
 automated provisioning and the caller has the required management authority.
+
+An `existing` Context source may name a compatible `public.vector(n)` column.
+Creating the collection then converts that physical column in place to
+`pgcontext.vector(n) NOT NULL`; it does not turn a legacy configuration ID into
+a collection or use the same-column bridge. Application-owned provisioning
+must separately retire any persisted legacy registration before creation and
+must present the table-lock and dependent-index impact for approval.
 
 ## Capabilities and collection setup
 
@@ -92,6 +102,13 @@ if not preflight.eligible:
     raise RuntimeError(f"Context preflight blocked: {preflight.blockers}")
 ```
 
+For a pgvector source, inspect blockers specifically for actual `NULL` values,
+dimension mismatch, and unsafe index dependencies. A column declared nullable
+can pass when every stored vector is populated. Successful creation is atomic:
+non-constraint dependent indexes are dropped, the column is converted through
+`real[]`, the native type is set `NOT NULL`, and the pgContext collection and
+managed index are created in the same database transaction.
+
 Source modes are `existing`, `add_column`, and `new_table`. The latter two can
 change database schema and should not be selected implicitly. Preflight is
 read-only; successful preflight does not create or reserve a collection.
@@ -122,12 +139,55 @@ if not verification.verified:
 An HTTP-successful verification can still report `verified = False`. Inspect
 the ordered checks and request ID.
 
+The creation vector becomes the collection's default. Add another vector only
+when the same source rows need another embedding model or input representation:
+
+```python
+operation = project.context.add_vector(
+    completed.collection_id,
+    "title_embedding",
+    768,
+    name="title_semantic",
+    mode="existing",
+    metric="cosine",
+    set_default=True,
+    idempotency_key="support-docs-title-vector-v1",
+)
+project.context.wait_for_operation(operation)
+```
+
+`mode` is `existing` or `add_column`. Adding a vector is a durable mutation and
+can change database schema. There is no dedicated add-vector preflight method.
+For `existing`, inspect the exact source column before mutation. `add_column`
+requires the source table to be empty; show the schema and ownership impact
+before application-owned automation performs it. Collection responses expose
+`vectors` and `default_vector_name`; do not assume collection status describes
+every vector index equally.
+
+Change the two independent defaults with their distinct methods:
+
+```python
+operation = project.context.update_collection(
+    collection_id,
+    default_vector_name="title_semantic",
+    idempotency_key="support-docs-default-vector-v1",
+)
+project.context.wait_for_operation(operation.id)
+
+operation = project.context.set_default_collection(
+    collection_id,
+    idempotency_key="project-default-context-v1",
+)
+project.context.wait_for_operation(operation.id)
+```
+
 ## Identity and durable operations
 
 Pass canonical collection UUIDs to administrative collection, filter, point,
 and operation methods. Pass a UUID or exact collection name to count, facets,
-and ranked retrieval. Do not scan collection pages to resolve names or infer a
-default collection.
+and ranked retrieval. The project default collection and each collection's
+default vector are independent. Do not scan collection pages to resolve names
+or infer either default.
 
 Every durable mutation returns immediately and sends one idempotency key. When
 the key is omitted, the SDK generates one UUIDv4 and reuses it only for permitted
@@ -138,12 +198,15 @@ survive a failed call, a later call, or a process restart.
 ```python
 operation = context.create_collection("support_docs", source=source, vector=vector)
 completed = context.wait_for_operation(operation)
-collection = context.get_collection(completed.collection_id)
+collection_response = context.get_collection(completed.collection_id)
+collection = collection_response.collection
 ```
 
 Waiting is explicit, honors server retry guidance, and does not cancel on
-timeout. Call `cancel_operation()` or `retry_operation()` separately when the
-application intends that action. Never read a private operation result payload.
+timeout. Operation-management methods identify the operation by its operation
+UUID, never by a collection UUID. Call `cancel_operation(operation_id)` or
+`retry_operation(operation_id)` separately when the application intends that
+action. Never read a private operation result payload.
 
 List and get operations to recover state after a process or network failure.
 Only failed or cancelled operations are candidates for retry. The server also
@@ -153,8 +216,11 @@ Preserve the original ID, replacement ID, collection ID, status, stage, error,
 and request ID.
 
 Collection deletion requires `confirm_collection_id` to exactly equal the path
-collection UUID. Read the collection deletion plan first. Do not hide that
-deletion is durable or imply that it deletes the source table.
+collection UUID. Read the collection as well as its deletion plan first. For
+`existing` and `add_column`, deletion preserves the source table and user-owned
+data. For a verified owned `new_table` source, deletion drops the managed source
+table and its rows. Do not rely on the summarized deletion plan alone; inspect
+`source_mode` and `owns_source_table`, and do not hide that deletion is durable.
 
 ## Point lifecycle
 
@@ -225,6 +291,7 @@ Dense retrieval uses a collection UUID or exact name:
 response = project.context.search(
     "support_docs",
     query_embedding,
+    vector_name="title_semantic",
     filter={
         "must": [
             {"key": "tenant_id", "match": authorized_tenant_id},
@@ -233,6 +300,11 @@ response = project.context.search(
     limit=10,
 )
 ```
+
+Every ranked Context method accepts optional `vector_name`. Omit it to use the
+collection's `default_vector_name`; otherwise pass an exact vector name and
+build the query embedding with that vector's model and dimensions. Count and
+facets operate on collection points and do not select a vector.
 
 Use `graph_first()` when a verified start entity defines the candidate
 neighborhood. Use `vector_first()` when semantic candidates should supply graph

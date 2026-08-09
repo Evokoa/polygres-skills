@@ -129,7 +129,9 @@ backend have a verified contract for that target-table cast.
 
 ## Execute and recover
 
-The local upload limit is 1 GiB and a backend tier can impose a lower limit.
+The format converter defaults to a 1 GiB output ceiling, configurable with
+`--max-output-bytes`. That is not the native CSV upload limit. CSV uploads are
+validated against the project tier and API contract, currently up to 5 GiB.
 Use `--wait` when the user wants terminal status.
 
 After submission, retain the job ID and request ID. On timeout, run:

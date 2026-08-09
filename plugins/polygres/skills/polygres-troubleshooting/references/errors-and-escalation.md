@@ -9,7 +9,9 @@ Use the public SDK exception hierarchy to classify failures:
 | `PolygresPermissionError` | authorization | verify principal and policy; do not broaden access |
 | `PolygresNotFoundError` | project resource or row identity | verify exact project, configuration, and row ID |
 | `PolygresRateLimitError` | Runtime API rate limit | honor retry guidance and use a bounded retry |
+| `PolygresMaintenanceError` | declared service maintenance | stop normal retries and honor supplied retry guidance |
 | `PolygresRuntimeError` | Runtime API or transport response | preserve status, request ID, and sanitized details |
+| `PolygresAPIError` | other public API failure | preserve status, code, details, and request ID |
 
 CLI parsing and local config failures occur before the remote control-plane.
 Control-plane errors affect identity, project administration, or asynchronous

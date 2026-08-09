@@ -101,6 +101,36 @@ def test_reference_links_from_skill_exist() -> None:
         assert (SKILL_ROOT / relative).is_file(), relative
 
 
+def test_cli_guidance_routes_new_semantic_setup_to_context() -> None:
+    skill_text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+    retrieval = (SKILL_ROOT / "references" / "retrieval.md").read_text(encoding="utf-8")
+
+    assert "configure graph, text, or Polygres AI Context retrieval" in skill_text
+    assert "For new semantic retrieval" in retrieval
+    assert "polygres context collections create" in retrieval
+    assert "vector configs create` path is retired" in retrieval
+
+
+def test_cli_pggraph_fixture_guidance_does_not_manufacture_rls_failures() -> None:
+    retrieval = (SKILL_ROOT / "references" / "retrieval.md").read_text(encoding="utf-8")
+
+    assert "do not enable Row\nLevel Security" in retrieval
+    assert "relrowsecurity = false" in retrieval
+    assert "relforcerowsecurity = false" in retrieval
+    assert "not a pgGraph product failure" in retrieval
+    assert "pre-existing user table without explicit approval" in retrieval
+
+
+def test_cli_live_testing_refreshes_cli_and_sdk_from_checkout() -> None:
+    skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+
+    assert "`polygres --version`" in skill
+    assert "reinstall both `polygres-cli` and `polygres-sdk`" in skill
+    assert "verify their versions\n   and import origins" in skill
+    assert "Do not substitute PyPI packages" in skill
+    assert "current skill compatibility record" in skill
+
+
 @pytest.mark.skipif(not CLI_ENTRYPOINT.is_file(), reason="CLI source is not part of this checkout")
 def test_documented_command_shapes_parse_with_current_cli() -> None:
     sys.path.insert(0, str(CLI_SOURCE))

@@ -20,8 +20,9 @@ pgContext support and limits.
 
 Polygres does not create embeddings. Confirm who generates embeddings, the
 stored vector dimensions, the metric, and how new or changed source rows get
-embedded before configuring a collection. Query embeddings must use the same
-model and dimensions as stored source vectors.
+embedded before configuring a collection. A collection can contain multiple
+named vectors over one source table. Query embeddings must use the model and
+dimensions of the selected vector.
 
 Use collection UUIDs for collection administration, filters, points, and
 operation-linked work. Count, facets, and ranked retrieval accept a UUID or an
@@ -40,7 +41,8 @@ polygres --json context sources discover --schema public
 Choose one source mode:
 
 - `existing`: register an existing table and native `pgcontext.vector(n)`
-  column. Polygres does not own either object.
+  column, or convert a compatible `public.vector(n)` column in place. Polygres
+  does not own the source table or an existing column.
 - `add-column`: add a native vector column to an empty existing table. This is
   a schema mutation and requires explicit approval.
 - `new-table`: create a minimal source table. This is a schema mutation and
@@ -58,6 +60,14 @@ Obtain explicit approval before every durable pgContext mutation. For
 `add-column` or `new-table`, show the exact preflight DDL, affected schema
 objects, and whether Polygres or the user owns each table, column, and index
 before requesting approval.
+
+Treat `existing` as a schema mutation when discovery reports
+`type_owner=pgvector`. Before approval, explain that creation takes an
+`ACCESS EXCLUSIVE` table lock, drops non-constraint indexes that depend on the
+selected column, converts its stored values and type to
+`pgcontext.vector(n) NOT NULL`, and creates a new managed index. A nullable
+declaration is acceptable only when the live row check finds no `NULL` vectors.
+Do not describe this ordinary create path as a bridge.
 
 ## Create a collection
 
@@ -84,6 +94,12 @@ default. Use `--no-wait` only when the user wants acceptance without waiting.
 Use an explicit stable `--idempotency-key` when recovery must survive a process
 restart. A wait timeout does not cancel server work.
 
+If the selected pgvector column has a persisted legacy vector configuration,
+list it and obtain explicit approval to delete that exact configuration before
+collection creation. Neither the dashboard nor the CLI deletes that registration
+as part of creation. Deleting the registration is a separate approved operation
+that preserves the source table, column, and vector values.
+
 After creation, retain the operation and collection UUIDs and verify serving:
 
 ```bash
@@ -93,6 +109,17 @@ polygres --json context collections verify <collection-uuid>
 
 A verification response can be HTTP-successful while `verified` is false.
 Inspect the checks rather than treating the command exit alone as proof.
+
+The creation vector is the collection default. Use JSON output for collection
+list, get, status, and deletion-plan inspection. The current human formatter
+does not faithfully render the plural `vectors`, `default_vector_name`, or
+plural deletion-plan fields. Preserve those JSON fields when reporting state.
+
+The project default collection is independent of a collection's default vector.
+`context collections set-default` changes the project default collection; it
+does not change `default_vector_name`. The current CLI has no dedicated command
+for adding a vector or changing a collection's default vector. Route those
+approved mutations to the dashboard, public Context API, or Python SDK.
 
 ## Operate collections
 
@@ -111,7 +138,13 @@ are retrieval inputs, not an authorization boundary. Applications must derive
 tenant filters from trusted authorization context.
 
 Obtain approval before reindexing. Preserve the accepted operation ID and
-verify status afterward.
+verify status afterward. The CLI reindex command targets the collection's
+current default vector; use the public Context API or SDK when an exact
+non-default vector must be reindexed.
+
+Collection status is not a substitute for checking the selected vector's index
+state. Report vector names, dimensions, metrics, per-vector index statuses, and
+the default vector without collapsing them into one synthetic index.
 
 ## Synchronize points
 
@@ -150,8 +183,11 @@ polygres --json context facets support_docs category --limit 10
 key. Both accept a UUID or exact collection name and optional registered-filter
 expressions.
 
-Every ranked command requires a finite query embedding with the collection's
-exact dimensions:
+Every ranked command requires a finite query embedding with the selected
+vector's exact dimensions. Omitting `vector_name` selects the collection
+default. The dedicated ranked CLI flags do not expose `--vector-name`; to query
+an exact non-default vector, use `--request` with a JSON request body containing
+that exact `vector_name`. Never silently query another vector or guess a name:
 
 | Need | Command |
 | --- | --- |
@@ -191,9 +227,13 @@ operation failed or stopped.
 
 ## Delete safely
 
-Read `context collections get` first and show the returned deletion plan.
-Deletion removes the pgContext collection and verified Polygres-owned index but
-preserves source tables, source columns, and user-created indexes.
+Read `context collections get` as JSON first and inspect `source_mode`,
+`owns_source_table`, and the plural deletion-plan fields. Deletion removes the
+collection and verified Polygres-owned indexes. For `existing` and `add_column`
+sources it preserves the source table and user-owned data. For a verified owned
+`new_table` source, deletion also drops the managed source table and its rows.
+Do not rely on the current summarized deletion plan alone when deciding whether
+source data will survive.
 
 Obtain explicit approval for the exact collection UUID before using:
 

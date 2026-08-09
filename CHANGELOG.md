@@ -2,7 +2,7 @@
 
 All notable changes to Polygres Agent Skills are documented in this file.
 
-## 0.3.0 - 2026-08-06
+## 0.3.0 - 2026-08-08
 
 ### Added
 
@@ -14,6 +14,19 @@ All notable changes to Polygres Agent Skills are documented in this file.
 
 - Expanded SDK guidance for building and operating pgContext integrations.
 - Expanded troubleshooting guidance for common pgContext failures.
+- Preferred Polygres AI Context collections for new semantic retrieval setup.
+- Reframed pgvector guidance around compatibility and management of existing
+  registrations.
+- Directed new CLI and SDK workflows to the supported Context collection
+  surface.
+- Prevented temporary pgGraph test fixtures from enabling RLS unless the test
+  explicitly targets RLS behavior.
+- Required agents to verify both PostgreSQL RLS flags before reporting a
+  pgGraph product failure, and classify RLS-induced failures as fixture/setup
+  incompatibilities.
+- Required live tests to verify CLI and SDK versions and import origins, and to
+  reinstall both packages from the source checkout instead of PyPI when testing
+  checkout code.
 
 ## 0.2.0 - 2026-07-14
 

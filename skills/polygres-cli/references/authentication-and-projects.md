@@ -47,7 +47,9 @@ If no project resolves, tell the user to run `polygres projects list` or
 
 Project creation waits for initial provisioning by default. `--no-wait`
 returns after submission. State the chosen name and active organization before
-creating a project.
+creating a project. Creation does not select the new project in local config;
+use the returned external project ID with `polygres projects use`, or pass it
+explicitly with `--project`.
 
 When readiness polling times out or becomes unavailable after creation, retain
 the returned project ID and request ID. Do not invent an ID and do not repeat

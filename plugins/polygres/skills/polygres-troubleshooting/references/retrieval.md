@@ -12,13 +12,27 @@ polygres --json --project <project> ready
 Application code may call `$polygres-sdk` `project.readiness()` to obtain the
 same class of public evidence. Preserve returned typed fields and request IDs.
 
+The vector configuration command is diagnostic support for existing
+registrations. New semantic retrieval setup belongs under Polygres AI Context;
+use the Context diagnostic workflow when collection creation or serving is
+involved. For a legacy query, confirm that the exact persisted registration is
+enabled and effectively Ready. HNSW requires its exact physical index to be
+Ready; an existing `index_kind: none` configuration can be Ready for exact scan
+without HNSW. An unregistered physical pgvector index is not a usable fallback
+and cannot be registered or re-enabled through the retired API.
+
 For a graph build issue, compare readiness and configuration identity, then
-check exact node table, stable row ID, direction, bounded depth, and empty
-results. For a vector reindex issue, verify configuration identity, embedding
-model and dimensions; a dimension mismatch or empty embedding is an input or
-compatibility error, not evidence that a retry will help. For TSVector or fuzzy
-results, inspect exact configured columns, language or threshold, normalization,
-and empty queries.
+check `relrowsecurity` and `relforcerowsecurity` for every registered temporary
+test table before attributing the failure to pgGraph. A temporary pgGraph
+fixture must leave both flags false unless the test explicitly targets RLS. If
+RLS caused the failure, report a fixture/setup incompatibility rather than a
+pgGraph defect. Do not recommend disabling RLS on a pre-existing user table
+without explicit approval. Then check exact node table, stable row ID,
+direction, bounded depth, and empty results. For a vector reindex issue, verify
+configuration identity, embedding model and dimensions; a dimension mismatch
+or empty embedding is an input or compatibility error, not evidence that a
+retry will help. For TSVector or fuzzy results, inspect exact configured
+columns, language or threshold, normalization, and empty queries.
 
 For hybrid requests, identify the failing stage and preserve provenance. A
 partial failure in graph expansion after vector candidates is not a successful

@@ -87,3 +87,13 @@ Reject an empty node, missing ID, unsupported direction, `max_depth` outside the
 SDK range, and more than ten connection entities before network work. If a real
 row is missing from results, verify registration and rebuild readiness through
 the CLI rather than changing an ID until it happens to match.
+
+## Live pgGraph fixtures
+
+When a live SDK test needs a temporary source table, create representative rows
+and at least one real relationship. Leave both Row Level Security and
+`FORCE ROW LEVEL SECURITY` disabled unless the test explicitly targets RLS.
+Verify `relrowsecurity = false` and `relforcerowsecurity = false` for every
+registered test table before treating a graph build or query failure as a
+pgGraph defect. An RLS-induced failure is a fixture/setup incompatibility.
+Never disable RLS on a pre-existing user table without explicit approval.

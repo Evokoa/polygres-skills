@@ -51,6 +51,26 @@ def test_release_contract_matches_version_manifests_record_and_digest() -> None:
     assert result.stdout == "Skills release version is consistent: 0.3.0\n"
 
 
+def test_release_targets_cli_sdk_020_and_skills_030() -> None:
+    record = json.loads((PACKAGE_ROOT / "releases" / "0.3.0.json").read_text())
+    readme = (PACKAGE_ROOT / "README.md").read_text(encoding="utf-8")
+
+    assert RELEASE.canonical_version(PACKAGE_ROOT) == "0.3.0"
+    assert record["version"] == "0.3.0"
+    assert record["release_date"] == "2026-08-08"
+    assert record["compatibility"]["polygres_cli"] == {
+        "minimum_supported": "0.2.0",
+        "maximum_tested": "0.2.0",
+    }
+    assert record["compatibility"]["polygres_sdk"] == {
+        "minimum_supported": "0.2.0",
+        "maximum_tested": "0.2.0",
+    }
+    assert "Package version: [`0.3.0`]" in readme
+    assert "polygres-cli 0.2.0" in readme
+    assert "polygres-sdk 0.2.0" in readme
+
+
 @pytest.mark.parametrize(
     "tag",
     (

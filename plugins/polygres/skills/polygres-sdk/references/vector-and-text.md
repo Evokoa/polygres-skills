@@ -1,6 +1,16 @@
 # Vector and text retrieval
 
-## Vector search
+## Existing vector search
+
+Use `project.vector` only when the application already depends on a registered
+vector configuration that remains enabled and is effectively Ready. An HNSW
+configuration requires its exact physical index to be Ready; an existing
+`index_kind: none` configuration can be Ready for exact scan without HNSW.
+Polygres keeps those reads available for compatibility. A physical pgvector
+index without that persisted registration is not implicitly usable, and the
+legacy SDK/API cannot register or re-enable it. For new semantic retrieval
+setup, use `project.context` and a Polygres AI Context collection instead of
+attempting to create another vector configuration.
 
 The embedding dimension must exactly match the selected configuration. Reject
 empty embeddings, non-numeric values, infinity, and NaN locally. Do not pad,

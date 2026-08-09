@@ -17,24 +17,39 @@ compatibility question and the evidence needed to resolve it.
 
 ## Strategy decision
 
-Choose relational, graph, vector, TSVector, fuzzy, or hybrid retrieval. Explain
-why simpler alternatives are insufficient and call out any unsupported
-strategy.
+Choose relational, graph, TSVector, fuzzy, pgContext dense or grouped search,
+or pgContext composition. For composition, name the exact
+`/context/hybrid/*` route. Use generic vector or Legacy Hybrid only for an
+existing persisted registration that is effectively Ready; do not propose it
+for a new vector-backed design. Explain why simpler alternatives are
+insufficient and call out any unsupported strategy.
 
 ## Data model
 
-Map tables, stable row IDs, relationships, direction, vector inputs,
-dimensions, text sources, filters, and provenance fields.
+Map tables, ordered non-empty `id_columns`, relationships, direction,
+collection and vector names, collection-default and project-default choices,
+vector inputs, dimensions, metrics, `index_kind`, text sources, filters, and
+provenance fields. Treat singular `id_column` as deprecated compatibility input
+for one identifier column.
 
 ## Configuration plan
 
 Describe configuration values, readiness checks, rebuild or reindex triggers,
-fallbacks, and the `$polygres-cli` handoff. Do not apply them.
+fallbacks, and the `$polygres-cli` handoff. For Context, distinguish
+`index_kind: hnsw` physical-index readiness from `index_kind: none` exact-scan
+readiness. If an existing pgvector column will become a Context vector, include
+preflight and explicitly approved Legacy registration cleanup before creation;
+the dashboard does not do this automatically. Never treat a physical-only index
+as implicitly usable or propose a retired Legacy API to register or re-enable
+it. Do not apply the plan.
 
 ## Application plan
 
-Describe the `$polygres-sdk` calls, stage bounds, pagination, authorization,
-deduplication, error handling, and token budget. Do not write production code.
+Describe the exact public route or `$polygres-sdk` call, collection and exact
+`vector_name` selection, stage bounds, pagination, authorization,
+deduplication, error handling, and token budget. State that an omitted
+`vector_name` selects the collection default, not the project default
+collection. Do not write production code.
 
 ## Validation plan
 
