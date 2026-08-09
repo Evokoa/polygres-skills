@@ -1,14 +1,14 @@
 # Polygres Agent Skills release traceability
 
-Date: 2026-08-08
+Date: 2026-08-09
 
 Scope: extend the four role-based public skills with pgContext guidance backed by the released CLI and SDK contracts. Release `0.3.0` keeps operations, application development, retrieval design, and troubleshooting separate while covering one coherent Context lifecycle. It also prevents temporary pgGraph fixtures from enabling RLS unless RLS behavior is the explicit test target, and requires live tests to verify current CLI and SDK versions and source origins. Broader database workflows and the native skill installer remain gated by absent public source-of-truth contracts. A separate `polygres-organizations` skill remains intentionally excluded; organization guidance belongs in product documentation or an existing skill when directly relevant.
 
 ## Release identity
 
-Release `0.3.0` uses `VERSION` as its canonical version and validates matching Codex, Claude, marketplace, release-record, and `polygres-skills-vX.Y.Z` tag values. The structured record is `releases/0.3.0.json`. Its deterministic installable-payload digest is `sha256:afb56a14fa7515f6d97ff63fd9df086bb7633a9dc8fd9f4e0b04ebadb097cbda`.
+Release `0.3.0` uses `VERSION` as its canonical version and validates matching Codex, Claude, marketplace, release-record, and `polygres-skills-vX.Y.Z` tag values. The structured record is `releases/0.3.0.json`. Its deterministic installable-payload digest is `sha256:43440721416a44d118f614cb5e6311b27d0e8002050d82fadfdac33dafa22cf8`.
 
-The release record identifies CLI `0.2.0` and SDK `0.2.0` as both the minimum supported and maximum tested package versions. The skills CLI installation channel remains explicitly unverified rather than claiming an unknown tool version.
+The release record identifies CLI `0.2.0` as the minimum supported version and CLI `0.2.1` as the maximum tested version. SDK `0.2.0` is both the minimum supported and maximum tested version. The skills CLI installation channel remains explicitly unverified rather than claiming an unknown tool version.
 
 ## pgContext guidance expansion
 
@@ -23,8 +23,8 @@ Verification for this increment:
 
 | Check | Result |
 | --- | --- |
-| Non-heavy package tests | 63 passed, 7 deselected |
-| Heavy CLI and SDK source-contract tests | 7 passed, 63 deselected |
+| Non-heavy package tests | 73 passed, 7 deselected |
+| Heavy CLI and SDK source-contract tests | 7 passed, 73 deselected |
 | Package validator | Validated 4 skills |
 | Release contract | Version, manifests, release record, digest, and proposed `polygres-skills-v0.3.0` tag value matched |
 | Release-record schema | Valid against `releases/schema.json` |
@@ -39,19 +39,18 @@ No live Polygres project was mutated while validating the skill update.
 
 | ID | Exact command | Result |
 | --- | --- | --- |
-| U | `packages/python-sdk/.venv/bin/python -m pytest packages/agent-skills/tests -m 'not heavy' -q` | 63 passed, 7 deselected |
-| H | `packages/python-sdk/.venv/bin/python -m pytest packages/agent-skills/tests -m heavy -q` | 7 passed, 63 deselected |
-| L | `packages/python-sdk/.venv/bin/python -m ruff check packages/agent-skills` | Passed |
-| F | `packages/python-sdk/.venv/bin/python -m ruff format --check packages/agent-skills/tests/test_package.py packages/agent-skills/tests/test_sdk_skill.py packages/agent-skills/tests/test_remaining_skills.py packages/agent-skills/tests/heavy/test_remaining_skill_contracts.py packages/agent-skills/tests/heavy/test_sdk_skill_contract.py` | 5 files already formatted |
-| P | `packages/python-sdk/.venv/bin/python packages/agent-skills/scripts/validate_package.py packages/agent-skills` | Validated 4 skills |
-| X | `packages/python-sdk/.venv/bin/python packages/agent-skills/scripts/release_version.py check --tag polygres-skills-v0.3.0` | Version, manifests, release record, digest, and proposed tag value matched; no public tag was created |
-| E | `packages/python-sdk/.venv/bin/python packages/agent-skills/scripts/export_public.py packages/agent-skills /tmp/polygres-skills-export-check-a`; repeat to `-b`; `diff -qr /tmp/polygres-skills-export-check-a /tmp/polygres-skills-export-check-b` | Exported 4 skills twice; no differences |
+| U | `.venv/bin/python -m pytest packages/agent-skills/tests -m 'not heavy' -q` | 73 passed, 7 deselected |
+| H | `.venv/bin/python -m pytest packages/agent-skills/tests -m heavy -q` | 7 passed, 73 deselected |
+| L | `.venv/bin/python -m ruff check packages/agent-skills` | Passed |
+| P | `.venv/bin/python packages/agent-skills/scripts/validate_package.py packages/agent-skills` | Validated 4 skills |
+| X | `.venv/bin/python packages/agent-skills/scripts/release_version.py check --tag polygres-skills-v0.3.0` | Version, manifests, release record, digest, and proposed tag value matched; no public tag was created |
+| E | `.venv/bin/python packages/agent-skills/scripts/export_public.py packages/agent-skills <temporary-directory>` | Exported 4 skills |
 | Q | `.venv/bin/python /Users/damienlim/.codex/skills/.system/skill-creator/scripts/quick_validate.py <skill-directory>` for all four skills | All valid |
 | V | `.venv/bin/python /Users/damienlim/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py packages/agent-skills/plugins/polygres` | Passed |
 | M | `claude plugin validate packages/agent-skills` | Passed |
-| C | `packages/python-cli/.venv/bin/python -m pytest packages/python-cli/tests -m 'not heavy' -q` | 92 passed |
-| S | `packages/python-sdk/.venv/bin/python -m pytest packages/python-sdk/tests -m 'not heavy' -q` | 16 passed |
-| D | `npm run check:cli` in `apps/polygres_docs` | Passed against public CLI 0.2.0 manifest |
+| C | `.venv/bin/python -m pytest packages/python-cli/tests -q` | 324 passed, 1 skipped |
+| S | `.venv/bin/python -m pytest packages/python-sdk/tests -q` | 87 passed |
+| D | `npm run check:cli` in `apps/polygres_docs` | Passed against the CLI 0.2.1 source manifest |
 | R | Isolated read-only forward evaluation using `polygres-retrieval-design` with an underspecified support-ticket hybrid retrieval prompt | Passed; no live calls or mutation |
 | T | Isolated read-only forward evaluation using `polygres-troubleshooting` with ambiguous projects, a timed-out import, `read_only`, dimension mismatch, and supplied credential placeholders | Passed; stopped on ambiguity, redacted secrets, retained IDs, no mutation |
 

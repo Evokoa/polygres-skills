@@ -157,7 +157,7 @@ For Claude Code:
 
 ## Compatibility
 
-Package version: [`0.3.0`](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.3.0). It supports and was tested with `polygres-cli 0.2.0` and `polygres-sdk 0.2.0`. If an example differs from your installed version, follow the installed CLI help or SDK method signature.
+Package version: [`0.3.0`](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.3.0). It supports `polygres-cli 0.2.0` and was tested through `polygres-cli 0.2.1`, with `polygres-sdk 0.2.0`. If an example differs from your installed version, follow the installed CLI help or SDK method signature.
 
 ## Changelog
 

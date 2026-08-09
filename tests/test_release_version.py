@@ -57,10 +57,10 @@ def test_release_targets_cli_sdk_020_and_skills_030() -> None:
 
     assert RELEASE.canonical_version(PACKAGE_ROOT) == "0.3.0"
     assert record["version"] == "0.3.0"
-    assert record["release_date"] == "2026-08-08"
+    assert record["release_date"] == "2026-08-09"
     assert record["compatibility"]["polygres_cli"] == {
         "minimum_supported": "0.2.0",
-        "maximum_tested": "0.2.0",
+        "maximum_tested": "0.2.1",
     }
     assert record["compatibility"]["polygres_sdk"] == {
         "minimum_supported": "0.2.0",
@@ -68,6 +68,7 @@ def test_release_targets_cli_sdk_020_and_skills_030() -> None:
     }
     assert "Package version: [`0.3.0`]" in readme
     assert "polygres-cli 0.2.0" in readme
+    assert "polygres-cli 0.2.1" in readme
     assert "polygres-sdk 0.2.0" in readme
 
 

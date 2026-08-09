@@ -2,7 +2,7 @@
 
 All notable changes to Polygres Agent Skills are documented in this file.
 
-## 0.3.0 - 2026-08-08
+## 0.3.0 - 2026-08-09
 
 ### Added
 
