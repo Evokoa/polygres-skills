@@ -40,6 +40,16 @@ def test_troubleshooting_commands_parse_with_the_public_cli() -> None:
         ["--json", "--project", project_id, "graph", "status"],
         ["--json", "--project", project_id, "vector", "configs", "list"],
         ["--json", "--project", project_id, "text", "configs", "list"],
+        ["--json", "--project", project_id, "text", "configs", "get", "documents"],
+        [
+            "--json",
+            "--project",
+            project_id,
+            "text",
+            "configs",
+            "diagnostics",
+            "documents",
+        ],
         ["--json", "--project", project_id, "context", "capabilities"],
         [
             "--json",

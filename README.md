@@ -157,11 +157,11 @@ For Claude Code:
 
 ## Compatibility
 
-Package version: [`0.3.0`](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.3.0). It supports `polygres-cli 0.2.0` and was tested through `polygres-cli 0.2.1`, with `polygres-sdk 0.2.0`. If an example differs from your installed version, follow the installed CLI help or SDK method signature.
+Package version: [`0.3.1`](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.3.1). It supports `polygres-cli 0.2.1` and `polygres-sdk 0.2.0`. If an example differs from your installed version, follow the installed CLI help or SDK method signature.
 
 ## Changelog
 
-See the [Agent Skills 0.3.0 release notes](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.3.0) for release changes.
+See the [Agent Skills 0.3.1 release notes](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.3.1) for release changes.
 
 ## License
 

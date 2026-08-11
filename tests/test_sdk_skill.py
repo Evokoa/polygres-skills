@@ -154,6 +154,9 @@ def test_sdk_references_cover_invalid_ambiguous_and_fuzzy_inputs() -> None:
     assert "max_depth" in graph and "direction" in graph and "fan-out" in graph
     assert "dimension" in vector_text and "NaN" in vector_text
     assert "empty" in vector_text.lower() and "fuzzy" in vector_text.lower()
+    assert "result.key" in vector_text
+    assert "filter value of `None`" in vector_text
+    assert "does not create, update, diagnose, or\nreindex" in vector_text
     assert "timeout" in errors.lower() and "request_id" in errors
     assert "malformed" in errors.lower() and "mock" in errors.lower()
 

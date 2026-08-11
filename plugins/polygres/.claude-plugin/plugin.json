@@ -1,6 +1,6 @@
 {
   "name": "polygres",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Operate, design, build, and troubleshoot Polygres and pgContext AI Search through public CLI and SDK workflows.",
   "author": {
     "name": "Polygres",

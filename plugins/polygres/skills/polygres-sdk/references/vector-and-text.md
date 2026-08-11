@@ -57,6 +57,11 @@ page = project.text.tsvector(
 TSVector behavior depends on configured source columns and language. A missing
 term can reflect stemming or configuration, not an unavailable row.
 
+The SDK queries ready configurations but does not create, update, diagnose, or
+reindex them. Route setup and maintenance through the dashboard, public API, or
+CLI. Keep `cursor` opaque and reuse it only with the same configuration, query,
+filters, and limit that produced it.
+
 ## Fuzzy search
 
 Fuzzy retrieval is useful for typos and approximate text, not semantic meaning:
@@ -73,6 +78,10 @@ Reject an empty or whitespace-only query. Test short strings, punctuation,
 Unicode, transpositions, repeated characters, and unrelated terms. A fuzzy
 match is evidence to rank or present, not permission to silently replace user
 data or select an ambiguous resource.
+
+For a compound row key, read every value from `result.key`. Keep using
+`result.id` for existing single-key integrations. A filter value of `None`
+intentionally matches SQL `NULL`; omit a filter when no filtering is intended.
 
 ## Filters and authorization
 

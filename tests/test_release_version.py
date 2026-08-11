@@ -45,29 +45,28 @@ def _run(package: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
 
 
 def test_release_contract_matches_version_manifests_record_and_digest() -> None:
-    result = _run(PACKAGE_ROOT, "check", "--tag", "polygres-skills-v0.3.0")
+    result = _run(PACKAGE_ROOT, "check", "--tag", "polygres-skills-v0.3.1")
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout == "Skills release version is consistent: 0.3.0\n"
+    assert result.stdout == "Skills release version is consistent: 0.3.1\n"
 
 
-def test_release_targets_cli_sdk_020_and_skills_030() -> None:
-    record = json.loads((PACKAGE_ROOT / "releases" / "0.3.0.json").read_text())
+def test_release_targets_cli_sdk_020_and_skills_031() -> None:
+    record = json.loads((PACKAGE_ROOT / "releases" / "0.3.1.json").read_text())
     readme = (PACKAGE_ROOT / "README.md").read_text(encoding="utf-8")
 
-    assert RELEASE.canonical_version(PACKAGE_ROOT) == "0.3.0"
-    assert record["version"] == "0.3.0"
-    assert record["release_date"] == "2026-08-09"
+    assert RELEASE.canonical_version(PACKAGE_ROOT) == "0.3.1"
+    assert record["version"] == "0.3.1"
+    assert record["release_date"] == "2026-08-11"
     assert record["compatibility"]["polygres_cli"] == {
-        "minimum_supported": "0.2.0",
+        "minimum_supported": "0.2.1",
         "maximum_tested": "0.2.1",
     }
     assert record["compatibility"]["polygres_sdk"] == {
         "minimum_supported": "0.2.0",
         "maximum_tested": "0.2.0",
     }
-    assert "Package version: [`0.3.0`]" in readme
-    assert "polygres-cli 0.2.0" in readme
+    assert "Package version: [`0.3.1`]" in readme
     assert "polygres-cli 0.2.1" in readme
     assert "polygres-sdk 0.2.0" in readme
 
@@ -90,7 +89,7 @@ def test_manifest_mismatch_is_rejected(tmp_path: Path) -> None:
     package = _copy_package(tmp_path)
     manifest_path = package / "plugins" / "polygres" / ".codex-plugin" / "plugin.json"
     manifest = json.loads(manifest_path.read_text())
-    manifest["version"] = "0.3.1"
+    manifest["version"] = "0.3.2"
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
 
     result = _run(package, "check")
@@ -123,11 +122,11 @@ def test_release_record_rejects_payload_drift(tmp_path: Path) -> None:
 def test_set_updates_all_machine_readable_version_copies(tmp_path: Path) -> None:
     package = _copy_package(tmp_path)
 
-    RELEASE.set_version("0.3.1", package)
+    RELEASE.set_version("0.3.2", package)
     versions = RELEASE.manifest_versions(package)
 
-    assert set(versions.values()) == {"0.3.1"}
-    assert (package / "VERSION").read_text() == "0.3.1\n"
+    assert set(versions.values()) == {"0.3.2"}
+    assert (package / "VERSION").read_text() == "0.3.2\n"
 
 
 def test_set_rolls_back_every_version_copy_after_a_write_failure(
@@ -155,7 +154,7 @@ def test_set_rolls_back_every_version_copy_after_a_write_failure(
     monkeypatch.setattr(RELEASE.os, "replace", fail_second_replace)
 
     with pytest.raises(OSError, match="simulated interrupted"):
-        RELEASE.set_version("0.3.1", package)
+        RELEASE.set_version("0.3.2", package)
 
     assert {path: path.read_bytes() for path in paths} == originals
 
@@ -175,7 +174,7 @@ def test_payload_change_requires_a_version_increase(tmp_path: Path) -> None:
     with pytest.raises(RELEASE.ReleaseValidationError, match="without increasing VERSION"):
         RELEASE.verify_version_change("HEAD~1", package)
 
-    RELEASE.set_version("0.3.1", package)
+    RELEASE.set_version("0.3.2", package)
     RELEASE.verify_version_change("HEAD~1", package)
 
 

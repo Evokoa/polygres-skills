@@ -71,7 +71,9 @@ Obtain explicit user approval before:
 
 - `replace_existing` imports;
 - applying a SQL migration;
-- creating a generated TSVector column;
+- creating or updating a text configuration, including a generated TSVector
+  column or managed text index;
+- reindexing a text configuration;
 - revoking a Runtime API key;
 - deleting existing vector or text configurations;
 - every durable pgContext mutation, including collection create, update,

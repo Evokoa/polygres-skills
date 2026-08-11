@@ -65,6 +65,7 @@ internal same-column binding or preserve the old pgvector index.
 
 ```bash
 polygres text configs list
+polygres text configs get <config-id-or-name>
 polygres text configs create-fuzzy <name> \
   --table <table> \
   --text-column <column>
@@ -76,15 +77,36 @@ polygres text configs create-tsvector <name> \
   --text-column <column> \
   --generated-column <column> \
   --yes
-polygres text configs delete <config-id> [--yes]
+polygres text configs update <config-id-or-name> [options]
+polygres text configs diagnostics <config-id-or-name>
+polygres text configs reindex <config-id-or-name>
+polygres text configs delete <config-id-or-name> [--yes]
 ```
 
-Existing-column TSVector mode does not mutate the table. Generated-column mode
-applies a migration and requires explicit approval before `--yes`. Fuzzy mode
-uses an existing text-like column.
+Existing-column TSVector mode registers a compatible `tsvector` column without
+creating another column. Generated-column mode sends one request to the
+existing text configuration endpoint, which creates the stored generated
+column, creates and verifies its GIN index, and saves the configuration. It does
+not create or apply a migration. PostgreSQL keeps the generated value current
+when its source text changes.
 
-Text readiness is reported by `text configs list`. A configuration is usable
-when its `index_status` is `ready`.
+Generated-column mode requires explicit approval before `--yes`. If it fails,
+Polygres tries to remove the new column, index, and configuration. Stop and
+inspect the table and saved configurations when cleanup is reported as
+incomplete. Do not blindly retry with another generated-column name.
+
+Fuzzy mode uses an existing text-like column and creates its managed trigram
+index. Repeat `--row-id-column` for a compound primary or unique non-null key.
+Use `--default-limit` and `--max-limit` to bound results, repeat
+`--metadata-column` for returned properties, and repeat `--filter-column` for
+allowed exact-match filters. Ensure the default limit does not exceed the
+maximum.
+
+Use `get` for one saved definition and `diagnostics` to compare saved state with
+the physical index. A configuration is usable only when `index_status` is
+`ready`. After correcting a failed or stale target, obtain approval before
+`reindex`, then confirm diagnostics are healthy. Deleting a configuration
+removes its managed index, but does not drop a generated source-table column.
 
 ## General readiness
 

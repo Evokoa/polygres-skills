@@ -12,7 +12,7 @@
       "name": "polygres",
       "source": "./plugins/polygres",
       "description": "Operate projects, design and build pgContext retrieval, and diagnose failures through public Polygres interfaces.",
-      "version": "0.3.0"
+      "version": "0.3.1"
     }
   ]
 }

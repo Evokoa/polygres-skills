@@ -29,11 +29,20 @@ queries, extreme lengths, and model-version compatibility mismatches.
 
 ## Text retrieval
 
-For TSVector, record the source columns, weights, language configuration,
-normalization, ranking, prefix behavior, and candidate cap. Test punctuation,
-stop words, Unicode, empty input, and missing columns.
+For TSVector, choose either an existing compatible `tsvector` column or a
+stored generated column built from one or more text source columns. Record the
+source columns, generated-column ownership, language configuration,
+normalization, ranking, prefix behavior, metadata columns, filter columns,
+stable single or compound row key, default limit, and maximum limit. Generated
+setup uses the existing text configuration endpoint and does not require a
+separate migration. PostgreSQL keeps the stored generated value current when a
+source column changes. Plan diagnostics and reindexing for physical-index
+failure, and state that deleting the configuration does not drop the generated
+table column. Test punctuation, stop words, Unicode, empty input, missing
+columns, null filters, and cursor reuse with changed query inputs.
 
 For fuzzy retrieval, record normalization, similarity threshold, indexed
-columns, candidate cap, and an exact-match preference. Include noisy, short,
-Unicode, and adversarial strings. Fuzzy matching is for user data, never to
-fuzzy-match schema identifiers or silently select a project resource.
+columns, default and maximum limits, metadata and filter columns, stable row
+key, and an exact-match preference. Include noisy, short, Unicode, and
+adversarial strings. Fuzzy matching is for user data, never to fuzzy-match
+schema identifiers or silently select a project resource.

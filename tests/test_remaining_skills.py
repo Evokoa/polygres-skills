@@ -223,6 +223,7 @@ def test_troubleshooting_covers_failures_secrets_and_partial_state() -> None:
         "migration",
         "graph build",
         "vector reindex",
+        "text configs reindex",
         "dimension mismatch",
         "empty embedding",
         "fuzzy",
@@ -253,6 +254,34 @@ def test_troubleshooting_rules_out_test_fixture_rls_before_pggraph() -> None:
     assert "relforcerowsecurity" in retrieval
     assert "fixture/setup incompatibility rather than a\npgGraph defect" in retrieval
     assert "pre-existing user table\nwithout explicit approval" in retrieval
+
+
+def test_text_search_guidance_matches_one_call_setup_and_maintenance() -> None:
+    cli_root = SKILLS_ROOT / "polygres-cli"
+    cli_skill = (cli_root / "SKILL.md").read_text()
+    cli_retrieval = (cli_root / "references" / "retrieval.md").read_text()
+    troubleshooting = (TROUBLESHOOTING_ROOT / "references" / "retrieval.md").read_text()
+    design = (DESIGN_ROOT / "references" / "vector-and-text-design.md").read_text()
+
+    for command in (
+        "text configs get",
+        "text configs update",
+        "text configs diagnostics",
+        "text configs reindex",
+    ):
+        assert command in cli_retrieval
+
+    assert "does not create or apply a migration" in " ".join(cli_retrieval.split())
+    assert "stored generated" in cli_retrieval
+    assert "compound" in cli_retrieval
+    assert "default limit" in cli_retrieval
+    assert "does not drop a generated" in cli_retrieval
+    assert "reindexing a text configuration" in cli_skill
+    assert "TEXT_GENERATION_CLEANUP_FAILED" in troubleshooting
+    assert "index_found" in troubleshooting and "index_valid" in troubleshooting
+    assert "null filter intentionally matches SQL `NULL`" in " ".join(troubleshooting.split())
+    assert "one or more text source columns" in design
+    assert "does not require a separate migration" in " ".join(design.split())
 
 
 def test_troubleshooting_verifies_cli_and_sdk_versions_and_origins() -> None:

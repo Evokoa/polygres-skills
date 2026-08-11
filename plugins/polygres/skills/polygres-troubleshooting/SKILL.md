@@ -62,7 +62,7 @@ while diagnosing.
 
 - Do not mutate while diagnosing, rotate credentials, retry jobs or Context
   operations, apply migrations, reconcile points, rebuild graph resources, or
-  start a vector or Context reindex.
+  start a text, vector, or Context reindex.
 - Do not call an undocumented or private route and do not query a private
   observability system.
 - Do not claim root cause when evidence supports only a likely boundary.

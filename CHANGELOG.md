@@ -2,6 +2,23 @@
 
 All notable changes to Polygres Agent Skills are documented in this file.
 
+## 0.3.1 - 2026-08-11
+
+### Changed
+
+- Updated CLI guidance for one-call generated TSVector setup without a separate
+  migration.
+- Added text configuration get, update, diagnostics, reindex, limits, compound
+  row-key, metadata, and filter guidance.
+- Added text index and incomplete-cleanup troubleshooting steps using public,
+  read-only evidence.
+- Updated SDK guidance for compound result keys, SQL `NULL` filters, bound
+  cursors, and the query-only text-search boundary.
+- Updated retrieval design guidance for generated and existing TSVector modes,
+  index ownership, limits, diagnostics, and deletion behavior.
+- Raised the minimum supported CLI version to `0.2.1` for the expanded text
+  configuration command surface.
+
 ## 0.3.0 - 2026-08-09
 
 ### Added
