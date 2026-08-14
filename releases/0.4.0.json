@@ -1,0 +1,55 @@
+{
+  "$schema": "./schema.json",
+  "version": "0.4.0",
+  "release_date": "2026-08-14",
+  "compatibility": {
+    "polygres_cli": {
+      "minimum_supported": "0.3.0",
+      "maximum_tested": "0.3.0"
+    },
+    "polygres_sdk": {
+      "minimum_supported": "0.3.0",
+      "maximum_tested": "0.3.0"
+    },
+    "codex": {
+      "tested": null
+    },
+    "claude_code": {
+      "tested": null
+    },
+    "skills_cli": {
+      "tested": null
+    }
+  },
+  "content_digest": "sha256:456991a9b44dca532157c976a5f9b3748a542a430e8b64cbb8c77c05f2113d03",
+  "installation_channels_verified": [],
+  "behavioral_evaluations": [
+    "Permissive safety lint blocker and warning tests",
+    "Adaptive minimal and selected-component scaffold tests",
+    "Approval-boundary stability and concise review tests",
+    "Agent instruction idempotency and removal tests",
+    "Local and hosted embedding choice safety tests",
+    "CLI and SDK 0.3.0 single-row guidance tests",
+    "Silent local and hosted embedding recommendation tests",
+    "Single-review embedding selection and approval-boundary tests",
+    "Adaptive-default and disabled-component omission tests",
+    "Independent agent capture and recall instruction tests",
+    "Vague-prompt direction-before-inspection routing tests",
+    "Read-only personalized project recommendation routing tests",
+    "Recommendation-to-setup context handoff tests",
+    "Single-object row-write versus dataset import routing tests",
+    "Row-only ambiguity versus Context exact-replay recovery tests",
+    "Context-backed request-state and 24-hour replay-window guidance tests",
+    "Bulk import followed by Context point reconciliation routing tests",
+    "Runtime rows API trusted-backend authentication and endpoint tests",
+    "Row target, payload, rate-limit, and upsert mutation-scope guidance tests",
+    "Rows API deletion-boundary and derived-evidence cleanup routing tests"
+  ],
+  "known_limitations": [
+    "Clean-machine installation from the remote public repository has not been verified.",
+    "Codex, Claude Code, and skills CLI live installation have not been verified for this release.",
+    "Guaranteed continuous chat capture requires a tested host hook, wrapper, application path, outbox, or worker.",
+    "Single-row capture requires compatible CLI or SDK 0.3.0 and target Runtime capability evidence; older environments require an explicit upgrade or approved compatibility path.",
+    "The device feasibility report and catalog resource estimates are conservative selection policy and do not replace a model-specific performance test."
+  ]
+}

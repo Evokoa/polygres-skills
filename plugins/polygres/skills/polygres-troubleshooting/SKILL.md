@@ -18,6 +18,8 @@ while diagnosing.
 3. Capture the symptom, timestamp, sanitized command or SDK call, exit code or
    exception type, `request_id`, job ID, and whether pagination returned a
    cursor.
+   For generated pipelines, also capture the manifest state, plan digest,
+   approved action IDs, checkpoint, and last successfully completed stage.
 4. Inspect project and database evidence with
    `references/projects-and-database.md`.
 5. For import job or migration failures, use
@@ -32,6 +34,14 @@ while diagnosing.
    explicit approval and delegate supported mutations to `$polygres-cli` or
    application changes to `$polygres-sdk`.
 
+For a single-row write that lost the response after submission, treat the
+commit outcome as ambiguous unless public evidence resolves it. Do not
+automatically retry a row-only insert, upsert, or ignore. For a Context-backed
+write, replay the exact request with its exact idempotency key within the
+24-hour replay window; the composite ledger prevents another row mutation.
+After `ROW_CONTEXT_IDEMPOTENCY_EXPIRED`, inspect the row and Context point before
+choosing a new key.
+
 ## Evidence rules
 
 - Use only commands confirmed by installed help and public `$polygres-sdk`
@@ -42,6 +52,9 @@ while diagnosing.
   string containing credentials, or full environment output.
 - Do not retry validation, authentication, permission, or compatibility errors
   as if they were transient. Bound any retry for a rate limit or timeout.
+- Do not request approval again for a corrective action already covered by an
+  unchanged consolidated pipeline review. Ask again when its project, source
+  scope, action set, egress, destructive effect, or plan digest changed.
 - Report pagination and partial failure explicitly; a successful first page or
   one healthy subsystem does not prove the whole operation succeeded.
 

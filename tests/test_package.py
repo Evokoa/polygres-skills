@@ -37,6 +37,7 @@ def test_skill_frontmatter_and_required_resources() -> None:
         "database-and-keys.md",
         "migrations.md",
         "retrieval.md",
+        "rows.md",
     }
     assert {path.name for path in (SKILL_ROOT / "references").glob("*.md")} == expected
     assert (SKILL_ROOT / "scripts" / "prepare_import.py").is_file()
@@ -111,6 +112,38 @@ def test_cli_guidance_routes_new_semantic_setup_to_context() -> None:
     assert "vector configs create` path is retired" in retrieval
 
 
+def test_cli_guidance_documents_capability_gated_single_row_writes() -> None:
+    rows = (SKILL_ROOT / "references" / "rows.md").read_text(encoding="utf-8")
+    for phrase in (
+        "CLI `0.3.0`",
+        "polygres rows --help",
+        "polygres rows validate",
+        "polygres rows insert",
+        "polygres rows upsert",
+        "polygres rows ignore",
+        "--file -",
+        "ambiguous outcome",
+        "every supplied writable",
+        "24-hour replay window",
+        "ROW_CONTEXT_IDEMPOTENCY_EXPIRED",
+        "256 KiB",
+        "60 per minute",
+        "rows:write",
+    ):
+        assert phrase in rows
+
+
+def test_cli_routes_one_json_object_to_rows_and_json_datasets_to_import() -> None:
+    skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+    imports = (SKILL_ROOT / "references" / "data-imports.md").read_text(encoding="utf-8")
+
+    assert "one JSON object or runtime event" in skill
+    assert "JSON arrays, and JSONL/NDJSON datasets" in skill
+    assert "Choose by workload, not file extension" in imports
+    assert "Do not convert a routine one-record write to CSV" in imports
+    assert "explicit create-table import" in imports
+
+
 def test_cli_pggraph_fixture_guidance_does_not_manufacture_rls_failures() -> None:
     retrieval = (SKILL_ROOT / "references" / "retrieval.md").read_text(encoding="utf-8")
 
@@ -157,6 +190,30 @@ def test_documented_command_shapes_parse_with_current_cli() -> None:
         ["keys", "revoke", "00000000-0000-0000-0000-000000000000", "--yes"],
         ["--json", "import", "csv", "data.csv", "--table", "documents", "--wait"],
         ["import", "status", "00000000-0000-0000-0000-000000000000"],
+        ["rows", "validate", "--table", "documents", "--file", "row.json"],
+        ["rows", "insert", "--table", "documents", "--file", "-"],
+        [
+            "rows",
+            "upsert",
+            "--table",
+            "documents",
+            "--file",
+            "row.json",
+            "--conflict-column",
+            "id",
+            "--update-column",
+            "content",
+        ],
+        [
+            "rows",
+            "ignore",
+            "--table",
+            "documents",
+            "--file",
+            "row.json",
+            "--conflict-column",
+            "id",
+        ],
         ["migrations", "list"],
         ["migrations", "apply", "--file", "migration.sql"],
         ["graph", "discover"],

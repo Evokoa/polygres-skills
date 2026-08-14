@@ -55,9 +55,11 @@ python packages/agent-skills/scripts/release_version.py check \
   --tag polygres-skills-vX.Y.Z
 ```
 
-The tag-triggered sync workflow verifies the tag, release record, content
-digest, and public export before applying the same tag to the exact exported
-repository commit.
+Synchronizing and releasing are separate manual operations. First, run the
+`sync-agent-skills-repo` workflow from the private monorepo and review the
+generated commit in `Evokoa/polygres-skills`. Then create the
+`polygres-skills-vX.Y.Z` tag and GitHub release manually from that reviewed
+public commit. The sync workflow does not create or push release tags.
 
 The two validator paths above are development-environment examples. Use the
 current official validators in other environments.

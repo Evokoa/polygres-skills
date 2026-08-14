@@ -312,7 +312,7 @@ def test_troubleshooting_report_has_required_evidence_fields() -> None:
         assert field in skill
 
 
-def test_plugin_and_docs_present_all_four_skills() -> None:
+def test_plugin_and_docs_present_all_five_skills() -> None:
     codex = json.loads((PLUGIN_ROOT / ".codex-plugin" / "plugin.json").read_text())
     claude = json.loads((PLUGIN_ROOT / ".claude-plugin" / "plugin.json").read_text())
     package_readme = (PACKAGE_ROOT / "README.md").read_text()
@@ -328,6 +328,7 @@ def test_plugin_and_docs_present_all_four_skills() -> None:
     assert "pgcontext" in prompts.lower()
     for name in (
         "polygres-cli",
+        "polygres-data-pipeline",
         "polygres-sdk",
         "polygres-retrieval-design",
         "polygres-troubleshooting",

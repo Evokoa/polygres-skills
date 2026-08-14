@@ -1,6 +1,6 @@
 ---
 name: polygres-cli
-description: Use the Polygres CLI to authenticate, select and inspect projects, obtain safe Postgres connection information, manage Runtime API keys, import data, apply migrations, configure graph, text, or Polygres AI Context retrieval, manage existing vector configurations, Context collections, and durable operations, and check readiness. Use when an agent must set up, operate, automate, or recover a documented managed-project operation through public CLI workflows. Use polygres-troubleshooting instead for evidence-first diagnosis of an unexplained failure.
+description: Use the Polygres CLI to authenticate, select and inspect projects, write one record through the public Runtime rows surface, import data, apply migrations, configure graph, text, or Polygres AI Context retrieval, manage Runtime keys and durable operations, and check readiness. Use for documented managed-project operations through public CLI workflows. Use polygres-troubleshooting for evidence-first diagnosis of an unexplained failure.
 ---
 
 # Polygres CLI
@@ -44,7 +44,8 @@ Read only the references needed for the task:
 | --- | --- |
 | Login, logout, identity, organization, project selection or status | `references/authentication-and-projects.md` |
 | Environment, Postgres metadata, `psql`, Runtime API keys | `references/database-and-keys.md` |
-| CSV, TSV, JSON, JSONL/NDJSON, import jobs | `references/data-imports.md` |
+| Dataset or backfill from CSV, TSV, a JSON array, or JSONL/NDJSON | `references/data-imports.md` |
+| Validate, insert, upsert, or ignore one JSON object or runtime event | `references/rows.md` |
 | Migration list/apply and SQL safety | `references/migrations.md` |
 | Graph, text, existing vector configurations, and general retrieval readiness | `references/retrieval.md` |
 | Polygres AI Context collections, filters, points, operations, and retrieval | `references/context.md` |
@@ -58,7 +59,9 @@ Read only the references needed for the task:
 3. Resolve authentication and project context.
 4. For a mutation, show the target project, affected resource, important
    options, and reversibility.
-5. Obtain explicit approval when required.
+5. Obtain explicit approval when required. Accept an existing consolidated
+   pipeline approval when it names this exact project, source scope, action,
+   and unchanged plan digest.
 6. Run the narrowest documented command.
 7. Retain project, job, migration, configuration, key, and request IDs from the
    result.
@@ -86,6 +89,9 @@ Obtain explicit user approval before:
 - any other operation that is destructive or difficult to reverse.
 
 Add `--yes` only after approval for that exact operation and target.
+Do not add a second confirmation to an explicit `rows insert`, `rows upsert`,
+or `rows ignore` command that is already authorized by the user's command or a
+matching consolidated pipeline approval.
 Before approval for `add-column` or `new-table` collection creation, also show
 the preflight DDL, affected schema objects, and ownership boundaries.
 
@@ -106,9 +112,11 @@ the preflight DDL, affected schema objects, and ownership boundaries.
 
 ## Prepare non-CSV data locally
 
-For TSV, JSON, and JSONL/NDJSON, read `references/data-imports.md` and use
-`scripts/prepare_import.py`. Resolve the script path from this skill directory
-instead of assuming the repository contains `scripts/`.
+For TSV, JSON arrays, and JSONL/NDJSON datasets, read
+`references/data-imports.md` and use `scripts/prepare_import.py`. Route one JSON
+object intended as an individual write to `references/rows.md` instead. Resolve
+the script path from this skill directory instead of assuming the repository
+contains `scripts/`.
 
 The converter is local-only and produces a reviewed CSV artifact. It does not
 call Polygres. Never silently flatten nested JSON, rename columns, or collapse

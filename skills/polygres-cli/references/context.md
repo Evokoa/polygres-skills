@@ -156,10 +156,13 @@ polygres --json context points status <collection-uuid>
 ```
 
 Do not interpret `current` as proof that mappings match rows after out-of-band
-changes. For known inserted or restored source keys, use `points upsert`. For
-known deleted source keys, use `points delete`. Use `points reconcile` for bulk
-loads or unknown row drift; it performs a live, full two-way reconciliation.
-Updating an embedding vector does not by itself change the source-key mapping.
+changes. For known keys inserted or restored outside a Context-backed `rows`
+command, use `points upsert`. For known deleted source keys, use `points
+delete`. Use `points reconcile` for bulk loads or unknown row drift; it performs
+a live, full two-way reconciliation. Never follow a Context-backed `rows`
+command with `points upsert`: the row command already completes or durably
+starts the required point reconciliation. Updating an embedding vector does not
+by itself change the source-key mapping.
 
 Small key batches may complete synchronously; larger accepted batches return
 durable operations. Obtain approval before a durable point mutation and before

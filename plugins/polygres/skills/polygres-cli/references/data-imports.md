@@ -24,6 +24,11 @@ locally to CSV with `scripts/prepare_import.py`. The converter does not make
 network requests. Upload only the reviewed CSV, never the original JSON or
 JSONL source.
 
+Choose by workload, not file extension. Route one JSON object or one runtime
+event intended for an existing eligible table to `rows validate`, `insert`,
+`upsert`, or `ignore`. Use import for a dataset, a bounded backfill, or an
+explicit create-table import. Do not convert a routine one-record write to CSV.
+
 Do not call backend import endpoints directly. Do not use migrations for
 generic row ingestion.
 
@@ -80,8 +85,9 @@ Supported shapes:
 
 - JSON array containing objects only;
 - JSONL/NDJSON with one object per non-empty line;
-- one top-level JSON object only when `--allow-single-object` is supplied after
-  the user approves treating it as one row.
+- one top-level JSON object only for an explicitly selected import, such as a
+  create-table import, when `--allow-single-object` is supplied. Otherwise use
+  the rows surface for an individual record.
 
 Example preparation:
 

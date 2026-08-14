@@ -1,7 +1,7 @@
 {
   "name": "polygres",
-  "version": "0.3.1",
-  "description": "Operate, design, build, and troubleshoot Polygres and pgContext AI Search through public CLI and SDK workflows.",
+  "version": "0.4.0",
+  "description": "Set up data pipelines, operate, design, build, and troubleshoot Polygres and pgContext AI Search through public CLI, SDK, and Runtime API workflows.",
   "author": {
     "name": "Polygres",
     "email": "support@polygres.com",
@@ -15,6 +15,8 @@
     "postgres",
     "database",
     "data-import",
+    "data-pipeline",
+    "agent-memory",
     "retrieval",
     "pgcontext",
     "ai-search",
@@ -23,8 +25,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Polygres",
-    "shortDescription": "Operate Polygres and pgContext safely",
-    "longDescription": "Operate projects and pgContext AI Search with the public CLI, design reviewable retrieval plans, build applications with the Python SDK, and diagnose failures from public read-only evidence.",
+    "shortDescription": "Set up and operate Polygres safely",
+    "longDescription": "Inspect user data, set up adaptive pipelines, use user-selected local or hosted embeddings, configure pgContext through public interfaces, build applications with the Python SDK or Runtime API, and diagnose failures from public read-only evidence.",
     "developerName": "Polygres",
     "category": "Developer Tools",
     "capabilities": [
@@ -33,9 +35,9 @@
     ],
     "websiteURL": "https://polygres.com",
     "defaultPrompt": [
+      "Use $polygres-data-pipeline and set up Polygres.",
       "Review and safely apply this Polygres import or migration through the CLI.",
-      "Design and implement pgContext AI Search in my Polygres application.",
-      "Diagnose this Polygres project, pgContext, or retrieval failure safely."
+      "Design and implement pgContext retrieval in my application, or diagnose this Polygres failure safely."
     ]
   }
 }

@@ -71,6 +71,14 @@ Use the corresponding `count`, `facets`, `grouped_search`, `recall_check`,
 methods. Collection status and verification do not replace feature-specific
 capability checks.
 
+The Python SDK performs this check automatically for Context retrieval. Its
+first retrieval call fetches and caches capabilities for that project Context
+namespace, and later calls validate project-specific limits locally. Calling
+`get_capabilities()` explicitly refreshes the cache. Runtime remains the
+authoritative enforcement boundary and revalidates every request.
+The cache expires after 60 seconds, and unavailable capabilities are refreshed
+on the next attempted call.
+
 Discover visible candidates, then preflight the exact collection request before
 creating it:
 
@@ -225,13 +233,17 @@ table and its rows. Do not rely on the summarized deletion plan alone; inspect
 ## Point lifecycle
 
 Source rows and Context point mappings have separate lifecycles. Upsert known
-keys after inserts or vector changes, delete known keys after source deletion,
-and reconcile after bulk or uncertain changes.
+keys after out-of-band or legacy inserts, existing-row backfills, or vector
+changes; delete known keys after source deletion; and reconcile after bulk or
+uncertain changes. Never follow a Context-backed `project.rows` write with
+`upsert_points()`: that one row operation already completes or durably starts
+the required point reconciliation.
 
-Commit the source-row transaction before calling `upsert_points()` or
-`delete_points()`. The source database change and Context point mutation are not
-one cross-system transaction. On an ambiguous outcome, inspect point status and
-reconcile rather than assuming both sides committed together.
+For an out-of-band source write, commit the source-row transaction before
+calling `upsert_points()` or `delete_points()`. The source database change and
+dedicated Context point mutation are not one cross-system transaction. On an
+ambiguous outcome, inspect point status and reconcile rather than assuming both
+sides committed together.
 
 Point upsert and delete may return either `PointMutationResponse` or
 `ContextOperation`:

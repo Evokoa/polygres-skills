@@ -66,3 +66,20 @@ Name the explicit approval required before configuration or implementation.
 
 Separate project configuration for `$polygres-cli`, application work for
 `$polygres-sdk`, owners, sequencing, and remaining unknowns.
+
+When this plan is consumed by `$polygres-data-pipeline`, append JSON with this
+shape so implementation can continue without re-asking resolved questions:
+
+```json
+{
+  "selected_components": ["text", "context", "retrieval_runtime"],
+  "omitted_components": {"graph": "no useful relationship evidence"},
+  "interfaces": {
+    "retrieval": {"surface": "sdk", "operation": "project.context.search"}
+  },
+  "blocking_unknowns": []
+}
+```
+
+Include only selected components and public operations. This handoff is design
+evidence, not mutation approval.

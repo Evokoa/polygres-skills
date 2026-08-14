@@ -10,8 +10,10 @@ This skill is advisory: it must not mutate a project directly.
 
 ## Workflow
 
-1. Establish the user outcome, representative questions, authorization rules,
-   latency target, freshness needs, and expected result shape.
+1. Extract the user outcome, authorization, latency, freshness, and expected
+   result shape from the prompt and inspected application. Ask only for a
+   missing fact that changes the recommendation; representative questions are
+   useful evidence, not a mandatory interview.
 2. Inspect the supplied schema, verified row identifiers, sample data, and
    existing retrieval configuration. Label missing evidence as unresolved;
    never infer production facts from a table or column name.
@@ -25,11 +27,13 @@ This skill is advisory: it must not mutate a project directly.
    Context retrieval modes, apply `references/context-design.md`.
 6. For multi-stage retrieval or RAG, apply
    `references/hybrid-and-rag-plan.md`.
-7. Write the result with `references/plan-template.md`. Separate known facts,
-   assumptions, decisions, risks, validation, and handoff work.
-8. After explicit approval, delegate supported project configuration to
-   `$polygres-cli` and application code to `$polygres-sdk`. Do not silently
-   switch from planning to execution.
+7. Write the result with `references/plan-template.md`. When called by
+   `$polygres-data-pipeline`, return the selected and omitted components plus
+   exact public-interface handoffs in a machine-readable section so the caller
+   can continue without another interview.
+8. In a design-only request, stop before mutation. In an active data-pipeline
+   setup, return control to the orchestrating skill; its consolidated review
+   and approval govern the implementation.
 
 ## Design rules
 
@@ -61,9 +65,9 @@ This skill is advisory: it must not mutate a project directly.
   `$polygres-cli` and approved Python integration to `$polygres-sdk`.
 - Filters are not an authorization boundary. Apply access control before data
   enters retrieval and again when results are resolved.
-- If required columns, stable IDs, representative queries, or a usable sample
-  are absent, record the missing columns or empty sample and stop short of a
-  final configuration recommendation.
+- If required columns, stable IDs, or a usable sample are absent, make a
+  reversible provisional recommendation when possible. Stop only when the
+  missing evidence makes every safe recommendation invalid.
 
 ## Completion
 

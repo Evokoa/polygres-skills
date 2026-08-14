@@ -57,6 +57,7 @@ def test_sdk_skill_has_required_structure_and_metadata() -> None:
         "errors-pagination-testing.md",
         "graph-retrieval.md",
         "hybrid-and-rag.md",
+        "rows.md",
         "vector-and-text.md",
     }
 
@@ -71,6 +72,7 @@ def test_sdk_skill_routes_every_reference_and_avoids_deep_links() -> None:
         "references/errors-pagination-testing.md",
         "references/graph-retrieval.md",
         "references/hybrid-and-rag.md",
+        "references/rows.md",
         "references/vector-and-text.md",
     }
     assert "../" not in skill_text
@@ -145,6 +147,36 @@ def test_sdk_skill_preserves_endpoint_and_secret_boundaries() -> None:
     assert not re.search(r"(?:sk|pgs|token)[_-][A-Za-z0-9]{20,}", all_text)
 
 
+def test_sdk_skill_documents_capability_gated_single_row_writes() -> None:
+    text = (SDK_SKILL_ROOT / "references" / "rows.md").read_text(encoding="utf-8")
+    for phrase in (
+        "SDK `0.3.0`",
+        "project.rows.upsert",
+        "validate",
+        "insert",
+        "ignore",
+        "PolygresAmbiguousWriteError",
+        "Never automatically retry a row-only write",
+        "every supplied writable",
+        "24-hour replay window",
+        "ROW_CONTEXT_IDEMPOTENCY_EXPIRED",
+        "256 KiB",
+        "60 writes per minute",
+        "row_committed=True",
+        "one point reconciliation",
+        "pgContext",
+        "pgGraph",
+    ):
+        assert phrase in text
+
+
+def test_context_point_lifecycle_excludes_context_backed_row_writes() -> None:
+    text = (SDK_SKILL_ROOT / "references" / "context.md").read_text(encoding="utf-8")
+
+    assert "out-of-band or legacy inserts" in text
+    assert "Never follow a Context-backed `project.rows` write" in text
+
+
 def test_sdk_references_cover_invalid_ambiguous_and_fuzzy_inputs() -> None:
     graph = (SDK_SKILL_ROOT / "references" / "graph-retrieval.md").read_text()
     vector_text = (SDK_SKILL_ROOT / "references" / "vector-and-text.md").read_text()
@@ -201,7 +233,7 @@ def test_validator_accepts_the_canonical_package() -> None:
     result = _run(VALIDATOR, PACKAGE_ROOT)
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout == "Validated 4 skills in the Polygres plugin.\n"
+    assert result.stdout == "Validated 5 skills in the Polygres plugin.\n"
     assert result.stderr == ""
 
 
@@ -256,9 +288,10 @@ def test_exporter_creates_a_deterministic_mirror_for_every_skill(tmp_path: Path)
 
     first = _run(EXPORTER, PACKAGE_ROOT, destination)
     assert first.returncode == 0, first.stderr
-    assert first.stdout == "Exported 4 skills.\n"
+    assert first.stdout == "Exported 5 skills.\n"
     for name in (
         "polygres-cli",
+        "polygres-data-pipeline",
         "polygres-retrieval-design",
         "polygres-sdk",
         "polygres-troubleshooting",

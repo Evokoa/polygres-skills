@@ -1,6 +1,6 @@
 ---
 name: polygres-sdk
-description: Use the Polygres Python SDK to build application retrieval with Polygres AI Context, graph, text, hybrid, and existing vector queries; manage pgContext collections, points, and durable operations; configure safe Runtime API clients; paginate typed results; design grounded RAG context; and handle SDK errors. Use when writing, reviewing, testing, or troubleshooting Python backend code that calls a Polygres project Runtime API. Do not use for control-plane project administration, imports, migrations, or interactive CLI workflows.
+description: Use the Polygres Python SDK to write individual application records and build retrieval with Polygres AI Context, graph, text, hybrid, and existing vector queries; manage pgContext collections, points, and durable operations; configure safe Runtime API clients; paginate typed results; and handle SDK errors. Use for Python backend code calling a project's Runtime API. Do not use for control-plane administration, bulk imports, migrations, or interactive CLI workflows.
 ---
 
 # Polygres SDK
@@ -56,6 +56,8 @@ control-plane project administration, imports, migrations, and API-key managemen
 - Read `references/context.md` for pgContext collection identity, multiple
   named vectors and defaults, explicit operations, point lifecycle, retrieval
   modes, and Joint versus rank fusion.
+- Read `references/rows.md` for validated single-row insert, upsert, ignore,
+  retry, ambiguous-commit, and pipeline checkpoint behavior.
 - Read `references/errors-pagination-testing.md` for typed models, cursors,
   automatic pagination, exceptions, retries, and mocked tests.
 

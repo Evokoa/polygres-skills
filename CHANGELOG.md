@@ -2,6 +2,58 @@
 
 All notable changes to Polygres Agent Skills are documented in this file.
 
+## 0.4.0 - 2026-08-14
+
+### Added
+
+- Added `polygres-data-pipeline` for guided ingestion and retrieval setup from
+  conversations, databases, files, APIs, event streams, and existing Polygres
+  data.
+- Added read-only device inspection and user choice for local Ollama, Sentence
+  Transformers, llama.cpp, and application-owned ONNX embedding options.
+- Added a versioned pipeline-plan validator, setup-pack scaffolder, safe `.env`
+  status checker, local embedding adapters, and an idempotent SQLite checkpoint
+  ledger.
+- Added separate documented store and retrieve interface decisions for CLI,
+  SDK, Runtime API, and approved direct Postgres fallback workflows.
+- Added a versioned local and hosted embedding model catalog plus deterministic,
+  device-aware recommendation tooling.
+
+### Changed
+
+- Expanded the plugin from four skills to five.
+- Added one-line setup prompts such as `Look at my data and use
+  $polygres-data-pipeline to set up a Polygres data pipeline.`
+- Required generated local setup packs to ignore `.env`, keep credential values
+  out of agent context, and give the user exact local paste instructions.
+- Changed pipeline setup to a bounded build-first fast path. The skill creates
+  and tests source-specific runtime code before full source inspection,
+  backfill, or broad Polygres capability discovery.
+- Limited questions to genuine blockers and consolidated upload and remote
+  mutation approval into one review.
+- Updated CLI and SDK guidance for the single-row Runtime write surface,
+  including exact no-retry behavior and ambiguous outcomes.
+- Made Context-backed capture one user-facing row operation that also completes
+  or durably starts point reconciliation.
+- Defined per-surface checkpoint state for pending or partially failed Context
+  reconciliation, with exact idempotent replay instead of a manual point step.
+- Preserved generic row-only behavior unless a Context collection is explicitly
+  selected or resolved safely.
+- Moved an unknown local-versus-hosted embedding choice into the single setup
+  review, so selecting either fully disclosed option does not require another
+  approval.
+- Clarified that workflow order, numeric values, retrieval timing, capture,
+  graph, embeddings, and agent integration are adaptable guidance rather than
+  required pipeline components.
+- Made generated setup packs omit explicitly disabled components and allowed
+  managed agent instructions to configure capture, recall, or both.
+- Made fully vague setup requests ask one short source-and-outcome question
+  before inspection, while contextual and detailed requests keep the fast path.
+- Added read-only personalized project recommendations for questions such as
+  `What can I do with Polygres?` without starting setup automatically.
+- Added a direct reply that carries an accepted recommendation into setup
+  without repeating discovery or bypassing the mutation review.
+
 ## 0.3.1 - 2026-08-11
 
 ### Changed
