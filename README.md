@@ -1,6 +1,6 @@
 # Polygres Agent Skills
 
-Polygres Agent Skills help coding agents set up data pipelines, operate projects,
+Polygres Agent Skills help coding agents sync PostgreSQL sources, set up data pipelines, operate projects,
 design retrieval, write applications, and diagnose failures using supported
 Polygres interfaces.
 
@@ -10,9 +10,9 @@ User guide: [Polygres Agent Skills](https://docs.polygres.com/agent-skills)
 
 | Skill | Use it for |
 | --- | --- |
-| `polygres-data-pipeline` | Set up the smallest useful Polygres ingestion, retrieval, memory, or agent integration from a short or detailed request. |
-| `polygres-cli` | Sign in, select projects, write one row, import data, apply migrations, manage Runtime API keys, and configure retrieval. |
-| `polygres-sdk` | Write application rows and build Python retrieval with Polygres AI Context, graph, text, hybrid, or existing vectors. |
+| `polygres-data-pipeline` | Choose managed PostgreSQL sync or set up the smallest useful custom ingestion, retrieval, memory, or agent integration. |
+| `polygres-cli` | Sign in, select standard or synced projects, run mode-supported operations, manage Runtime API keys, and configure retrieval. |
+| `polygres-sdk` | Write standard-project application rows and build Python retrieval for standard or synced projects. |
 | `polygres-retrieval-design` | Compare retrieval approaches and produce an implementation plan without changing a project. |
 | `polygres-troubleshooting` | Diagnose CLI, API, PostgreSQL, job, migration, and retrieval failures using read-only evidence. |
 
@@ -103,6 +103,10 @@ Look at my current setup and set up a Polygres data pipeline.
 ```
 
 ```text
+Sync my Supabase, Neon, or PostgreSQL database into Polygres.
+```
+
+```text
 Log me into Polygres and help me select the correct project.
 ```
 
@@ -137,10 +141,17 @@ recommend the safest next action.
 The skills follow a few important boundaries:
 
 - They use public Polygres CLI, Runtime API, SDK, and PostgreSQL interfaces.
+- They resolve project mode before choosing a surface. Synced projects keep the
+  source database authoritative and reject target rows, imports, migrations,
+  SQL, database credentials, and `psql`.
+- They hand synced-project creation, source preflight, table selection, and
+  lifecycle work to the dashboard. Source credentials never enter agent chat,
+  generated plans, CLI arguments, Runtime requests, or SDK code.
 - The pipeline skill records separate documented store and retrieve interfaces,
-  selecting CLI, SDK, or Runtime API based on the workload. SDK and CLI 0.3.0
+  selecting CLI, SDK, or Runtime API based on the workload. CLI and SDK 0.4.0
   provide capability-gated single-row validation, insert, upsert, and ignore.
-  Direct Postgres remains an explicitly approved compatibility fallback.
+  On standard projects, direct Postgres remains an explicitly approved
+  compatibility fallback.
 - They ask before imports, migrations, revocations, deletions, and schema changes.
 - They keep database passwords out of command arguments and generated code.
 - They treat Runtime API keys as secrets and warn when a command can expose one in terminal or agent history.
@@ -215,11 +226,11 @@ For Claude Code:
 
 ## Compatibility
 
-Package version: [`0.4.0`](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.4.0). It is coordinated with `polygres-cli 0.3.0` and `polygres-sdk 0.3.0`. If an example differs from your installed version, follow the installed CLI help or SDK method signature.
+Package version: [`0.5.0`](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.5.0). It supports `polygres-cli 0.4.0` and is coordinated with `polygres-sdk 0.4.0` for local synced-project mode guards. If an example differs from your installed version, follow the installed CLI help or SDK method signature.
 
 ## Changelog
 
-See the [Agent Skills 0.4.0 release notes](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.4.0) for release changes.
+See the [Agent Skills 0.5.0 release notes](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.5.0) for release changes.
 
 ## License
 

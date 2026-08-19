@@ -197,6 +197,67 @@ def _plan() -> dict[str, Any]:
     }
 
 
+def _synced_plan() -> dict[str, Any]:
+    return {
+        "version": 2,
+        "pipeline_id": "managed-postgres-sync",
+        "name": "Managed PostgreSQL sync",
+        "state": "ready_for_review",
+        "target": {
+            "organization_id": "org_example",
+            "project_id": "project_example",
+            "project_mode": "synced",
+        },
+        "source": {
+            "kind": "postgresql",
+            "scope": "public.customers and public.orders",
+            "system_of_record": "source PostgreSQL",
+        },
+        "sync": {
+            "enabled": True,
+            "mode": "managed-postgres",
+            "provider": "Supabase",
+            "selected_tables": ["public.customers", "public.orders"],
+            "interface": {
+                "surface": "cli",
+                "operation": "create synchronized project",
+                "available": True,
+            },
+        },
+        "context": {
+            "enabled": True,
+            "source_mode": "existing",
+            "source_schema": "public",
+            "source_table": "customers",
+            "source_key_column": "id",
+            "vector_column": "embedding",
+        },
+        "retrieval_runtime": {
+            "enabled": True,
+            "interface": {
+                "surface": "sdk",
+                "operation": "project.context.search",
+                "available": True,
+            },
+        },
+        "credentials": {
+            "required": ["POLYGRES_RUNTIME_URL", "POLYGRES_API_KEY"],
+        },
+        "actions": [
+            {
+                "id": "create-sync",
+                "type": "sync-project-create",
+                "target": "project_example",
+                "effect": "create a synced project through the CLI",
+                "data_egress": "selected source rows continuously synchronize to Polygres",
+                "requires_approval": True,
+            }
+        ],
+        "approval": {"status": "pending"},
+        "verification": {"claims": []},
+    }
+
+
 def test_skill_structure_and_reference_routing() -> None:
     skill = SKILL_ROOT / "SKILL.md"
     text = skill.read_text(encoding="utf-8")
@@ -215,6 +276,7 @@ def test_skill_structure_and_reference_routing() -> None:
         "source-chat-agents.md",
         "source-databases.md",
         "source-files-and-apis.md",
+        "synced-projects.md",
     }
     for reference in references:
         assert f"`references/{reference}`" in text
@@ -412,6 +474,117 @@ def test_plan_linter_warns_without_blocking_incomplete_optional_details() -> Non
     result = validator.lint_plan(plan)
     assert result.ok
     assert result.warnings
+
+
+def test_synced_plan_accepts_cli_creation_and_retrieval_only() -> None:
+    validator = _load_module(
+        "pipeline_synced_validator", SCRIPT_ROOT / "validate_pipeline_plan.py"
+    )
+    result = validator.lint_plan(_synced_plan())
+    assert result.ok, result.blockers
+    boundary = validator.approval_boundary(_synced_plan())
+    assert boundary["project_mode"] == "synced"
+    assert boundary["source_authority"] == "source PostgreSQL"
+    assert boundary["sync_selection"] == ["public.customers", "public.orders"]
+    changed = _synced_plan()
+    changed["sync"]["selected_tables"] = [
+        {
+            "schema_name": "public",
+            "table_name": "customers",
+            "included_columns": ["id", "email"],
+        }
+    ]
+    assert validator.approval_digest(changed) != validator.approval_digest(_synced_plan())
+    assert validator.approval_boundary(changed)["sync_selection"] == [
+        "public.customers [email, id]"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("mutation", "expected"),
+    [
+        ("schema", "synced-target-schema-unavailable"),
+        ("import", "synced-target-mutation-unavailable"),
+        ("capture", "synced-custom-capture-unavailable"),
+        ("database-secret", "synced-target-database-secret-unavailable"),
+        ("rows", "synced-runtime-surface-unavailable"),
+        ("sdk-sync-control", "synced-control-plane-handoff-required"),
+        ("cli-sync-control", "synced-control-plane-handoff-required"),
+        ("context-new-table", "synced-context-source-mode-unavailable"),
+        ("private-schema", "synced-source-schema-unavailable"),
+        ("direct-postgres", "synced-target-database-unavailable"),
+        ("credential-rotation", "synced-credential-rotation-unavailable"),
+    ],
+)
+def test_synced_plan_blocks_target_mutation_and_unsupported_sync_control(
+    mutation: str, expected: str
+) -> None:
+    validator = _load_module(
+        f"pipeline_synced_validator_{mutation}", SCRIPT_ROOT / "validate_pipeline_plan.py"
+    )
+    plan = _synced_plan()
+    if mutation == "schema":
+        plan["schema"] = {"enabled": True, "mode": "create"}
+    elif mutation == "import":
+        plan["actions"].append({"id": "import", "type": "bulk-import"})
+    elif mutation == "capture":
+        plan["capture_runtime"] = {"enabled": True}
+    elif mutation == "database-secret":
+        plan["credentials"]["required"].append("POLYGRES_DATABASE_URL")
+    elif mutation == "rows":
+        plan["retrieval_runtime"]["interface"]["operation"] = "project.rows.validate"
+    elif mutation == "sdk-sync-control":
+        plan["sync"]["interface"] = {
+            "surface": "sdk",
+            "operation": "configure sync tables",
+        }
+    elif mutation == "cli-sync-control":
+        plan["sync"]["interface"] = {
+            "surface": "cli",
+            "operation": "configure sync tables",
+        }
+    elif mutation == "context-new-table":
+        plan["context"]["source_mode"] = "new_table"
+    elif mutation == "private-schema":
+        plan["sync"]["selected_tables"] = ["private.customers"]
+    elif mutation == "direct-postgres":
+        plan["retrieval_runtime"]["interface"] = {
+            "surface": "postgres",
+            "operation": "write target row",
+        }
+    elif mutation == "credential-rotation":
+        plan["actions"].append({"id": "rotate", "type": "sync-credential-rotate"})
+    result = validator.lint_plan(plan)
+    assert expected in {blocker["code"] for blocker in result.blockers}
+
+
+def test_synced_scaffold_omits_target_writer_schema_and_checkpoint(tmp_path: Path) -> None:
+    plan_path = tmp_path / "synced.json"
+    plan_path.write_text(json.dumps(_synced_plan()), encoding="utf-8")
+    destination = tmp_path / "synced"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_ROOT / "scaffold_pipeline.py"),
+            str(plan_path),
+            str(destination),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert not (destination / "schema.sql").exists()
+    assert not (destination / "capture-runtime.json").exists()
+    assert not (destination / "lib" / "checkpoint_ledger.py").exists()
+    assert (destination / "sync.json").is_file()
+    readme = (destination / "README.md").read_text(encoding="utf-8")
+    assert "source remains the system of record" in readme
+    assert "does not contain a custom capture worker" in readme
+    review = (destination / "REVIEW.md").read_text(encoding="utf-8")
+    assert "Project mode: `synced`" in review
+    assert "Selected sync tables: public.customers, public.orders" in review
+    assert "Write path: mutate the source database" in review
 
 
 def test_scaffolder_creates_a_secret_free_setup_pack(tmp_path: Path) -> None:

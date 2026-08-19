@@ -1,5 +1,9 @@
 # pgContext AI Search
 
+For a synced project, configure Context only from an existing synchronized
+table and column. Do not use `add-column` or `new-table`; generate and persist
+embeddings in the source PostgreSQL database.
+
 ## Contents
 
 - [Boundaries](#boundaries)

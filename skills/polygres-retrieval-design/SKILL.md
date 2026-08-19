@@ -14,7 +14,7 @@ This skill is advisory: it must not mutate a project directly.
    result shape from the prompt and inspected application. Ask only for a
    missing fact that changes the recommendation; representative questions are
    useful evidence, not a mandatory interview.
-2. Inspect the supplied schema, verified row identifiers, sample data, and
+2. Resolve project mode, then inspect the supplied schema, verified row identifiers, sample data, and
    existing retrieval configuration. Label missing evidence as unresolved;
    never infer production facts from a table or column name.
 3. Select the smallest sufficient strategy using
@@ -39,6 +39,9 @@ This skill is advisory: it must not mutate a project directly.
 
 - Prefer relational retrieval for exact predicates, joins, aggregates, and
   transactions that do not need a retrieval index.
+- For a synced project, keep exact SQL, transactions, and source mutations in
+  the source PostgreSQL database. Use only the supported Runtime retrieval and
+  retrieval-configuration surfaces on Polygres.
 - Treat graph, vector, text, and Context indexes and point mappings as derived
   project resources whose readiness and refresh behavior must be validated.
 - Use exact schema identifiers and stable row ID values from verified data.
@@ -51,6 +54,8 @@ This skill is advisory: it must not mutate a project directly.
   collection or require separate collection-level source and policy settings.
   Record any existing pgvector configuration that must remain compatible or
   needs a migration plan. Never treat those resources as interchangeable.
+  On a synced project, use only an existing synchronized source table and
+  embedding column; do not plan `add_column` or `new_table` on the target.
 - State TSVector language/configuration choices and fuzzy thresholds.
 - For hybrid retrieval, define stage order, provenance, deduplication,
   authorization, and token budget.

@@ -18,6 +18,13 @@ Typical local names are `POLYGRES_RUNTIME_URL`, `POLYGRES_API_KEY`, and a
 source-specific name such as `SOURCE_DATABASE_URL` or `SOURCE_API_TOKEN`. Use
 only names required by the selected adapter.
 
+For managed PostgreSQL sync, do not generate or inspect a source credential
+file. Prefer the CLI's hidden interactive prompt or direct the user to the
+Polygres dashboard. For approved non-interactive CLI creation, reference only a
+user-populated environment-variable name with `--connection-env`. Do not put
+the connection value in chat, a plan, a literal CLI argument, SDK code, Runtime
+request, generated file, or log.
+
 Run `scripts/check_env.py --env-file <path> --required <NAME>` for each required
 name. The tool reports status without values. Do not open, print, summarize, or
 log `.env`. For deployment, copy the same names into the platform secret
@@ -35,6 +42,10 @@ verification. Ask once before the first upload or remote mutation. An approval
 of that displayed review covers the setup while its project, source scope, data
 egress, destructive effects, and paid processing remain unchanged. Internal
 implementation details may change without duplicate confirmation.
+
+For a synced project, also disclose project mode, source authority, selected
+tables and columns, continuous source-to-Polygres egress, Polygres-owned
+publication and slot, reconfiguration behavior, and any resnapshot effect.
 
 When an unknown embedding deployment preference leaves both local and hosted
 paths feasible, fully describe one recommendation and one alternative inside

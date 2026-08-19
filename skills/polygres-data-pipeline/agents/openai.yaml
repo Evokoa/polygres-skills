@@ -1,4 +1,4 @@
 interface:
   display_name: "Polygres Data Pipeline"
-  short_description: "Set up Polygres ingestion and retrieval"
-  default_prompt: "Use $polygres-data-pipeline to help me set up Polygres from my accessible data and application. Infer safe defaults, ask once only for critical missing information, build the smallest useful ingestion and retrieval setup, and verify it."
+  short_description: "Set up Polygres sync, ingestion, and retrieval"
+  default_prompt: "Use $polygres-data-pipeline to inspect my source, choose managed PostgreSQL sync or the smallest safe custom pipeline, and verify the selected ingestion and retrieval path."

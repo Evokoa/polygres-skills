@@ -1,6 +1,6 @@
 ---
 name: polygres-sdk
-description: Use the Polygres Python SDK to write individual application records and build retrieval with Polygres AI Context, graph, text, hybrid, and existing vector queries; manage pgContext collections, points, and durable operations; configure safe Runtime API clients; paginate typed results; and handle SDK errors. Use for Python backend code calling a project's Runtime API. Do not use for control-plane administration, bulk imports, migrations, or interactive CLI workflows.
+description: Use the Polygres Python SDK to write individual standard-project application records and build retrieval on standard or synchronized projects with Polygres AI Context, graph, text, hybrid, and existing vector queries; manage supported pgContext collections, points, and durable operations; configure safe Runtime API clients; paginate typed results; and handle SDK errors. Use for Python backend code calling a project's Runtime API. Do not use for sync control-plane administration, bulk imports, migrations, or interactive CLI workflows.
 ---
 
 # Polygres SDK
@@ -24,29 +24,35 @@ control-plane project administration, imports, migrations, and API-key managemen
    environment configuration. Never log or embed either value.
 5. Confirm that the URL is the per-project Runtime API URL, not the Polygres
    control-plane URL or a direct or pooled Postgres URL.
-6. Check `project.readiness()` before relying on graph, existing vector, or
+6. Resolve project mode before selecting a namespace. For a synced project,
+   construct `client.project(project_mode="synced")` and read
+   `references/synced-projects.md`.
+7. Check `project.readiness()` before relying on graph, existing vector, or
    legacy hybrid retrieval. For new semantic retrieval, prefer Polygres AI
    Context: call `project.context.get_capabilities()` and then inspect collection
    status or verification. Use `project.connection_info()` only for passwordless
    connection metadata.
-7. Keep every pgContext call on the flat `project.context` namespace. Prefer
+8. Keep every pgContext call on the flat `project.context` namespace. Prefer
    `$polygres-cli` for interactive setup. Use SDK mutations for explicit,
    backend-owned automation, return them immediately, and wait only when the
    application workflow requires a terminal result.
-8. Choose one focused retrieval call. Use real row IDs returned by the SDK or
+9. Choose one focused retrieval call. Use real row IDs returned by the SDK or
    verified application data; never invent graph identifiers.
-9. Bound depth, candidate counts, result limits, pagination, and application
+10. Bound depth, candidate counts, result limits, pagination, and application
    token budget. Apply authorization before retrieval because filters are not
    an authorization boundary.
-10. Preserve result provenance, request IDs, and typed models through RAG
+11. Preserve result provenance, request IDs, and typed models through RAG
    assembly. Deduplicate before constructing context.
-11. Handle the documented exception hierarchy and test success, malformed
+12. Handle the documented exception hierarchy and test success, malformed
    responses, fuzzy or empty queries, invalid dimensions, and transient errors.
 
 ## Reference routing
 
 - Read `references/client-setup.md` for installation, environment variables,
   endpoint selection, readiness, and passwordless connection information.
+- Read `references/synced-projects.md` for synced-project API-key limits,
+  unavailable write and database surfaces, source-authoritative writes, and
+  CLI or dashboard control-plane handoff.
 - Read `references/graph-retrieval.md` for graph calls, real row-ID discovery,
   direction, depth, and fan-out limits.
 - Read `references/vector-and-text.md` for existing vector compatibility,
@@ -78,13 +84,15 @@ control-plane project administration, imports, migrations, and API-key managemen
   Polygres generates source or query embeddings.
 - Never print headers, environment variables, API keys, or database secrets.
 - Treat `connection_info()` as passwordless metadata. It does not return a
-  database password.
+  database password. Never call it for a synced project.
+- Never use `project.rows` for a synced project or use rows validation as a
+  capability probe. Mutate the source database instead.
 - Do not claim a query is authorized merely because it includes filters.
 - Do not retry validation, authentication, or permission errors blindly.
 - Do not hide partial pagination, malformed payloads, timeouts, or request IDs.
 
 ## Completion report
 
-State the Runtime API context without secrets, retrieval strategy, filters and
+State project mode and the Runtime API context without secrets, retrieval strategy, filters and
 bounds, pagination behavior, provenance fields retained, tests run, and any
 readiness or configuration work still required through `$polygres-cli`.

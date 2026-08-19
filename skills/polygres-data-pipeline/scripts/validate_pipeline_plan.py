@@ -21,9 +21,53 @@ REMOTE_ACTION_TYPES = {
     "graph-configure",
     "deploy",
     "backfill",
+    "sync-project-create",
+    "sync-table-reconfigure",
+    "sync-resnapshot",
+    "sync-credential-rotate",
 }
-DESTRUCTIVE_ACTION_TYPES = {"delete", "replace", "drop", "revoke", "truncate"}
-SECRET_KEYS = {"password", "api_key", "access_token", "secret", "token", "database_url"}
+DESTRUCTIVE_ACTION_TYPES = {
+    "delete",
+    "replace",
+    "drop",
+    "revoke",
+    "truncate",
+    "resnapshot",
+}
+SECRET_KEYS = {
+    "password",
+    "api_key",
+    "access_token",
+    "secret",
+    "token",
+    "database_url",
+    "connection_url",
+    "connection_string",
+}
+SYNCED_FORBIDDEN_ACTION_TYPES = {
+    "schema-create",
+    "schema-alter",
+    "bulk-import",
+    "row-write",
+    "backfill",
+}
+SYNCED_FORBIDDEN_ENV_NAMES = {
+    "POLYGRES_DATABASE_URL",
+    "POLYGRES_DB_PASSWORD",
+    "POLYGRES_DATABASE_PASSWORD",
+}
+SYNCED_FORBIDDEN_OPERATION_PARTS = (
+    "project.rows",
+    "rows.",
+    "rows ",
+    "/rows",
+    "import",
+    "migration",
+    "connection_info",
+    "db info",
+    "db psql",
+)
+SYNCED_TARGET_DATABASE_SURFACES = {"postgres", "postgresql", "direct-postgres", "sql"}
 ENV_NAME = re.compile(r"^[A-Z_][A-Z0-9_]*$")
 SECRET_PATTERNS = (
     re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
@@ -54,6 +98,16 @@ class PlanValidationError(ValueError):
 
 def _issue(code: str, path: str, message: str) -> dict[str, str]:
     return {"code": code, "path": path, "message": message}
+
+
+def _is_cli_sync_creation(surface: str, operation: str) -> bool:
+    if surface != "cli":
+        return False
+    normalized = " ".join(operation.split())
+    return normalized in {
+        "create synchronized project",
+        "create synced project",
+    } or normalized.startswith("polygres projects create sync")
 
 
 def _actions(plan: dict[str, Any]) -> list[dict[str, Any]]:
@@ -92,6 +146,19 @@ def approval_boundary(plan: dict[str, Any]) -> dict[str, Any]:
     source_scope = (
         plan.get("source", {}).get("scope") if isinstance(plan.get("source"), dict) else None
     )
+    project_mode = (
+        plan.get("target", {}).get("project_mode")
+        if isinstance(plan.get("target"), dict)
+        else None
+    )
+    source_authority = (
+        plan.get("source", {}).get("system_of_record")
+        if isinstance(plan.get("source"), dict)
+        else None
+    )
+    sync = plan.get("sync")
+    selected_tables = sync.get("selected_tables", []) if isinstance(sync, dict) else []
+    sync_selection = sorted(_sync_selection_label(item) for item in selected_tables)
     egress = sorted(
         {
             str(action["data_egress"])
@@ -140,7 +207,10 @@ def approval_boundary(plan: dict[str, Any]) -> dict[str, Any]:
                 egress.append(str(data_egress))
     return {
         "project_id": project_id,
+        "project_mode": project_mode,
         "source_scope": source_scope,
+        "source_authority": source_authority,
+        "sync_selection": sync_selection,
         "data_egress": sorted(set(egress)),
         "destructive_actions": sorted(set(destructive)),
         "paid_processing": sorted(set(paid)),
@@ -227,6 +297,178 @@ def _important_path_tested(plan: dict[str, Any]) -> bool:
     return False
 
 
+def _sync_selection_label(item: Any) -> str:
+    if not isinstance(item, dict):
+        return str(item)
+    schema = item.get("schema_name") or item.get("schema")
+    table = item.get("table_name") or item.get("table") or item.get("name")
+    identity = ".".join(str(part) for part in (schema, table) if part)
+    columns = item.get("included_columns")
+    if isinstance(columns, list) and columns:
+        identity += f" [{', '.join(sorted(str(column) for column in columns))}]"
+    return identity or "unresolved-table"
+
+
+def _sync_selection_schema(item: Any) -> str | None:
+    if isinstance(item, dict):
+        value = item.get("schema_name") or item.get("schema")
+        return str(value) if value else None
+    if isinstance(item, str) and "." in item:
+        return item.split(".", 1)[0]
+    return None
+
+
+def _synced_project_blockers(
+    plan: dict[str, Any], actions: list[dict[str, Any]]
+) -> list[dict[str, str]]:
+    target = plan.get("target")
+    if not isinstance(target, dict) or target.get("project_mode") != "synced":
+        return []
+
+    blockers: list[dict[str, str]] = []
+    schema = plan.get("schema")
+    if (
+        isinstance(schema, dict)
+        and schema.get("enabled", True) is not False
+        and schema.get("mode") != "reuse"
+        and schema.get("authority") != "source"
+    ):
+        blockers.append(
+            _issue(
+                "synced-target-schema-unavailable",
+                "schema",
+                "a synced project cannot create or alter target schema; change the source schema",
+            )
+        )
+
+    capture = plan.get("capture_runtime")
+    if isinstance(capture, dict) and capture.get("enabled", True) is not False:
+        blockers.append(
+            _issue(
+                "synced-custom-capture-unavailable",
+                "capture_runtime",
+                "managed PostgreSQL sync replaces target row capture and checkpoint workers",
+            )
+        )
+
+    context = plan.get("context")
+    if (
+        isinstance(context, dict)
+        and context.get("enabled", True) is not False
+        and context.get("source_mode") != "existing"
+    ):
+        blockers.append(
+            _issue(
+                "synced-context-source-mode-unavailable",
+                "context.source_mode",
+                "a synced project must use an existing synchronized source table and column",
+            )
+        )
+
+    sync = plan.get("sync")
+    selected_tables = sync.get("selected_tables", []) if isinstance(sync, dict) else []
+    for index, table in enumerate(selected_tables if isinstance(selected_tables, list) else []):
+        if _sync_selection_schema(table) != "public":
+            blockers.append(
+                _issue(
+                    "synced-source-schema-unavailable",
+                    f"sync.selected_tables[{index}]",
+                    "managed sync currently selects eligible tables in the public schema",
+                )
+            )
+
+    sync_actions = {
+        action.get("type")
+        for action in actions
+        if str(action.get("type", "")).startswith("sync-")
+    }
+    sync_interface = sync.get("interface") if isinstance(sync, dict) else None
+    sync_surface = (
+        str(sync_interface.get("surface", "")).casefold()
+        if isinstance(sync_interface, dict)
+        else ""
+    )
+    cli_creation_only = sync_actions == {"sync-project-create"} and sync_surface == "cli"
+    if sync_actions and sync_surface != "dashboard" and not cli_creation_only:
+        blockers.append(
+            _issue(
+                "synced-control-plane-handoff-required",
+                "sync.interface",
+                "use CLI or dashboard for initial sync creation and dashboard for later "
+                "control-plane actions",
+            )
+        )
+    if "sync-credential-rotate" in sync_actions:
+        blockers.append(
+            _issue(
+                "synced-credential-rotation-unavailable",
+                "actions",
+                "do not promise self-service source credential rotation",
+            )
+        )
+
+    credentials = plan.get("credentials")
+    required = credentials.get("required", []) if isinstance(credentials, dict) else []
+    for index, name in enumerate(required if isinstance(required, list) else []):
+        if name in SYNCED_FORBIDDEN_ENV_NAMES:
+            blockers.append(
+                _issue(
+                    "synced-target-database-secret-unavailable",
+                    f"credentials.required[{index}]",
+                    "a synced project does not expose target database credentials",
+                )
+            )
+
+    for index, action in enumerate(actions):
+        if (
+            action.get("type") in SYNCED_FORBIDDEN_ACTION_TYPES
+            and action.get("authority") != "source"
+        ):
+            blockers.append(
+                _issue(
+                    "synced-target-mutation-unavailable",
+                    f"actions[{index}]",
+                    f"{action.get('type')} is unavailable on a synced target; mutate the source",
+                )
+            )
+
+    for path, interface in _interfaces(plan):
+        if interface.get("authority") == "source":
+            continue
+        surface = str(interface.get("surface", "")).casefold()
+        operation = str(interface.get("operation", "")).casefold()
+        if surface in SYNCED_TARGET_DATABASE_SURFACES:
+            blockers.append(
+                _issue(
+                    "synced-target-database-unavailable",
+                    path,
+                    f"{interface.get('surface')} target access is unavailable on a synced project",
+                )
+            )
+        if any(part in operation for part in SYNCED_FORBIDDEN_OPERATION_PARTS):
+            blockers.append(
+                _issue(
+                    "synced-runtime-surface-unavailable",
+                    path,
+                    f"{interface.get('operation')} is unavailable on a synced project",
+                )
+            )
+        if (
+            "sync" in operation
+            and surface != "dashboard"
+            and not _is_cli_sync_creation(surface, operation)
+        ):
+            blockers.append(
+                _issue(
+                    "synced-control-plane-handoff-required",
+                    path,
+                    "use CLI or dashboard for initial sync creation and dashboard for later "
+                    "sync control",
+                )
+            )
+    return blockers
+
+
 def lint_plan(plan: Any) -> LintResult:
     blockers: list[dict[str, str]] = []
     warnings: list[dict[str, str]] = []
@@ -234,6 +476,7 @@ def lint_plan(plan: Any) -> LintResult:
         return LintResult((_issue("invalid-plan", "plan", "must be a JSON object"),), ())
 
     actions = _actions(plan)
+    blockers.extend(_synced_project_blockers(plan, actions))
     remote_actions = [action for action in actions if _is_remote(action)]
     target = plan.get("target")
     project_id = target.get("project_id") if isinstance(target, dict) else None

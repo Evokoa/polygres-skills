@@ -1,5 +1,8 @@
 # Data imports
 
+Use imports only for a standard project. Synced projects reject imports; change
+the source PostgreSQL database and let managed sync carry eligible changes.
+
 ## Contents
 
 - [Capability boundary](#capability-boundary)

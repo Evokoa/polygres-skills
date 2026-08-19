@@ -1,6 +1,6 @@
 ---
 name: polygres-troubleshooting
-description: Diagnose Polygres CLI, Runtime API, control-plane, Postgres, job, migration, retrieval, and pgContext failures using public read-only evidence. Use for errors, timeouts, partial failures, readiness problems, ambiguous projects, failed Context collections or operations, stale point mappings, or broken graph, vector, text, hybrid, or Joint retrieval. Do not use private observability, undocumented endpoints, or mutating repair actions.
+description: Diagnose Polygres CLI, Runtime API, control-plane, standard or synchronized PostgreSQL project, job, migration, retrieval, and pgContext failures using public read-only evidence. Use for errors, sync preflight or lifecycle failures, timeouts, partial failures, readiness problems, ambiguous projects, failed Context collections or operations, stale point mappings, or broken graph, vector, text, hybrid, or Joint retrieval. Do not use private observability, undocumented endpoints, or mutating repair actions.
 ---
 
 # Polygres Troubleshooting
@@ -22,15 +22,17 @@ while diagnosing.
    approved action IDs, checkpoint, and last successfully completed stage.
 4. Inspect project and database evidence with
    `references/projects-and-database.md`.
-5. For import job or migration failures, use
+5. If `project_mode` is `synced`, use `references/synced-projects.md` and skip
+   target database, row, import, and migration checks.
+6. For import job or migration failures, use
    `references/jobs-and-migrations.md`. For graph, vector, text, hybrid, or
    general readiness failures, use `references/retrieval.md`. For pgContext
    capability, collection, point, operation, recall, or Joint failures, use
    `references/context.md`.
-6. Classify the fault as CLI/local configuration, control-plane, Runtime API,
+7. Classify the fault as CLI/local configuration, control-plane, Runtime API,
    Postgres/database or pooler, or asynchronous job state. Use
    `references/errors-and-escalation.md` for typed SDK errors and escalation.
-7. Re-check status before retry. Recommend a corrective action, but obtain
+8. Re-check status before retry. Recommend a corrective action, but obtain
    explicit approval and delegate supported mutations to `$polygres-cli` or
    application changes to `$polygres-sdk`.
 

@@ -77,16 +77,20 @@ agent integration, continue here.
    outcome, ownership boundary, freshness, embedding choice, and existing code.
 2. Inspect one bounded source sample and the narrow project capabilities needed
    for the likely setup. Do not inventory every Polygres surface.
-3. Infer reversible defaults. Ask one concise batch of questions only for
+3. Resolve `target.project_mode` before selecting any write, import, migration,
+   database, or retrieval surface. For an existing PostgreSQL source, evaluate
+   managed sync with `references/synced-projects.md` before designing custom
+   capture.
+4. Infer reversible defaults. Ask one concise batch of questions only for
    critical facts that inspection cannot resolve safely. Do not ask about
    optional components that are unnecessary.
-4. Keep a small internal setup plan when work has multiple actions, then create
+5. Keep a small internal setup plan when work has multiple actions, then create
    the local source-specific adapter, privacy filter, writer, retrieval entry
    point, tests, and operator files that the selected design requires.
-5. Test locally with a small safe sample appropriate to the source. Present one
+6. Test locally with a small safe sample appropriate to the source. Present one
    consolidated review before the first upload, remote mutation, modification
    of active agent instructions, or installation of a runtime integration.
-6. After approval, apply all actions covered by that exact review without
+7. After approval, apply all actions covered by that exact review without
    repeated prompts, verify a bounded end-to-end slice, then continue any
    approved backfill or integration.
 
@@ -150,6 +154,7 @@ Read only the source reference that matches the inspected input:
 | --- | --- |
 | Agent memory, Codex, Claude Code, or chat export | `references/source-chat-agents.md` |
 | Existing database, polling, outbox, or change stream | `references/source-databases.md` |
+| Managed Supabase, Neon, or PostgreSQL sync project | `references/synced-projects.md` |
 | Files, APIs, webhooks, queues, or mixed input | `references/source-files-and-apis.md` |
 
 Follow `references/pipeline-runtime.md`. The generated implementation must use
@@ -159,6 +164,9 @@ retrieval commands when selected, and include focused tests.
 
 Use the public interface appropriate to each workload:
 
+- synced project: keep the source database authoritative, hand sync creation
+  and configuration to the dashboard, and use the Runtime API key only for
+  supported retrieval and retrieval configuration;
 - dataset or bounded backfill: reviewed CLI import is normally sufficient;
 - one JSON object or runtime event: use the rows surface when the target and
   workload pass its read-only validation and deployed limits;
@@ -168,6 +176,10 @@ Use the public interface appropriate to each workload:
 - deletion or unsupported/high-throughput writes: use another documented public
   operation when available, otherwise approved direct Postgres;
 - direct Postgres: only when no public operation satisfies the approved need.
+
+Never apply the standard-project mutation routes to a synced project. Do not
+probe rows validation, request target database information, or infer that a
+project API key can call sync control-plane operations.
 
 The single-row contract is available in CLI/SDK `0.3.0` and includes
 `insert`, `upsert`, `ignore`, and `validate`. If the installed client or project

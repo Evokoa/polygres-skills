@@ -1,4 +1,4 @@
 interface:
   display_name: "Polygres CLI"
-  short_description: "Operate Polygres projects and pgContext safely"
-  default_prompt: "Use $polygres-cli to set up this pgContext AI Search collection safely."
+  short_description: "Operate standard and synced Polygres projects"
+  default_prompt: "Use $polygres-cli to inspect this project's mode and run only the supported Polygres operation."

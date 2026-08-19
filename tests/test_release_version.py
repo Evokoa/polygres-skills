@@ -45,30 +45,30 @@ def _run(package: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
 
 
 def test_release_contract_matches_version_manifests_record_and_digest() -> None:
-    result = _run(PACKAGE_ROOT, "check", "--tag", "polygres-skills-v0.4.0")
+    result = _run(PACKAGE_ROOT, "check", "--tag", "polygres-skills-v0.5.0")
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout == "Skills release version is consistent: 0.4.0\n"
+    assert result.stdout == "Skills release version is consistent: 0.5.0\n"
 
 
 def test_release_targets_current_clients_and_skills_050() -> None:
-    record = json.loads((PACKAGE_ROOT / "releases" / "0.4.0.json").read_text())
+    record = json.loads((PACKAGE_ROOT / "releases" / "0.5.0.json").read_text())
     readme = (PACKAGE_ROOT / "README.md").read_text(encoding="utf-8")
 
-    assert RELEASE.canonical_version(PACKAGE_ROOT) == "0.4.0"
-    assert record["version"] == "0.4.0"
-    assert record["release_date"] == "2026-08-14"
+    assert RELEASE.canonical_version(PACKAGE_ROOT) == "0.5.0"
+    assert record["version"] == "0.5.0"
+    assert record["release_date"] == "2026-08-18"
     assert record["compatibility"]["polygres_cli"] == {
-        "minimum_supported": "0.3.0",
-        "maximum_tested": "0.3.0",
+        "minimum_supported": "0.4.0",
+        "maximum_tested": "0.4.0",
     }
     assert record["compatibility"]["polygres_sdk"] == {
-        "minimum_supported": "0.3.0",
-        "maximum_tested": "0.3.0",
+        "minimum_supported": "0.4.0",
+        "maximum_tested": "0.4.0",
     }
-    assert "Package version: [`0.4.0`]" in readme
-    assert "polygres-cli 0.3.0" in readme
-    assert "polygres-sdk 0.3.0" in readme
+    assert "Package version: [`0.5.0`]" in readme
+    assert "polygres-cli 0.4.0" in readme
+    assert "polygres-sdk 0.4.0" in readme
 
 
 @pytest.mark.parametrize(

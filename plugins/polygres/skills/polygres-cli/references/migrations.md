@@ -1,5 +1,8 @@
 # Migrations
 
+Use migrations only for a standard project. A synced target rejects migrations;
+apply an approved schema change to the source and re-check sync eligibility.
+
 Use migrations for intended schema changes, not generic data loading.
 
 ```bash

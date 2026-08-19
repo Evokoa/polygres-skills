@@ -1,5 +1,11 @@
 # Database, environment, and Runtime API keys
 
+Read `project_mode` first. A synced project exposes neither target database
+connection information nor `psql`; do not run `env`, `db info`, or `db psql`.
+Its project API key is automatically restricted to supported Runtime retrieval
+and retrieval-configuration scopes and cannot authenticate sync control-plane
+operations. See `synced-projects.md`.
+
 ## Safe environment output
 
 ```bash

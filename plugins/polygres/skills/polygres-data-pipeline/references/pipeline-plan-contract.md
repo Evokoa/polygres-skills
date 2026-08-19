@@ -5,6 +5,13 @@ fixed schema. Use the smallest JSON object that helps resume multi-step work.
 A simple setup can record only source, target, actions, approval, and
 verification. Skip the plan entirely for a harmless one-step check.
 
+Resolve `target.project_mode` as `standard` or `synced` before choosing a
+mutation surface. For managed PostgreSQL sync, record
+`source.system_of_record`, `sync.mode: managed-postgres`, the provider, and the
+selected table or column scope without a connection value. Use `surface: cli`
+or `surface: dashboard` for initial sync creation. Use `surface: dashboard` for
+later reconfiguration and lifecycle interfaces.
+
 Add schema, embeddings, graph, backfill, incremental capture, retrieval,
 deployment, or agent integration only when selected. Missing optional details
 must not create user questions.
@@ -36,7 +43,11 @@ Only these conditions block:
    destructive actions, or paid processing;
 4. capability evidence says a selected public interface is unavailable;
 5. the plan claims `operational` without passing evidence for the important
-   path.
+   path;
+6. a synced-project plan selects a target schema mutation, target rows,
+   import, backfill, direct target database credential, custom capture worker,
+   or an unsupported sync control interface. CLI is valid only for initial
+   synchronized-project creation.
 
 Everything else is optional or a warning.
 
@@ -64,7 +75,9 @@ After the user approves it, store `approval.status: approved` and the printed
 digest as `approval.boundary_digest`. This digest intentionally covers only:
 
 - project;
+- project mode;
 - source scope;
+- source system of record and selected sync tables;
 - data egress;
 - destructive effects;
 - paid processing.

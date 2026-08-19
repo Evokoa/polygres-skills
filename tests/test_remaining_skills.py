@@ -72,6 +72,7 @@ def test_troubleshooting_skill_structure_and_metadata() -> None:
             "jobs-and-migrations.md",
             "projects-and-database.md",
             "retrieval.md",
+            "synced-projects.md",
         },
     )
 
@@ -156,6 +157,33 @@ def test_retrieval_plan_has_a_complete_review_contract() -> None:
         "## Handoff",
     ):
         assert heading in template
+
+
+def test_retrieval_design_branches_for_synced_projects() -> None:
+    text = " ".join(_all_skill_text(DESIGN_ROOT).split())
+    for phrase in (
+        "Resolve project mode",
+        "source PostgreSQL database",
+        "existing synchronized source table",
+        "both foreign-key endpoint tables",
+        "Do not assign sync control-plane work",
+    ):
+        assert phrase in text
+
+
+def test_troubleshooting_covers_synced_preflight_and_lifecycle() -> None:
+    text = (TROUBLESHOOTING_ROOT / "references" / "synced-projects.md").read_text()
+    for phrase in (
+        "SYNCED_PROJECT_SURFACE_UNAVAILABLE",
+        "SOURCE_AUTH_FAILED",
+        "SOURCE_WAL_LEVEL_NOT_LOGICAL",
+        "SOURCE_SLOT_CAPACITY_EXHAUSTED",
+        "SYNC_SCHEMA_DRIFT_DETECTED",
+        "SYNC_CONFIGURATION_GENERATION_CONFLICT",
+        "valid_actions",
+        "resnapshot",
+    ):
+        assert phrase in text
 
 
 def test_troubleshooting_uses_only_public_evidence_and_read_only_checks() -> None:

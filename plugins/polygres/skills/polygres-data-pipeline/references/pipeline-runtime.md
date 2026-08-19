@@ -24,6 +24,11 @@ ingestion-only setup does not need retrieval code.
 
 ## Preserve delivery correctness
 
+Resolve the target project mode first. For a synced project, omit the writer,
+custom CDC worker, target backfill, and checkpoint ledger. Write and enrich at
+the source, then verify managed sync state and retrieval. The standard-project
+rules below do not authorize target mutation on synced projects.
+
 - Emit source namespace, stable ID, revision, timestamp, ownership, and content
   hash.
 - Filter before embedding or extraction.
@@ -74,6 +79,13 @@ do not generate undocumented API calls.
 
 ## Route operations through public interfaces
 
+- For a synced project, use `polygres projects create sync` or the dashboard for
+  initial creation and table selection. Use the dashboard for later
+  reconfiguration and lifecycle actions. Use the project Runtime API key only
+  for supported graph, text, vector, hybrid, Context, catalog, and readiness
+  work. Do not use CLI import, migrations, rows, SDK rows, `connection_info()`,
+  or direct target Postgres.
+
 - Use CLI import for reviewed one-time or bounded CSV backfills. If Context is
   selected, follow a successful import with approved existing-row point
   reconciliation and verify it before declaring the backfill durable.
@@ -100,7 +112,7 @@ do not generate undocumented API calls.
 - Route source-row deletion separately because the rows surface has no delete
   mode. Use an approved database deletion path and delete or invalidate the
   corresponding Context points, text resources, and graph evidence.
-- Use direct Postgres for source-row writes only when no public ingestion
+- For a standard project, use direct Postgres for target-row writes only when no public ingestion
   operation meets the requirement and the user approves that credential path.
 - Record the public interface inside each selected capture or retrieval runtime.
 - Never call a private control-plane route or infer a request body.

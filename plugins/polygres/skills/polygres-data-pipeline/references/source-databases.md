@@ -10,12 +10,17 @@ history are in scope.
 Require a stable primary key. If none exists, propose a reviewed schema change
 or deterministic source key and explain update and collision limitations.
 
-## Choose one incremental method
+## Choose managed sync or one custom incremental method
+
+For an eligible Supabase, Neon, or PostgreSQL source, first evaluate a managed
+synced project with `synced-projects.md`. Choose it when a new project is
+acceptable and the source will remain the system of record. Otherwise choose
+one custom method for a standard project:
 
 - **Application outbox:** recommended when the application can be changed. Put
   source mutation and outbox event in one transaction.
-- **Existing CDC stream:** consume it when the user already operates one. Do
-  not claim Polygres provides managed CDC.
+- **Existing CDC stream:** consume it when the user already operates one and a
+  managed synced project does not fit.
 - **Checkpointed polling:** use primary key plus `updated_at` and a deterministic
   tie-breaker. Do not use time alone.
 - **Dual write:** use only when the application owns retry and reconciliation.
@@ -52,7 +57,12 @@ text or graph maintenance paths for derived evidence. Do not encode deletion as
 ## Separate source and target credentials
 
 Use separate environment-variable names such as `SOURCE_DATABASE_URL` and
-`POLYGRES_DATABASE_URL` only when direct database access is approved. Prefer a
+`POLYGRES_DATABASE_URL` only for a custom standard-project pipeline when direct
+database access is approved. A synced project never exposes a target
+`POLYGRES_DATABASE_URL`; enter its source connection through the dashboard or
+the CLI's hidden prompt. For non-interactive creation, let the user populate a
+source environment variable and reference only its name with
+`--connection-env`; do not place its value in a generated pack. Prefer a
 public Polygres application credential when available. Put values in the
 ignored `.env`; never place them in the plan, arguments, logs, or chat.
 

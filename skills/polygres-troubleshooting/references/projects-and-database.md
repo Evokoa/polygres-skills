@@ -4,9 +4,13 @@ After resolving one exact project, collect public read-only status:
 
 ```console
 polygres --json --project <project> projects status
-polygres --json --project <project> db info
 polygres --json --project <project> ready
 ```
+
+Read `project_mode` from status before continuing. For a standard project, add
+`polygres --json --project <project> db info`. For a synced project, never run
+`db info`; follow `synced-projects.md` and keep source, control-plane, and
+Runtime evidence separate.
 
 `projects status` can separate provisioning or control-plane state from Runtime
 API readiness and resource pressure. Preserve its `request_id`. Record

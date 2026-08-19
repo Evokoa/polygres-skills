@@ -1,94 +1,77 @@
 # Polygres Agent Skills release traceability
 
-Date: 2026-08-14
+Date: 2026-08-18
 
-Scope: release Context-aware single-row capture guidance in Agent Skills
-`0.4.0`, coordinated with CLI and SDK `0.3.0` single-row writes.
+Scope: release synchronized PostgreSQL project guidance and executable safety
+boundaries in Agent Skills `0.5.0`, coordinated with CLI `0.4.0` and SDK
+`0.4.0`.
 
 ## Release identity
 
-Canonical version: `0.4.0`
+Canonical version: `0.5.0`
 
-Release record: `releases/0.4.0.json`
+Release record: `releases/0.5.0.json`
 
 The installable payload digest is recorded in the release record. Live Codex,
-Claude Code, and skills CLI installation remain unverified release gates.
+Claude Code, skills CLI, and clean-machine installation remain unverified
+release gates.
 
 ## Implemented behavior
 
-- Activates from broad intent such as `Help me set up Polygres`, contextual
-  requests, or detailed technical specifications.
-- For broad intent with neither a source nor an outcome, asks one direction
-  question before inspection. Contextual and detailed requests proceed without
-  that opening question.
-- For capability questions, scans the accessible workspace and resolved
-  Polygres project read-only, then recommends project-specific uses without
-  starting setup or mutation. A direct reply carries an accepted recommendation
-  into setup without repeating discovery or bypassing review.
-- Inspects a bounded sample, infers reversible defaults, and asks one concise
-  batch only for critical unknowns.
-- Selects only useful components. Schema changes, embeddings, graph, backfill,
-  continuous capture, retrieval code, and agent instructions are conditional.
-- Treats workflow order and numeric values as adaptable defaults. Safety,
-  authorization, embedding compatibility, public-interface support, graph
-  evidence, approval, and truthful verification remain firm boundaries.
-- Honors source-provided, local, hosted, or no-embedding choices. When local
-  versus hosted is unknown, it silently ranks one compatible option from each
-  allowed category using the bounded data sample and device report, then puts
-  both inside the single setup review.
-- Uses a versioned, source-cited model catalog and exact provider contracts.
-  Selecting either fully disclosed embedding option counts as the one approval.
-- Uses an internal permissive safety linter. Tiny plans are valid; warnings are
-  handled silently. Only unresolved remote targets, secrets, stale material
-  approvals, capability-proven unavailable interfaces, and unsupported
-  operational claims block.
-- Renders one concise mutation review. Approval remains valid while project,
-  source scope, data egress, destructive effects, and paid processing remain
-  unchanged.
-- Adds capability-gated CLI and SDK `0.3.0` single-row validation, insert,
-  upsert, and ignore guidance. Bulk work continues to use import.
-- Adds an idempotent, reversible managed block for scoped capture, recall, or
-  both. The active instruction file changes only after the consolidated review
-  is approved, and instructions alone remain best-effort.
-- Uses one explicit Context-backed row operation for source persistence and
-  point reconciliation while keeping embeddings and pgGraph independent.
-- Keeps generic tables row-only unless a Context collection is explicitly
-  selected or resolved safely.
-- Persists per-record, per-surface pending state before advancing a source
-  cursor when Context reconciliation has not completed.
-- Extends retrieval-design handoff and troubleshooting evidence so the setup
-  flow can continue without repeating discovery or approval.
+- Resolve standard versus synced project mode before selecting ingestion,
+  database, CLI, SDK, or Runtime surfaces.
+- Evaluate managed sync for eligible Supabase, Neon, or PostgreSQL sources when
+  a new project is acceptable and the source remains authoritative.
+- Route initial project creation and table selection through
+  `polygres projects create sync` or the dashboard without collecting source
+  credentials. Keep later reconfiguration and lifecycle work in the dashboard.
+- Restrict synced Runtime guidance to graph, text, existing vector, hybrid,
+  Context, retrieval readiness, and table catalog surfaces.
+- Reject target schema changes, imports, rows, backfills, target database
+  credentials, custom capture workers, and unsupported sync control in the
+  deterministic plan validator while allowing CLI sync creation.
+- Omit target schema and checkpoint artifacts from managed-sync scaffolds.
+- Record project mode, source authority, selected tables, continuous egress,
+  managed publication and slot ownership, reconfiguration behavior, and
+  source-only writes in the setup review.
+- Keep application writes, deletes, schema changes, and embedding generation in
+  the source PostgreSQL database.
+- Restrict synced Context design to existing synchronized source tables and
+  columns, and require both foreign-key endpoints in the selection for graph
+  traversal.
+- Diagnose public sync preflight result codes, lifecycle states, table resync,
+  generation conflicts, schema drift, storage pressure, and expected surface
+  permission errors without mutation or secret collection.
+- Preserve the adaptive standard-project pipeline workflow and its existing
+  safety, approval, embedding, capture, and retrieval behavior.
 
 ## Acceptance mapping
 
 | Acceptance criterion | Implementation | Verification |
 | --- | --- | --- |
-| Short and detailed prompts activate setup. | Data-pipeline frontmatter and workflow; package README | Skill text tests |
-| Fully vague prompts establish direction before inspection. | Vague-opening branch and guided question | Vague-prompt routing test |
-| Capability questions receive project-specific recommendations. | Read-only recommendation branch | Personalized-recommendation routing test |
-| Accepted recommendations transition directly into setup. | Recommendation call to action and context handoff | Recommendation-to-setup routing test |
-| Optional components stay optional. | Permissive linter and conditional scaffolder | Minimal-plan scaffold test |
-| Explicitly disabled components produce no files or review effects. | Conditional scaffolder, review, and approval boundary | Disabled-component regression test |
-| Only material safety failures block. | `validate_pipeline_plan.py` | Five blocker families and warning-only plan tests |
-| Approval survives harmless implementation changes. | Boundary-only approval digest | Approval digest regression test |
-| Agent instructions preserve user text and support independent capture or recall. | `update_agent_instructions.py` | Idempotency, removal, and recall-only tests |
-| CLI and SDK use public single-row writes when available. | CLI/SDK `rows.md` references | Command and method guidance tests |
-| Hosted embeddings remain explicit and secret-free. | Embedding plan guidance and linter | Hosted choice and secret tests |
-| Embedding selection does not create a second interview. | Model catalog, recommender, and review renderer | Local/hosted ranking and approval-boundary tests |
-| Existing skills remain coherent. | CLI, SDK, design, and troubleshooting updates | Package test suites |
+| Existing PostgreSQL sources route to managed sync when eligible. | Data-pipeline workflow and `synced-projects.md` | Source-routing text tests |
+| Synced plans cannot target unsupported mutation surfaces. | `validate_pipeline_plan.py` | Synced blocker-family tests for ten unsupported paths |
+| Managed-sync scaffolds omit custom ingestion artifacts. | `scaffold_pipeline.py` | Synced scaffold regression test |
+| Reviews disclose sync authority and scope. | `render_pipeline_review.py` | Synced review assertions |
+| CLI guidance matches typed standard and sync creation without exposing source credentials. | CLI project references | CLI creation and command-boundary tests |
+| SDK guidance is Runtime-only and mode aware. | SDK synced reference and SDK 0.4.0 example | SDK synced-boundary test |
+| Troubleshooting separates source, control plane, and Runtime. | Troubleshooting synced reference | Preflight and lifecycle coverage test |
+| Retrieval designs remain valid after sync selection changes. | Retrieval design references | Synced retrieval-design test |
+| Public project documentation matches reconfiguration behavior. | PostgreSQL sync guide | Package documentation review |
+| Existing skill behavior remains coherent. | All five skills and package metadata | Full non-heavy package test suite |
 
 No live Polygres project was mutated. No dependency was installed. No remote
 repository, marketplace, commit, or deployment was changed by this work.
 
 ## Known limitations
 
-- Guaranteed chat capture requires a tested host hook, wrapper, application
-  path, outbox, or worker.
-- The rows surface requires compatible CLI or SDK `0.3.0` and target Runtime
-  capability evidence. Older environments receive an explicit upgrade path.
-- ONNX requires a model-specific tokenizer and pooling adapter.
-- Device feasibility and catalog resource estimates are conservative selection
-  policy, not a performance benchmark. The selected model still requires a
-  bounded smoke test.
+- CLI `0.4.0` creates standard and synchronized projects but does not expose
+  existing-sync reconfiguration, pause, resume, retry, resnapshot, or credential
+  rotation commands.
+- The Python SDK local `project_mode="synced"` guard requires SDK `0.4.0`.
+- Synced-project creation, preflight, table selection, reconfiguration, and
+  lifecycle work do not have first-class CLI or SDK workflows.
+- Source credential rotation is not presented as a self-service workflow
+  because the dashboard currently hides it.
 - Clean-machine remote installation and live Codex or Claude activation remain
   external release gates.

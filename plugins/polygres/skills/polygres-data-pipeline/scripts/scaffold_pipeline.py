@@ -32,6 +32,11 @@ def _enabled(plan: dict[str, Any], component: str) -> bool:
     return isinstance(value, dict) and value.get("enabled", True) is not False
 
 
+def _is_synced(plan: dict[str, Any]) -> bool:
+    target = plan.get("target")
+    return isinstance(target, dict) and target.get("project_mode") == "synced"
+
+
 def _schema_sql(plan: dict[str, Any]) -> str:
     schema = plan["schema"]
     embedding = plan.get("embedding", {"enabled": False})
@@ -89,12 +94,33 @@ def _readme(plan: dict[str, Any]) -> str:
         )
         if name not in selected
     ]
+    synced = _is_synced(plan)
+    mode_guidance = (
+        "This is a managed PostgreSQL sync plan. Enter the source connection only in the "
+        "Polygres dashboard. The source remains the system of record, and this pack does not "
+        "contain a custom capture worker, target schema migration, checkpoint ledger, or source "
+        "credential.\n"
+        if synced
+        else ""
+    )
+    write_guidance = (
+        "For synchronized data, write, update, delete, and generate embeddings in the source "
+        "database. Use the Polygres Runtime API only for supported retrieval and retrieval "
+        "configuration."
+        if synced
+        else "For per-record capture, use the public rows surface only after capability or\n"
+        "installed-version evidence confirms it. If unavailable, keep capture blocked\n"
+        "with the exact CLI/SDK upgrade requirement; do not invent an endpoint."
+    )
     return f"""# {plan.get("name", "Polygres setup")}
 
 This pack records the inspected design and local support files. It does not
 claim that remote resources or application hooks have been applied.
 
+{mode_guidance}
+
 - Project: `{target.get("project_id", "not needed for local work")}`
+- Project mode: `{target.get("project_mode", "standard")}`
 - Source: {source.get("kind", "not recorded")} ({source.get("scope", "not recorded")})
 - Selected components: {", ".join(selected) or "none"}
 - Omitted components: {", ".join(omitted) or "none"}
@@ -109,9 +135,7 @@ claim that remote resources or application hooks have been applied.
    destructive effects, or paid processing changes.
 5. Use `operational` only after the important path has passing evidence.
 
-For per-record capture, use the public rows surface only after capability or
-installed-version evidence confirms it. If unavailable, keep capture blocked
-with the exact CLI/SDK upgrade requirement; do not invent an endpoint.
+{write_guidance}
 """
 
 
@@ -135,6 +159,7 @@ def scaffold(plan_path: Path, destination: Path) -> list[Path]:
             isinstance(schema, dict)
             and schema.get("enabled")
             and schema.get("mode") != "reuse"
+            and not _is_synced(plan)
             and isinstance(schema.get("columns"), list)
             and schema.get("schema")
             and schema.get("table")
@@ -175,7 +200,9 @@ def scaffold(plan_path: Path, destination: Path) -> list[Path]:
                 staging / "scripts" / "recommend_embedding_models.py",
             )
             shutil.copyfile(EMBEDDING_CATALOG, staging / "embedding-models.json")
-        if _enabled(plan, "sync") or _enabled(plan, "capture_runtime"):
+        if not _is_synced(plan) and (
+            _enabled(plan, "sync") or _enabled(plan, "capture_runtime")
+        ):
             (staging / "lib").mkdir(exist_ok=True)
             shutil.copyfile(
                 ASSET_ROOT / "checkpoint_ledger.py", staging / "lib" / "checkpoint_ledger.py"

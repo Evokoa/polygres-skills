@@ -1,9 +1,21 @@
 # pgContext design
 
+## Contents
+
+- Data contract
+- Retrieval mode
+- Lifecycle and validation
+
 Use Polygres AI Context as the default design surface for new semantic
 retrieval. If the project already has a pgvector configuration, decide whether
 to preserve it temporarily for compatibility or replace it with a native
 collection through explicit in-place column migration.
+
+For a synced project, select `existing` source mode only. Use an eligible
+synchronized source table and embedding column, and write embeddings in the
+source PostgreSQL database. Do not propose `add_column`, `new_table`, target
+schema changes, or target row writes. Re-review the collection when sync
+selection removes or resyncs a required table, column, key, or embedding.
 
 ## Data contract
 

@@ -2,6 +2,12 @@
 
 Choose the smallest strategy that answers the representative questions.
 
+Resolve `project_mode` first. On a synced project, relational SQL and
+transactions run against the source database, while Polygres supplies supported
+graph, text, existing vector, hybrid, Context, catalog, and readiness surfaces.
+Do not include target rows, migrations, imports, or database access in the
+retrieval plan.
+
 | Need | Prefer | Review constraints |
 | --- | --- | --- |
 | Exact filters, joins, aggregates, ordering, or transactions | relational | indexes, query plan, cardinality, authorization |

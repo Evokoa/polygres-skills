@@ -1,5 +1,9 @@
 # Client setup
 
+Resolve project mode before selecting SDK methods. For a synchronized project,
+use `client.project(project_mode="synced")` with SDK 0.4.0 or newer and follow
+`synced-projects.md`. The SDK is Runtime-only and cannot create or control sync.
+
 ## Contents
 
 - [Install and configure](#install-and-configure)

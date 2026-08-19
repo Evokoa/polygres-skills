@@ -1,5 +1,10 @@
 # Authentication and projects
 
+Resolve and retain `project_mode` with the selected project. `projects create`
+is a command group: use `projects create standard` for a managed PostgreSQL
+project and `projects create sync` for a synchronized PostgreSQL project. For
+sync creation and synced-project boundaries, follow `synced-projects.md`.
+
 ## Authentication
 
 Use browser authentication only:
@@ -27,7 +32,8 @@ resolution is surprising or the active organization is uncertain.
 polygres projects list
 polygres projects use <project-id-or-exact-name>
 polygres projects status [project]
-polygres projects create <name> [--no-wait] [--timeout <seconds>]
+polygres projects create standard <name> [--no-wait] [--timeout <seconds>]
+polygres projects create sync <name> [sync options]
 ```
 
 Project names are exact and case-sensitive. Ambiguous names exit `6`. Persist
@@ -43,7 +49,7 @@ For other project-scoped commands, `--project` overrides the selected project.
 If no project resolves, tell the user to run `polygres projects list` or
 `polygres projects use <project>`.
 
-## Project creation
+## Standard project creation
 
 Project creation waits for initial provisioning by default. `--no-wait`
 returns after submission. State the chosen name and active organization before
@@ -55,3 +61,7 @@ When readiness polling times out or becomes unavailable after creation, retain
 the returned project ID and request ID. Do not invent an ID and do not repeat
 the create request. Use `polygres projects status <project>` to continue
 checking the created project.
+
+For synchronized project creation, read `synced-projects.md`. It covers source
+connection input, table selection, confirmation, idempotency, and the remaining
+dashboard-only lifecycle boundary.

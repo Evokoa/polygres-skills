@@ -1,0 +1,44 @@
+{
+  "$schema": "./schema.json",
+  "version": "0.5.0",
+  "release_date": "2026-08-18",
+  "compatibility": {
+    "polygres_cli": {
+      "minimum_supported": "0.4.0",
+      "maximum_tested": "0.4.0"
+    },
+    "polygres_sdk": {
+      "minimum_supported": "0.4.0",
+      "maximum_tested": "0.4.0"
+    },
+    "codex": {
+      "tested": null
+    },
+    "claude_code": {
+      "tested": null
+    },
+    "skills_cli": {
+      "tested": null
+    }
+  },
+  "content_digest": "sha256:1ccf6ba0386531613cef30bc02ef4bd5674c855ce812f8740229c2a148f9e7ee",
+  "installation_channels_verified": [],
+  "behavioral_evaluations": [
+    "Synced project-mode routing and source-authority guidance tests",
+    "Synced target schema, import, row, credential, capture, Context mode, source schema, direct database, rotation, and control-plane blocker tests",
+    "Managed-sync scaffold omission and review disclosure tests",
+    "CLI standard and synchronized project creation, command-boundary, and secret-handoff tests",
+    "SDK 0.4.0 synced Runtime-only boundary tests",
+    "Troubleshooting sync preflight, lifecycle, generation, and schema-drift tests",
+    "Synced Context, graph, and retrieval-design tests",
+    "Existing adaptive pipeline and all five skill regression suites"
+  ],
+  "known_limitations": [
+    "Clean-machine installation from the remote public repository has not been verified.",
+    "Codex, Claude Code, and skills CLI live installation have not been verified for this release.",
+    "The synchronized-project creation and local synced-surface guards require polygres-cli 0.4.0.",
+    "The SDK project_mode synced local guard requires polygres-sdk 0.4.0.",
+    "CLI 0.4.0 supports synchronized-project creation and initial table selection, while existing-sync reconfiguration and lifecycle operations remain dashboard workflows and are not SDK workflows.",
+    "Source credential rotation is not presented as self-service because the dashboard currently hides it."
+  ]
+}

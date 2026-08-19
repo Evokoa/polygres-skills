@@ -26,7 +26,9 @@ def render_review(plan: dict) -> str:
         "# Polygres setup review",
         "",
         f"- Project: `{boundary['project_id'] or 'unresolved'}`",
+        f"- Project mode: `{boundary['project_mode'] or 'standard'}`",
         f"- Source scope: {boundary['source_scope'] or 'not recorded'}",
+        f"- Source system of record: {boundary['source_authority'] or 'not recorded'}",
         f"- Data egress: {', '.join(boundary['data_egress']) or 'none'}",
         f"- Destructive effects: {', '.join(boundary['destructive_actions']) or 'none'}",
         f"- Paid processing: {', '.join(boundary['paid_processing']) or 'none'}",
@@ -35,6 +37,18 @@ def render_review(plan: dict) -> str:
         "## Planned actions",
         "",
     ]
+    if boundary["project_mode"] == "synced":
+        sync = plan.get("sync") if isinstance(plan.get("sync"), dict) else {}
+        lines[6:6] = [
+            f"- Selected sync tables: {', '.join(boundary['sync_selection']) or 'not recorded'}",
+            f"- Source provider: {sync.get('provider', 'PostgreSQL')}",
+            "- Managed replication resources: Polygres owns the filtered publication and slot",
+            "- Write path: mutate the source database; the synced target is retrieval-only",
+            (
+                "- Reconfiguration: re-inspect the source; added or changed tables resync, "
+                "and deselected tables stop syncing"
+            ),
+        ]
     if not actions:
         lines.append("None. The current plan contains only local or read-only work.")
     for action in actions:

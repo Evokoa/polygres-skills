@@ -14,6 +14,18 @@ PLUGIN_ROOT = PACKAGE_ROOT / "plugins" / "polygres"
 SDK_SKILL_ROOT = PLUGIN_ROOT / "skills" / "polygres-sdk"
 VALIDATOR = PACKAGE_ROOT / "scripts" / "validate_package.py"
 EXPORTER = PACKAGE_ROOT / "scripts" / "export_public.py"
+MONOREPO_ROOT = PACKAGE_ROOT.parents[1]
+SDK_CLIENT = MONOREPO_ROOT / "packages" / "python-sdk" / "src" / "polygres" / "client.py"
+PROJECT_MODES = (
+    MONOREPO_ROOT
+    / "packages"
+    / "polygres-lib"
+    / "python"
+    / "src"
+    / "polygres_lib"
+    / "auth"
+    / "project_modes.py"
+)
 
 
 def _run(script: Path, *arguments: object) -> subprocess.CompletedProcess[str]:
@@ -58,6 +70,7 @@ def test_sdk_skill_has_required_structure_and_metadata() -> None:
         "graph-retrieval.md",
         "hybrid-and-rag.md",
         "rows.md",
+        "synced-projects.md",
         "vector-and-text.md",
     }
 
@@ -73,6 +86,7 @@ def test_sdk_skill_routes_every_reference_and_avoids_deep_links() -> None:
         "references/graph-retrieval.md",
         "references/hybrid-and-rag.md",
         "references/rows.md",
+        "references/synced-projects.md",
         "references/vector-and-text.md",
     }
     assert "../" not in skill_text
@@ -168,6 +182,49 @@ def test_sdk_skill_documents_capability_gated_single_row_writes() -> None:
         "pgGraph",
     ):
         assert phrase in text
+
+
+def test_sdk_documents_synced_runtime_only_boundary() -> None:
+    text = (SDK_SKILL_ROOT / "references" / "synced-projects.md").read_text(
+        encoding="utf-8"
+    )
+    for phrase in (
+        'client.project(project_mode="synced")',
+        "SDK 0.4.0",
+        "SYNCED_PROJECT_SURFACE_UNAVAILABLE",
+        "project.connection_info()",
+        "project.rows.validate()",
+        "source PostgreSQL",
+        "dashboard",
+        "Runtime API",
+    ):
+        assert phrase in text
+
+
+def test_synced_skill_contract_tracks_sdk_and_authoritative_runtime_scopes() -> None:
+    sdk_source = SDK_CLIENT.read_text(encoding="utf-8")
+    auth_source = PROJECT_MODES.read_text(encoding="utf-8")
+    guidance = (SDK_SKILL_ROOT / "references" / "synced-projects.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert 'project_mode not in {None, "standard", "synced"}' in sdk_source
+    assert 'if self.project_mode == "synced"' in sdk_source
+    assert "api_key=os.environ" in guidance
+    assert "runtime_url=os.environ" in guidance
+    for scope, guidance_phrase in (
+        ("GRAPH_READ", "graph"),
+        ("VECTOR_READ", "vector"),
+        ("TEXT_READ", "text"),
+        ("RETRIEVAL_READ", "retrieval readiness"),
+        ("HYBRID_READ", "hybrid"),
+        ("CONTEXT_READ", "Context"),
+    ):
+        assert f"RuntimeScope.{scope}" in auth_source
+        assert guidance_phrase in guidance
+    assert "RuntimeScope.ROWS_WRITE" not in auth_source.split("_SYNCED_RUNTIME_SCOPES", 1)[1].split(
+        ")", 1
+    )[0]
 
 
 def test_context_point_lifecycle_excludes_context_backed_row_writes() -> None:

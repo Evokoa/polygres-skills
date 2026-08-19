@@ -2,6 +2,11 @@
 
 Model only relationships that are explicit in verified data.
 
+For a synced project, include a relationship only when both foreign-key
+endpoint tables are present in the selected sync scope. If one endpoint is not
+selected, record the relationship as source metadata rather than a usable
+Polygres traversal.
+
 ## Nodes
 
 - Name each source table and its ordered, non-empty `id_columns` used by Runtime

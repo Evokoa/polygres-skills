@@ -7,8 +7,11 @@ success measure.
 
 ## Known facts
 
-List verified schema, representative data, stable IDs, current resources,
+List project mode, verified schema, representative data, stable IDs, current resources,
 authorization constraints, and public interface compatibility.
+
+For a synced project, also list the source system of record and selected
+tables and columns. State that source credentials were not collected.
 
 ## Unresolved assumptions
 
@@ -43,6 +46,9 @@ the dashboard does not do this automatically. Never treat a physical-only index
 as implicitly usable or propose a retired Legacy API to register or re-enable
 it. Do not apply the plan.
 
+For a synced project, use existing synchronized source columns only. Identify
+selection changes that trigger reinspection, resync, or retrieval revalidation.
+
 ## Application plan
 
 Describe the exact public route or `$polygres-sdk` call, collection and exact
@@ -50,6 +56,10 @@ Describe the exact public route or `$polygres-sdk` call, collection and exact
 deduplication, error handling, and token budget. State that an omitted
 `vector_name` selects the collection default, not the project default
 collection. Do not write production code.
+
+For a synced project, separate source-database SQL and writes from Polygres
+Runtime retrieval. Do not assign sync control-plane work to the API key, CLI,
+or SDK.
 
 ## Validation plan
 

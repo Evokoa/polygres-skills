@@ -1,7 +1,7 @@
 {
   "name": "polygres",
-  "version": "0.4.0",
-  "description": "Set up data pipelines, operate, design, build, and troubleshoot Polygres and pgContext AI Search through public CLI, SDK, and Runtime API workflows.",
+  "version": "0.5.0",
+  "description": "Sync PostgreSQL sources, set up data pipelines, operate, design, build, and troubleshoot Polygres and pgContext AI Search through public dashboard, CLI, SDK, and Runtime API workflows.",
   "author": {
     "name": "Polygres",
     "email": "support@polygres.com",
@@ -16,6 +16,7 @@
     "database",
     "data-import",
     "data-pipeline",
+    "database-sync",
     "agent-memory",
     "retrieval",
     "pgcontext",

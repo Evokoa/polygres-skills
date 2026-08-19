@@ -1,5 +1,9 @@
 # pgContext
 
+For a synced project, use an existing synchronized source table and embedding
+column. Do not use a collection mode that creates a target table or column;
+write embeddings to the source PostgreSQL database.
+
 ## Contents
 
 - [Namespace and boundaries](#namespace-and-boundaries)

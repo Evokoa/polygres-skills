@@ -1,5 +1,9 @@
 # Single-row writes
 
+Use this surface only for a standard project. On a synced project, do not call
+rows validation as a probe and do not write the target; mutate the source
+database and follow `synced-projects.md`.
+
 Use this surface for explicit one-record validation or capture. Use bulk import
 for backfills. It requires CLI `0.3.0` and deployed Runtime compatibility
 metadata or OpenAPI containing the rows endpoints. Confirm the installed client

@@ -1,6 +1,6 @@
 ---
 name: polygres-cli
-description: Use the Polygres CLI to authenticate, select and inspect projects, write one record through the public Runtime rows surface, import data, apply migrations, configure graph, text, or Polygres AI Context retrieval, manage Runtime keys and durable operations, and check readiness. Use for documented managed-project operations through public CLI workflows. Use polygres-troubleshooting for evidence-first diagnosis of an unexplained failure.
+description: Use the Polygres CLI to authenticate, create standard or synchronized PostgreSQL projects, select and inspect projects, write one standard-project record through the public Runtime rows surface, import data, apply migrations, configure graph, text, or Polygres AI Context retrieval, manage Runtime keys and durable operations, and check readiness. Use for documented managed-project operations through public CLI workflows. Use polygres-troubleshooting for evidence-first diagnosis of an unexplained failure.
 ---
 
 # Polygres CLI
@@ -30,7 +30,9 @@ control-plane routes or infer undocumented request payloads.
 6. Resolve the project with `polygres projects list`, an explicit `--project`,
    or `polygres projects use <project>`. State the resolved project before a
    destructive, secret-producing, or schema-mutating operation.
-7. Prefer `polygres --json ...` for output the agent must parse. Treat stdout as
+7. Resolve `project_mode`. When it is `synced`, read
+   `references/synced-projects.md` before choosing any command.
+8. Prefer `polygres --json ...` for output the agent must parse. Treat stdout as
    the JSON channel and stderr as diagnostics.
 
 If bundled examples differ from the installed `--help`, follow the installed
@@ -43,6 +45,7 @@ Read only the references needed for the task:
 | User intent | Reference |
 | --- | --- |
 | Login, logout, identity, organization, project selection or status | `references/authentication-and-projects.md` |
+| Synced-project creation, capabilities, lifecycle handoff, and permission boundaries | `references/synced-projects.md` |
 | Environment, Postgres metadata, `psql`, Runtime API keys | `references/database-and-keys.md` |
 | Dataset or backfill from CSV, TSV, a JSON array, or JSONL/NDJSON | `references/data-imports.md` |
 | Validate, insert, upsert, or ignore one JSON object or runtime event | `references/rows.md` |
@@ -57,15 +60,16 @@ Read only the references needed for the task:
    schema-mutating, or secret-producing.
 2. Load the relevant reference and validate local inputs.
 3. Resolve authentication and project context.
-4. For a mutation, show the target project, affected resource, important
+4. Resolve project mode and stop any command that is unavailable for that mode.
+5. For a mutation, show the target project, affected resource, important
    options, and reversibility.
-5. Obtain explicit approval when required. Accept an existing consolidated
+6. Obtain explicit approval when required. Accept an existing consolidated
    pipeline approval when it names this exact project, source scope, action,
    and unchanged plan digest.
-6. Run the narrowest documented command.
-7. Retain project, job, migration, configuration, key, and request IDs from the
+7. Run the narrowest documented command.
+8. Retain project, job, migration, configuration, key, and request IDs from the
    result.
-8. Report only the observed terminal state. If work is still running, say so
+9. Report only the observed terminal state. If work is still running, say so
    and provide the status command.
 
 ## Require consent
@@ -98,6 +102,10 @@ the preflight DDL, affected schema objects, and ownership boundaries.
 ## Protect secrets
 
 - Never request, retrieve, store, log, or pass a native database password.
+- Never request, print, or place a synced source connection in an argument,
+  generated file, or transcript. Prefer the CLI's hidden interactive URL prompt.
+  For approved non-interactive work, reference a user-populated environment
+  variable with `--connection-env`; never inspect its value.
 - Let `psql` prompt the user for the database password.
 - If an agent terminal cannot maintain an interactive TTY, give the user the
   passwordless command or ask them to run `polygres db psql` directly.

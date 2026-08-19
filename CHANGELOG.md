@@ -2,6 +2,41 @@
 
 All notable changes to Polygres Agent Skills are documented in this file.
 
+## 0.5.0 - 2026-08-18
+
+### Added
+
+- Added synchronized-project guidance across all five skills for Supabase,
+  Neon, and PostgreSQL sources.
+- Added deterministic pipeline-plan guards that reject target schema changes,
+  imports, row writes, direct target credentials, custom capture workers, and
+  unsupported sync control on synchronized projects while allowing CLI sync
+  creation.
+- Added sync-aware scaffolding and review output that records source authority,
+  selected tables, continuous egress, managed replication resources,
+  reconfiguration, and source-only writes without generating a target schema
+  or checkpoint worker.
+- Added preflight, lifecycle, generation-conflict, schema-drift, resync, and
+  expected-permission troubleshooting guidance.
+
+### Changed
+
+- Required project-mode resolution before choosing CLI, SDK, database,
+  ingestion, or retrieval surfaces.
+- Directed synchronized-project creation and initial table selection to the CLI
+  or dashboard, with later reconfiguration and lifecycle work in the dashboard
+  and source credentials kept out of agent-visible paths.
+- Documented `projects create standard` and the complete `projects create sync`
+  connection, selection, confirmation, waiting, and idempotency surface.
+- Restricted synchronized-project SDK and API-key guidance to supported graph,
+  text, vector, hybrid, Context, catalog, and readiness surfaces.
+- Updated Context and retrieval design so synchronized projects use existing
+  source columns and generate embeddings in the source database.
+- Raised coordinated SDK guidance to `polygres-sdk 0.4.0` for the local
+  `project_mode="synced"` guard.
+- Raised coordinated CLI guidance to `polygres-cli 0.4.0` for synchronized
+  project creation and local synced-surface guards.
+
 ## 0.4.0 - 2026-08-14
 
 ### Added

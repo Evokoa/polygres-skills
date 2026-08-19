@@ -38,6 +38,7 @@ def test_skill_frontmatter_and_required_resources() -> None:
         "migrations.md",
         "retrieval.md",
         "rows.md",
+        "synced-projects.md",
     }
     assert {path.name for path in (SKILL_ROOT / "references").glob("*.md")} == expected
     assert (SKILL_ROOT / "scripts" / "prepare_import.py").is_file()
@@ -144,6 +145,37 @@ def test_cli_routes_one_json_object_to_rows_and_json_datasets_to_import() -> Non
     assert "explicit create-table import" in imports
 
 
+def test_cli_documents_synced_project_command_boundary() -> None:
+    text = (SKILL_ROOT / "references" / "synced-projects.md").read_text(encoding="utf-8")
+    for phrase in (
+        "polygres projects create sync <name>",
+        "--connection-env SOURCE_DATABASE_URL",
+        "--password-env SOURCE_DATABASE_PASSWORD",
+        "--all-eligible",
+        "--idempotency-key <key>",
+        "There is no separate public preflight command",
+        "reconfiguration has no first-class command",
+        "polygres api request",
+        "polygres db info",
+        "polygres rows validate",
+        "polygres import",
+        "polygres migrations",
+        "SYNCED_PROJECT_SURFACE_UNAVAILABLE",
+        "source database",
+        "dashboard",
+    ):
+        assert phrase in text
+
+
+def test_cli_documents_typed_project_creation_commands() -> None:
+    text = (SKILL_ROOT / "references" / "authentication-and-projects.md").read_text(
+        encoding="utf-8"
+    )
+    assert "polygres projects create standard <name>" in text
+    assert "polygres projects create sync <name>" in text
+    assert "polygres projects create <name>" not in text
+
+
 def test_cli_pggraph_fixture_guidance_does_not_manufacture_rls_failures() -> None:
     retrieval = (SKILL_ROOT / "references" / "retrieval.md").read_text(encoding="utf-8")
 
@@ -180,7 +212,7 @@ def test_documented_command_shapes_parse_with_current_cli() -> None:
         ["whoami"],
         ["projects", "list"],
         ["projects", "use", "example"],
-        ["projects", "create", "example", "--no-wait"],
+        ["projects", "create", "standard", "example", "--no-wait"],
         ["projects", "status"],
         ["env"],
         ["db", "info"],
