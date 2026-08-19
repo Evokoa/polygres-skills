@@ -1,0 +1,4 @@
+interface:
+  display_name: "Polygres SDK"
+  short_description: "Build pgContext and retrieval apps with Polygres"
+  default_prompt: "Use $polygres-sdk to add safe pgContext AI Search to this Python application."

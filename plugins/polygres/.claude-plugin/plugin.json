@@ -1,0 +1,25 @@
+{
+  "name": "polygres",
+  "version": "0.5.0",
+  "description": "Sync PostgreSQL sources, set up data pipelines, operate, design, build, and troubleshoot Polygres and pgContext AI Search through public dashboard, CLI, SDK, and Runtime API workflows.",
+  "author": {
+    "name": "Polygres",
+    "email": "support@polygres.com",
+    "url": "https://polygres.com"
+  },
+  "homepage": "https://docs.evokoa.com/polygres/cli",
+  "repository": "https://github.com/Evokoa/polygres-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "polygres",
+    "postgres",
+    "database",
+    "data-import",
+    "data-pipeline",
+    "database-sync",
+    "agent-memory",
+    "retrieval",
+    "pgcontext",
+    "ai-search"
+  ]
+}

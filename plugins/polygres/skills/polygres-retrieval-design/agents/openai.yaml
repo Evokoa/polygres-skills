@@ -1,0 +1,4 @@
+interface:
+  display_name: "Polygres Retrieval Design"
+  short_description: "Plan pgContext and Polygres retrieval safely"
+  default_prompt: "Use $polygres-retrieval-design to decide whether this workload needs pgContext."

@@ -1,0 +1,44 @@
+{
+  "name": "polygres",
+  "version": "0.5.0",
+  "description": "Sync PostgreSQL sources, set up data pipelines, operate, design, build, and troubleshoot Polygres and pgContext AI Search through public dashboard, CLI, SDK, and Runtime API workflows.",
+  "author": {
+    "name": "Polygres",
+    "email": "support@polygres.com",
+    "url": "https://polygres.com"
+  },
+  "homepage": "https://docs.evokoa.com/polygres/cli",
+  "repository": "https://github.com/Evokoa/polygres-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "polygres",
+    "postgres",
+    "database",
+    "data-import",
+    "data-pipeline",
+    "database-sync",
+    "agent-memory",
+    "retrieval",
+    "pgcontext",
+    "ai-search",
+    "developer-tools"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Polygres",
+    "shortDescription": "Set up and operate Polygres safely",
+    "longDescription": "Inspect user data, choose managed PostgreSQL sync or an adaptive pipeline, use user-selected local or hosted embeddings, configure pgContext through public interfaces, build applications with the Python SDK or Runtime API, and diagnose failures from public read-only evidence.",
+    "developerName": "Polygres",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://polygres.com",
+    "defaultPrompt": [
+      "Use $polygres-data-pipeline to sync this PostgreSQL database into Polygres safely.",
+      "Review and safely apply this Polygres import or migration through the CLI.",
+      "Design and implement pgContext retrieval in my application, or diagnose this Polygres failure safely."
+    ]
+  }
+}
