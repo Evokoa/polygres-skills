@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import difflib
+import hashlib
 import json
 import re
 import sys
@@ -120,6 +121,35 @@ def _validate_manifests(package_root: Path, plugin_root: Path) -> None:
     skills_path = (plugin_root / codex.get("skills", "")).resolve()
     if not skills_path.is_relative_to(plugin_root.resolve()) or not skills_path.is_dir():
         raise ValidationFailure("Codex manifest skills path must stay inside the plugin")
+    mcp_path = (plugin_root / codex.get("mcpServers", "")).resolve()
+    if not mcp_path.is_relative_to(plugin_root.resolve()) or not mcp_path.is_file():
+        raise ValidationFailure("Codex manifest MCP configuration must stay inside the plugin")
+    mcp = json.loads(mcp_path.read_text(encoding="utf-8"))
+    servers = mcp.get("mcpServers") if isinstance(mcp, dict) else None
+    polygres = servers.get("polygres") if isinstance(servers, dict) else None
+    if polygres != {"type": "http", "url": "https://mcp.polygres.com/mcp"}:
+        raise ValidationFailure("Polygres MCP must use the canonical production HTTP endpoint")
+
+
+def _validate_mcp_contract(plugin_root: Path, skills: list[SkillMetadata]) -> None:
+    canonical_path = plugin_root / "references" / "mcp-tool-contract.md"
+    canonical = canonical_path.read_bytes()
+    digest = hashlib.sha256(canonical).hexdigest()
+    header = (
+        "<!-- Generated from ../../../references/mcp-tool-contract.md; "
+        f"source-sha256: {digest} -->\n\n"
+    ).encode()
+    expected = header + canonical
+    for skill in skills:
+        copied = skill.root / "references" / "mcp-tool-contract.md"
+        if not copied.is_file() or copied.read_bytes() != expected:
+            raise ValidationFailure(
+                f"{copied}: run scripts/sync_mcp_contract.py to refresh the MCP contract"
+            )
+        if "`references/mcp-tool-contract.md`" not in (
+            skill.root / "SKILL.md"
+        ).read_text(encoding="utf-8"):
+            raise ValidationFailure(f"{skill.root}: SKILL.md must route to the MCP contract")
 
 
 def validate_package(package_root: Path) -> list[SkillMetadata]:
@@ -140,6 +170,7 @@ def validate_package(package_root: Path) -> list[SkillMetadata]:
         _validate_skill_files(metadata)
     _validate_descriptions(skills)
     _validate_manifests(package_root, plugin_root)
+    _validate_mcp_contract(plugin_root, skills)
     verify_release(package_root)
     return skills
 

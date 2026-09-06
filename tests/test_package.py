@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import ast
+import hashlib
 import json
 import re
 import sys
@@ -26,7 +28,7 @@ def test_skill_frontmatter_and_required_resources() -> None:
     keys = [line.split(":", 1)[0] for line in frontmatter if ":" in line]
     assert keys == ["name", "description"]
     assert "name: polygres-cli" in frontmatter
-    assert any(line.startswith("description: Use the Polygres CLI") for line in frontmatter)
+    assert any(line.startswith("description: Use available Polygres MCP") for line in frontmatter)
     assert len(lines) < 500
 
     expected = {
@@ -36,6 +38,8 @@ def test_skill_frontmatter_and_required_resources() -> None:
         "data-imports.md",
         "database-and-keys.md",
         "migrations.md",
+        "mcp-graph-retrieval.md",
+        "mcp-tool-contract.md",
         "retrieval.md",
         "rows.md",
         "synced-projects.md",
@@ -56,6 +60,16 @@ def test_codex_manifest_and_marketplace_are_consistent() -> None:
     assert manifest["version"] == PACKAGE_VERSION
     assert manifest["skills"] == "./skills/"
     assert (PLUGIN_ROOT / manifest["skills"]).is_dir()
+    assert manifest["mcpServers"] == "./.mcp.json"
+    mcp = json.loads((PLUGIN_ROOT / manifest["mcpServers"]).read_text())
+    assert mcp == {
+        "mcpServers": {
+            "polygres": {
+                "type": "http",
+                "url": "https://mcp.polygres.com/mcp",
+            }
+        }
+    }
     assert entry["name"] == manifest["name"]
     assert entry["source"] == {"source": "local", "path": "./plugins/polygres"}
     assert (PACKAGE_ROOT / entry["source"]["path"]).resolve() == PLUGIN_ROOT.resolve()
@@ -66,6 +80,52 @@ def test_codex_manifest_and_marketplace_are_consistent() -> None:
     prompts = manifest["interface"]["defaultPrompt"]
     assert 1 <= len(prompts) <= 3
     assert all(len(prompt) <= 128 for prompt in prompts)
+
+
+def test_mcp_contract_matches_server_catalog_and_generated_copies() -> None:
+    canonical_path = PLUGIN_ROOT / "references" / "mcp-tool-contract.md"
+    canonical = canonical_path.read_text(encoding="utf-8")
+    policies_path = MONOREPO_ROOT / "services" / "mcp" / "polygres_mcp" / "policies.py"
+    tree = ast.parse(policies_path.read_text(encoding="utf-8"))
+    named_lists: dict[str, set[str]] = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign) or len(node.targets) != 1:
+            continue
+        if not isinstance(node.targets[0], ast.Name) or not isinstance(node.value, ast.List):
+            continue
+        named_lists[node.targets[0].id] = {
+            item.value
+            for item in node.value.elts
+            if isinstance(item, ast.Constant) and isinstance(item.value, str)
+        }
+    tool_names: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Name):
+            continue
+        if node.func.id != "_add" or len(node.args) < 2:
+            continue
+        names = node.args[1]
+        if isinstance(names, ast.List):
+            tool_names.update(
+                item.value
+                for item in names.elts
+                if isinstance(item, ast.Constant) and isinstance(item.value, str)
+            )
+        elif isinstance(names, ast.Name):
+            tool_names.update(named_lists.get(names.id, set()))
+    assert len(tool_names) == 91
+    assert all(f"`{name}`" in canonical for name in tool_names)
+
+    digest = hashlib.sha256(canonical.encode()).hexdigest()
+    expected_header = (
+        "<!-- Generated from ../../../references/mcp-tool-contract.md; "
+        f"source-sha256: {digest} -->"
+    )
+    for skill in (PLUGIN_ROOT / "skills").iterdir():
+        if not (skill / "SKILL.md").is_file():
+            continue
+        copied = skill / "references" / "mcp-tool-contract.md"
+        assert copied.read_text(encoding="utf-8").startswith(expected_header)
 
 
 def test_claude_manifest_and_marketplace_are_consistent() -> None:
@@ -107,7 +167,8 @@ def test_cli_guidance_routes_new_semantic_setup_to_context() -> None:
     skill_text = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
     retrieval = (SKILL_ROOT / "references" / "retrieval.md").read_text(encoding="utf-8")
 
-    assert "configure graph, text, or Polygres AI Context retrieval" in skill_text
+    assert "configure retrieval" in skill_text
+    assert "Prefer an available MCP connection" in skill_text
     assert "For new semantic retrieval" in retrieval
     assert "polygres context collections create" in retrieval
     assert "vector configs create` path is retired" in retrieval

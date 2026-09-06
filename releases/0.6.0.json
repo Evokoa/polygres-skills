@@ -1,0 +1,45 @@
+{
+  "$schema": "./schema.json",
+  "version": "0.6.0",
+  "release_date": "2026-09-05",
+  "compatibility": {
+    "polygres_mcp": {
+      "minimum_supported": "1.0.0",
+      "maximum_tested": "1.0.0"
+    },
+    "polygres_cli": {
+      "minimum_supported": "0.4.0",
+      "maximum_tested": "0.4.1"
+    },
+    "polygres_sdk": {
+      "minimum_supported": "0.4.0",
+      "maximum_tested": "0.4.1"
+    },
+    "codex": {
+      "tested": null
+    },
+    "claude_code": {
+      "tested": null
+    },
+    "skills_cli": {
+      "tested": null
+    }
+  },
+  "content_digest": "sha256:64bc882dbd43c67196ae2d80704726cdc870815bc94f18e461f43811b0c6db6d",
+  "installation_channels_verified": [],
+  "behavioral_evaluations": [
+    "MCP catalog coverage for all 91 tools",
+    "Canonical MCP contract and generated-copy hash validation",
+    "Fixed-project and organization-wide routing guidance",
+    "Read-only, feature, scope, project-mode, and fallback guidance",
+    "Action-bound confirmation and idempotency guidance",
+    "Project setup, RAG, grounded-answer, retrieval-quality, graph, dataset, memory, and operation-recovery playbooks",
+    "Existing adaptive pipeline and all five skill regression suites"
+  ],
+  "known_limitations": [
+    "Clean-machine installation from the remote public repository remains a release gate.",
+    "Codex plugin loading of the production MCP connection remains a live release gate.",
+    "Production browser OAuth and installation consent remain a live release gate.",
+    "The static Codex plugin MCP connection is organization-wide; fixed-project connections come from the project Connect page."
+  ]
+}

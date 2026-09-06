@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "polygres": {
+      "type": "http",
+      "url": "https://mcp.polygres.com/mcp"
+    }
+  }
+}

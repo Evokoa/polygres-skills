@@ -12,7 +12,7 @@
       "name": "polygres",
       "source": "./plugins/polygres",
       "description": "Sync PostgreSQL sources, set up data pipelines, operate projects, build pgContext retrieval, and diagnose failures through public Polygres interfaces.",
-      "version": "0.5.0"
+      "version": "0.6.0"
     }
   ]
 }

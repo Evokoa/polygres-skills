@@ -1,8 +1,8 @@
 # Polygres Agent Skills
 
-Polygres Agent Skills help coding agents sync PostgreSQL sources, set up data pipelines, operate projects,
-design retrieval, write applications, and diagnose failures using supported
-Polygres interfaces.
+Polygres Agent Skills connect coding agents to Polygres MCP, guide PostgreSQL
+sync and data-pipeline setup, operate projects, design retrieval, build
+applications, and diagnose failures through supported Polygres interfaces.
 
 User guide: [Polygres Agent Skills](https://docs.polygres.com/agent-skills)
 
@@ -10,11 +10,11 @@ User guide: [Polygres Agent Skills](https://docs.polygres.com/agent-skills)
 
 | Skill | Use it for |
 | --- | --- |
-| `polygres-data-pipeline` | Choose managed PostgreSQL sync or set up the smallest useful custom ingestion, retrieval, memory, or agent integration. |
-| `polygres-cli` | Sign in, select standard or synced projects, run mode-supported operations, manage Runtime API keys, and configure retrieval. |
-| `polygres-sdk` | Write standard-project application rows and build Python retrieval for standard or synced projects. |
-| `polygres-retrieval-design` | Compare retrieval approaches and produce an implementation plan without changing a project. |
-| `polygres-troubleshooting` | Diagnose CLI, API, PostgreSQL, job, migration, and retrieval failures using read-only evidence. |
+| `polygres-data-pipeline` | Use available MCP tools to choose managed PostgreSQL sync or build ingestion, retrieval, memory, or agent integration. |
+| `polygres-cli` | Use MCP for compatible interactive operations and the CLI for authentication, migrations, keys, imports, and retrieval configuration. |
+| `polygres-sdk` | Use MCP for grounded interactive retrieval and build persistent Python integrations. |
+| `polygres-retrieval-design` | Inspect read-only MCP evidence and produce a retrieval implementation plan. |
+| `polygres-troubleshooting` | Diagnose MCP, CLI, API, PostgreSQL, job, migration, and retrieval failures using read-only evidence. |
 
 Compatible agents select the appropriate skill automatically. You can also name the skill in your request when you want a specific workflow.
 
@@ -45,6 +45,11 @@ codex
 
 Open `/plugins`, choose the Polygres marketplace, install Polygres, and start a new task.
 
+The Codex plugin installs the production Polygres MCP connection and all five
+skills. Its base connection covers all accessible projects. Use the Polygres
+Dashboard's project **Connect → MCP** page when you want a fixed-project
+connection.
+
 ### Claude Code plugin marketplace
 
 Run these commands inside Claude Code:
@@ -60,6 +65,10 @@ Run these commands inside Claude Code:
 Ask for the outcome you want in one short line or a detailed specification. The
 skill infers the workflow from intent, inspects relevant state, and asks only
 for critical information it cannot safely discover.
+
+```text
+Use Polygres MCP to inspect this project and recommend the next useful setup step.
+```
 
 ```text
 Help me set up Polygres.
@@ -226,11 +235,11 @@ For Claude Code:
 
 ## Compatibility
 
-Package version: [`0.5.0`](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.5.0). It supports `polygres-cli 0.4.0` and is coordinated with `polygres-sdk 0.4.0` for local synced-project mode guards. If an example differs from your installed version, follow the installed CLI help or SDK method signature.
+Package version: [`0.6.0`](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.6.0). It supports Polygres MCP catalog `1.0`, `polygres-cli 0.4.0` through `0.4.1`, and `polygres-sdk 0.4.0` through `0.4.1`. If an example differs from your installed version, follow discovered MCP tools, installed CLI help, or the SDK method signature.
 
 ## Changelog
 
-See the [Agent Skills 0.5.0 release notes](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.5.0) for release changes.
+See the [Agent Skills 0.6.0 release notes](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.6.0) for release changes.
 
 ## License
 

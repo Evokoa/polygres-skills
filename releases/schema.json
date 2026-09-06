@@ -28,8 +28,9 @@
     "compatibility": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["polygres_cli", "polygres_sdk", "codex", "claude_code", "skills_cli"],
+      "required": ["polygres_mcp", "polygres_cli", "polygres_sdk", "codex", "claude_code", "skills_cli"],
       "properties": {
+        "polygres_mcp": { "$ref": "#/$defs/packageCompatibility" },
         "polygres_cli": { "$ref": "#/$defs/packageCompatibility" },
         "polygres_sdk": { "$ref": "#/$defs/packageCompatibility" },
         "codex": { "$ref": "#/$defs/toolCompatibility" },

@@ -2,6 +2,29 @@
 
 All notable changes to Polygres Agent Skills are documented in this file.
 
+## 0.6.0 - 2026-09-05
+
+### Added
+
+- Added the production Polygres MCP connection to the Codex plugin.
+- Added a shared catalog `1.0` MCP contract with generated, hash-validated
+  copies for all five skills.
+- Added focused MCP playbooks for project setup, RAG, grounded answers,
+  retrieval quality, graph retrieval, dataset imports, agent memory, and
+  operation recovery.
+- Added package checks that keep the MCP endpoint, shared contract, generated
+  copies, and 91-tool catalog aligned.
+
+### Changed
+
+- Updated every skill to prefer compatible MCP tools for interactive work and
+  use its existing CLI, SDK, Dashboard, or PostgreSQL workflow as the supported
+  fallback.
+- Added fixed-project and organization-wide targeting, feature filtering,
+  read-only mode, action-bound confirmation, idempotency, and durable-operation
+  guidance.
+- Updated plugin prompts and public installation guidance for MCP catalog `1.0`.
+
 ## 0.5.0 - 2026-08-18
 
 ### Added

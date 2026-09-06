@@ -160,7 +160,7 @@ def validate_release_record(package_root: Path = PACKAGE_ROOT) -> dict[str, Any]
     compatibility = record.get("compatibility")
     if not isinstance(compatibility, dict):
         raise ReleaseValidationError("release record compatibility must be an object")
-    for package_name in ("polygres_cli", "polygres_sdk"):
+    for package_name in ("polygres_mcp", "polygres_cli", "polygres_sdk"):
         package = compatibility.get(package_name)
         if not isinstance(package, dict):
             raise ReleaseValidationError(f"release compatibility is missing {package_name}")

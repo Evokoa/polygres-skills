@@ -1,6 +1,6 @@
 ---
 name: polygres-data-pipeline
-description: Set up or extend Polygres from either a short request such as "Help me set up Polygres" or a detailed ingestion, memory, graph, embedding, synchronization, or retrieval specification. Also use for questions such as "What can I do with Polygres?" by scanning the accessible current workspace and project read-only and giving a personalized recommendation without changing anything. Ask one short direction question first when a setup request identifies neither a source nor an outcome; otherwise inspect the user's accessible data and application, resolve only critical unknowns, design the smallest useful schema and retrieval setup, generate source-specific ingestion and retrieval code, configure the selected project after one consolidated approval, verify a small vertical slice, and optionally connect capture and recall to the user's agent. Use whenever the user intends to make their data usable through Polygres, even if they do not say "data pipeline."
+description: Set up or extend Polygres through available MCP tools and supported fallbacks for ingestion, memory, graph, embeddings, synchronization, retrieval, RAG, and agent integration. Use for personalized recommendations, complete data-pipeline setup, and verification from a short outcome or detailed specification.
 ---
 
 # Polygres Data Pipeline
@@ -23,6 +23,20 @@ provenance, keep secrets out of plans and payloads, disclose and approve
 material effects, use compatible embedding contracts, avoid unsupported public
 interfaces and invented graph relationships, and test the important selected
 path before calling it operational.
+
+## Choose the execution surface
+
+When Polygres MCP tools are available, read
+`references/mcp-tool-contract.md`, call `whoami`, and prefer discovered
+compatible MCP tools for interactive inspection, setup, retrieval, and
+operation tracking. Treat the connection's project boundary, feature selection,
+read-only setting, and visible catalog as authoritative.
+
+Use the existing CLI, SDK, Dashboard, or PostgreSQL workflow when MCP is absent,
+incompatible, or does not expose the required operation. Keep the SDK for
+persistent application code, the Dashboard for source secret entry and import
+start, and the CLI for migrations, Runtime keys, and other documented operator
+workflows.
 
 ## Recognize setup intent
 
@@ -156,6 +170,15 @@ Read only the source reference that matches the inspected input:
 | Existing database, polling, outbox, or change stream | `references/source-databases.md` |
 | Managed Supabase, Neon, or PostgreSQL sync project | `references/synced-projects.md` |
 | Files, APIs, webhooks, queues, or mixed input | `references/source-files-and-apis.md` |
+
+Read the focused MCP playbook that matches the outcome:
+
+| Outcome | Reference |
+| --- | --- |
+| Create or recover a project, onboard sync, or change capacity | `references/mcp-project-setup.md` |
+| Build and verify grounded RAG | `references/mcp-rag-pipeline.md` |
+| Prepare and monitor a dataset import | `references/mcp-dataset-import.md` |
+| Create interactive or application-backed agent memory | `references/mcp-agent-memory.md` |
 
 Follow `references/pipeline-runtime.md`. The generated implementation must use
 stable source identities, filter before persistence or embedding, write

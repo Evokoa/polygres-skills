@@ -60,7 +60,7 @@ def test_sdk_skill_has_required_structure_and_metadata() -> None:
 
     assert keys == ["name", "description"]
     assert "name: polygres-sdk" in frontmatter
-    assert any(line.startswith("description: Use the Polygres Python SDK") for line in frontmatter)
+    assert any(line.startswith("description: Use available Polygres MCP") for line in frontmatter)
     assert len(skill.read_text(encoding="utf-8").splitlines()) < 500
     assert (SDK_SKILL_ROOT / "agents" / "openai.yaml").is_file()
     assert {path.name for path in (SDK_SKILL_ROOT / "references").glob("*.md")} == {
@@ -69,6 +69,8 @@ def test_sdk_skill_has_required_structure_and_metadata() -> None:
         "errors-pagination-testing.md",
         "graph-retrieval.md",
         "hybrid-and-rag.md",
+        "mcp-grounded-context.md",
+        "mcp-tool-contract.md",
         "rows.md",
         "synced-projects.md",
         "vector-and-text.md",
@@ -85,6 +87,8 @@ def test_sdk_skill_routes_every_reference_and_avoids_deep_links() -> None:
         "references/errors-pagination-testing.md",
         "references/graph-retrieval.md",
         "references/hybrid-and-rag.md",
+        "references/mcp-grounded-context.md",
+        "references/mcp-tool-contract.md",
         "references/rows.md",
         "references/synced-projects.md",
         "references/vector-and-text.md",

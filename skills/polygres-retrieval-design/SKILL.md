@@ -1,12 +1,17 @@
 ---
 name: polygres-retrieval-design
-description: Design and review Polygres retrieval plans across relational, graph, text, hybrid, Polygres AI Context, and existing pgvector-backed strategies. Use when a user must choose between retrieval surfaces, model graph or embedding inputs, plan Context collections or grounded RAG, migrate or coexist with an existing vector configuration, or review retrieval architecture before configuration or implementation. Do not mutate a project, run configuration commands, or write application code.
+description: Design and review Polygres retrieval using available read-only MCP evidence across relational, graph, text, hybrid, Polygres AI Context, and existing pgvector strategies. Use for strategy selection, Context or graph design, grounded RAG planning, compatibility, and architecture review before implementation.
 ---
 
 # Polygres Retrieval Design
 
 Produce a reviewable plan before retrieval configuration or application work.
 This skill is advisory: it must not mutate a project directly.
+
+When Polygres MCP tools are available, read
+`references/mcp-tool-contract.md` and use discovered read tools for bounded
+inspection. Call `whoami`, respect the connection's project boundary, and keep
+this skill read-only even when change tools are visible.
 
 ## Workflow
 
@@ -23,6 +28,8 @@ This skill is advisory: it must not mutate a project directly.
 4. For graph retrieval, apply `references/graph-modeling.md`. For an existing
    vector configuration, TSVector, or fuzzy retrieval, apply
    `references/vector-and-text-design.md`.
+   When MCP Graph tools are available, also read
+   `references/mcp-graph-retrieval.md` for evidence and handoff requirements.
 5. For pgContext collections, point synchronization, registered filters, or
    Context retrieval modes, apply `references/context-design.md`.
 6. For multi-stage retrieval or RAG, apply

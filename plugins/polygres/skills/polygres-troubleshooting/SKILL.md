@@ -1,6 +1,6 @@
 ---
 name: polygres-troubleshooting
-description: Diagnose Polygres CLI, Runtime API, control-plane, standard or synchronized PostgreSQL project, job, migration, retrieval, and pgContext failures using public read-only evidence. Use for errors, sync preflight or lifecycle failures, timeouts, partial failures, readiness problems, ambiguous projects, failed Context collections or operations, stale point mappings, or broken graph, vector, text, hybrid, or Joint retrieval. Do not use private observability, undocumented endpoints, or mutating repair actions.
+description: Diagnose Polygres MCP, OAuth connections, CLI, Runtime API, projects, jobs, synchronization, migrations, and retrieval through public read-only evidence. Use for scope or project-boundary issues, timeouts, partial failures, readiness, Context operations, graph, vector, text, hybrid, and Joint retrieval.
 ---
 
 # Polygres Troubleshooting
@@ -8,6 +8,12 @@ description: Diagnose Polygres CLI, Runtime API, control-plane, standard or sync
 Use read-only checks first. Resolve context, preserve evidence, classify the
 failure boundary, and recommend the smallest safe correction. Do not mutate
 while diagnosing.
+
+When Polygres MCP tools are available, read
+`references/mcp-tool-contract.md`, call `whoami`, and use the discovered read
+catalog before CLI or SDK fallback. Treat the connection URL restrictions,
+OAuth installation, current scopes, project boundary, project mode, and catalog
+version as separate diagnostic layers.
 
 ## Workflow
 
@@ -29,6 +35,8 @@ while diagnosing.
    general readiness failures, use `references/retrieval.md`. For pgContext
    capability, collection, point, operation, recall, or Joint failures, use
    `references/context.md`.
+   Use `references/mcp-retrieval-quality.md` for retrieval evaluation through
+   MCP and `references/mcp-operation-recovery.md` for MCP operation state.
 7. Classify the fault as CLI/local configuration, control-plane, Runtime API,
    Postgres/database or pooler, or asynchronous job state. Use
    `references/errors-and-escalation.md` for typed SDK errors and escalation.

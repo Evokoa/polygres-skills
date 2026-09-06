@@ -1,6 +1,6 @@
 ---
 name: polygres-cli
-description: Use the Polygres CLI to authenticate, create standard or synchronized PostgreSQL projects, select and inspect projects, write one standard-project record through the public Runtime rows surface, import data, apply migrations, configure graph, text, or Polygres AI Context retrieval, manage Runtime keys and durable operations, and check readiness. Use for documented managed-project operations through public CLI workflows. Use polygres-troubleshooting for evidence-first diagnosis of an unexplained failure.
+description: Use available Polygres MCP tools or the Polygres CLI to authenticate, operate standard or synchronized projects, import data, apply migrations, configure retrieval, manage Runtime keys and durable operations, and check readiness. Use the CLI for explicit command-line work and as the documented fallback for operations outside the MCP catalog.
 ---
 
 # Polygres CLI
@@ -8,6 +8,19 @@ description: Use the Polygres CLI to authenticate, create standard or synchroniz
 Operate a user's Polygres project through the installed `polygres` command.
 Treat the CLI as the operational and security boundary. Do not call private
 control-plane routes or infer undocumented request payloads.
+
+## Prefer an available MCP connection
+
+When Polygres MCP tools are available in the current session, read
+`references/mcp-tool-contract.md` and use the discovered compatible tools for
+interactive project operations. Call `whoami`, respect the fixed-project or
+multi-project boundary, and treat the discovered catalog as authoritative.
+
+Use the CLI workflow in this skill when the user explicitly asks for CLI, when
+MCP is absent or incompatible, or when the operation belongs to the CLI surface,
+such as migrations, Runtime keys, interactive database access, import start,
+and legacy vector or text configuration. Never invent an MCP tool to mirror a
+CLI command.
 
 ## Start safely
 
@@ -51,6 +64,7 @@ Read only the references needed for the task:
 | Validate, insert, upsert, or ignore one JSON object or runtime event | `references/rows.md` |
 | Migration list/apply and SQL safety | `references/migrations.md` |
 | Graph, text, existing vector configurations, and general retrieval readiness | `references/retrieval.md` |
+| Execute an approved graph plan through MCP or fall back to CLI | `references/mcp-graph-retrieval.md` |
 | Polygres AI Context collections, filters, points, operations, and retrieval | `references/context.md` |
 | JSON output, polling, exit codes, retry and recovery | `references/automation-and-errors.md` |
 

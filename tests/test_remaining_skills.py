@@ -48,10 +48,12 @@ def test_retrieval_design_skill_structure_and_metadata() -> None:
     _assert_skill_structure(
         DESIGN_ROOT,
         "polygres-retrieval-design",
-        "description: Design and review Polygres retrieval",
+        "description: Design and review Polygres retrieval using available read-only MCP",
         {
             "graph-modeling.md",
             "hybrid-and-rag-plan.md",
+            "mcp-graph-retrieval.md",
+            "mcp-tool-contract.md",
             "context-design.md",
             "plan-template.md",
             "strategy-selection.md",
@@ -64,12 +66,15 @@ def test_troubleshooting_skill_structure_and_metadata() -> None:
     _assert_skill_structure(
         TROUBLESHOOTING_ROOT,
         "polygres-troubleshooting",
-        "description: Diagnose Polygres",
+        "description: Diagnose Polygres MCP",
         {
             "context-and-connectivity.md",
             "context.md",
             "errors-and-escalation.md",
             "jobs-and-migrations.md",
+            "mcp-operation-recovery.md",
+            "mcp-retrieval-quality.md",
+            "mcp-tool-contract.md",
             "projects-and-database.md",
             "retrieval.md",
             "synced-projects.md",

@@ -1,6 +1,6 @@
 ---
 name: polygres-sdk
-description: Use the Polygres Python SDK to write individual standard-project application records and build retrieval on standard or synchronized projects with Polygres AI Context, graph, text, hybrid, and existing vector queries; manage supported pgContext collections, points, and durable operations; configure safe Runtime API clients; paginate typed results; and handle SDK errors. Use for Python backend code calling a project's Runtime API. Do not use for sync control-plane administration, bulk imports, migrations, or interactive CLI workflows.
+description: Use available Polygres MCP tools for interactive grounded retrieval and the Polygres Python SDK for persistent application code, standard-project row writes, AI Search, graph, text, hybrid, pagination, durable operations, and typed error handling.
 ---
 
 # Polygres SDK
@@ -8,6 +8,12 @@ description: Use the Polygres Python SDK to write individual standard-project ap
 Build Python application code against the public `polygres-sdk` package and a
 project's Runtime API. Use `$polygres-cli` instead for human authentication,
 control-plane project administration, imports, migrations, and API-key management.
+
+For an interactive grounded answer, prefer available Polygres MCP tools. Read
+`references/mcp-tool-contract.md` and
+`references/mcp-grounded-context.md`, then use the discovered read catalog.
+Continue with the SDK workflow for persistent Python application integration,
+backend-owned automation, or an MCP fallback.
 
 ## Workflow
 
@@ -66,6 +72,8 @@ control-plane project administration, imports, migrations, and API-key managemen
   retry, ambiguous-commit, and pipeline checkpoint behavior.
 - Read `references/errors-pagination-testing.md` for typed models, cursors,
   automatic pagination, exceptions, retries, and mocked tests.
+- Read `references/mcp-grounded-context.md` for interactive grounded answers
+  through the available MCP Context tools.
 
 ## Boundaries
 
