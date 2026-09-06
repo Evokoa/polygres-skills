@@ -24,6 +24,15 @@ All notable changes to Polygres Agent Skills are documented in this file.
   read-only mode, action-bound confirmation, idempotency, and durable-operation
   guidance.
 - Updated plugin prompts and public installation guidance for MCP catalog `1.0`.
+- Clarified that MCP retrieval readiness reports legacy vector and hybrid
+  compatibility state rather than Context readiness.
+- Prevented missing legacy vector readiness from being reported as missing
+  semantic setup or as a reason to recommend the retired vector-configuration
+  creation surface.
+- Directed semantic-readiness diagnosis to Context capabilities, collections,
+  status, verification, and named-vector index status.
+- Replaced ambiguous legacy vector-configuration wording in the embedding
+  workflow with the Context named-vector contract.
 
 ## 0.5.0 - 2026-08-18
 

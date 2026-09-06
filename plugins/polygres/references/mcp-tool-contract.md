@@ -156,6 +156,14 @@ fan-out, filters, and result count.
   `get_project_metrics_history`
 
 Diagnostics expose bounded public project evidence. Preserve request IDs.
+`get_retrieval_readiness` reports graph plus legacy vector and hybrid
+compatibility readiness; it does not report Context readiness. A false legacy
+`vector.ready` or `hybrid.ready` value is not missing semantic setup and must
+not lead to a legacy vector-configuration recommendation. Legacy vector
+creation is retired. For new semantic retrieval, inspect
+`get_context_capabilities`, `list_context_collections`, collection status,
+verification, and named-vector index status before deciding whether Context is
+ready.
 
 ### Public documentation
 

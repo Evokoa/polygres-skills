@@ -25,11 +25,14 @@
       "tested": null
     }
   },
-  "content_digest": "sha256:64bc882dbd43c67196ae2d80704726cdc870815bc94f18e461f43811b0c6db6d",
+  "content_digest": "sha256:760b0582bf7001927e6833ecd1364fedb9a5452badbedd27665e9983ffedcd10",
   "installation_channels_verified": [],
   "behavioral_evaluations": [
     "MCP catalog coverage for all 91 tools",
     "Canonical MCP contract and generated-copy hash validation",
+    "Legacy vector and hybrid readiness classified as compatibility-only",
+    "Context readiness required before semantic availability conclusions",
+    "Retired vector-configuration setup recommendations rejected",
     "Fixed-project and organization-wide routing guidance",
     "Read-only, feature, scope, project-mode, and fallback guidance",
     "Action-bound confirmation and idempotency guidance",

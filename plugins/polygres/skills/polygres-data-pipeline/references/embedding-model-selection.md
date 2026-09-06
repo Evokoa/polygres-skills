@@ -78,14 +78,14 @@ document input, and query input in the pipeline configuration. Indexing and
 querying must use the same contract. For model changes, use a new named vector
 or a reviewed reindex rather than mixing vectors.
 
-Before creating the final vector configuration or starting a backfill, embed a
-small representative set of filtered records and queries. Five to 20 records is
-a useful starting range, not a requirement. Verify the vector count,
-finite values, exact dimensions, normalization, document/query formatting, a
-simple relevant-result check, and acceptable local memory/latency or hosted
-errors/rate handling. A failed candidate may fall back automatically only when
-the alternative and all of its material effects were already included in the
-approved review.
+Before creating the final Context named-vector configuration or starting a
+backfill, embed a small representative set of filtered records and queries.
+Five to 20 records is a useful starting range, not a requirement. Verify the
+vector count, finite values, exact dimensions, normalization, document/query
+formatting, a simple relevant-result check, and acceptable local memory/latency
+or hosted errors/rate handling. A failed candidate may fall back automatically
+only when the alternative and all of its material effects were already included
+in the approved review.
 
 ## Catalog maintenance
 

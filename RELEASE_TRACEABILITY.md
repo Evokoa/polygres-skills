@@ -17,6 +17,10 @@ skills package are available together.
 
 ## Implemented behavior
 
+- Interpret MCP vector and hybrid readiness as legacy compatibility evidence,
+  not Context readiness or a recommendation to configure a retired surface.
+- Require Context capabilities, collections, status, verification, and
+  named-vector index evidence before reporting semantic retrieval unavailable.
 - Install the production Streamable HTTP MCP connection with the Codex plugin.
 - Start MCP-aware work from discovery, `whoami`, connection targeting, project
   mode, and current project state.

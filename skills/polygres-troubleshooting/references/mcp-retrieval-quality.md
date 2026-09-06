@@ -7,6 +7,12 @@ Use `get_retrieval_readiness`, collection status and verification,
 `get_context_diagnostics`, `get_context_index_status`,
 `get_context_index_diagnostics`, `get_context_index_advice`,
 `get_context_query_stats`, and `check_context_recall` as available.
+Treat the `vector` and `hybrid` fields from `get_retrieval_readiness` as legacy
+compatibility evidence only. They do not report Context readiness. A false
+value is not a reason to recommend legacy vector setup, whose creation surface
+is retired. Inspect Context capabilities, collections, collection status,
+verification, and the selected named-vector index before claiming semantic
+retrieval is unavailable.
 
 Run a bounded labeled query set with fixed candidate and answer limits. Measure
 recall, precision, reciprocal rank, empty-result rate, latency, and truncation.

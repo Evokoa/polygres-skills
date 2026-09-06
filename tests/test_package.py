@@ -174,6 +174,29 @@ def test_cli_guidance_routes_new_semantic_setup_to_context() -> None:
     assert "vector configs create` path is retired" in retrieval
 
 
+def test_mcp_guidance_does_not_treat_legacy_readiness_as_context_readiness() -> None:
+    contract = (PLUGIN_ROOT / "references" / "mcp-tool-contract.md").read_text(
+        encoding="utf-8"
+    )
+    troubleshooting = (
+        PLUGIN_ROOT
+        / "skills"
+        / "polygres-troubleshooting"
+        / "references"
+        / "mcp-retrieval-quality.md"
+    ).read_text(encoding="utf-8")
+
+    assert "legacy vector and hybrid\ncompatibility readiness" in contract
+    assert "must\nnot lead to a legacy vector-configuration recommendation" in contract
+    assert "legacy\ncompatibility evidence only" in troubleshooting
+    assert "not a reason to recommend legacy vector setup" in troubleshooting
+    assert "get_context_capabilities" in contract
+    assert "Context capabilities" in troubleshooting
+    for text in (contract, troubleshooting):
+        assert "not report context readiness" in text.lower()
+        assert "creation" in text and "retired" in text
+
+
 def test_cli_guidance_documents_capability_gated_single_row_writes() -> None:
     rows = (SKILL_ROOT / "references" / "rows.md").read_text(encoding="utf-8")
     for phrase in (
