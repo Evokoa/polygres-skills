@@ -1,5 +1,13 @@
 # Errors, pagination, and testing
 
+## Contents
+
+- [Exception handling](#exception-handling)
+- [Query embeddings, spending, and retries](#query-embeddings-spending-and-retries)
+- [Pagination](#pagination)
+- [Typed results](#typed-results)
+- [Focused tests](#focused-tests)
+
 ## Exception handling
 
 Catch the narrowest useful SDK exception:
@@ -9,7 +17,8 @@ Catch the narrowest useful SDK exception:
   them.
 - `PolygresPermissionError`: stop and correct authorization or project scope.
 - `PolygresNotFoundError`: verify the exact resource or real row ID.
-- `PolygresRateLimitError`: honor retry guidance and back off.
+- `PolygresRateLimitError`: inspect `code`. Back off for temporary rate limits;
+  resolve allowance or funding requirements before resuming quota failures.
 - `PolygresMaintenanceError`: stop normal retries and surface the maintenance
   state or retry guidance supplied by the service.
 - `PolygresRuntimeError`: preserve the `request_id`; retry only when the
@@ -33,6 +42,45 @@ except PolygresRuntimeError as error:
 Do not include request headers or environment values in logs. A timeout is not
 proof that no response or server work occurred.
 
+## Query embeddings, spending, and retries
+
+Text queries use the project's retrieval allowance at the configured model's
+price. `use_credits=False` is the default. Additional credit usage requires
+`use_credits=True`, project spending permission, an available organization
+balance, and room within the project cycle limit. Check usage and renewal dates
+through the dashboard, CLI, or MCP; keep generation and retrieval allowances
+separate, and distinguish usage value from additional credits charged.
+
+For text queries, the SDK generates an idempotency key when one is omitted and
+preserves it across automatic transport retries and automatic pagination. To
+recover across separate calls or process restarts, persist a caller-owned
+`idempotency_key` before making the request and reuse it for the same query.
+Choose a new key for changed text, selected vector, or query plan. A static key
+shared by all user searches would mix unrelated requests.
+
+Set `timeout` for the complete query request, including embedding generation
+and its bounded transport retries. A timeout can leave provider work in
+progress; keep the original key when recovering. For query plans, supply these
+options to `execute_query()`. Building a plan generates no embeddings, and
+each text nearest branch has its own generation usage when executed.
+
+Use the specific error code to choose a next step:
+
+| Code | Recovery |
+| --- | --- |
+| `CONTEXT_CAPABILITY_UNAVAILABLE` for `query_embedding_generation` | Use a supporting Runtime for text input, or continue the application's compatible-vector workflow. |
+| `EMBEDDING_SEARCH_NOT_READY` | Check generation and collection readiness, then confirm the selected vector's saved model connection. |
+| `EMBEDDING_QUOTA_EXHAUSTED` | Check the remaining retrieval allowance and renewal date; enable authorized credit usage when available. Resume after funding or renewal. |
+| `EMBEDDING_MODEL_UNAVAILABLE` | Review the configured model with the project administrator; retain the model compatibility of existing data. |
+| `EMBEDDING_PROVIDER_RATE_LIMITED`, `EMBEDDING_PROVIDER_UNAVAILABLE` | Follow the service's delay guidance within the application's retry budget and keep the query key. |
+| `EMBEDDING_PROVIDER_OUTCOME_UNKNOWN` | Preserve the request ID and query key; reconcile the provider outcome through the supported administrative workflow before another attempt. |
+| `EMBEDDING_USAGE_CONFLICT` | Compare the recorded request with the intended query and resolve the conflict before retrying. |
+
+Avoid an outer retry loop based on HTTP 429 or 503 alone. For example, an
+exhausted allowance and a provider rate limit can both return 429, but only the
+temporary rate limit calls for ordinary backoff. Use the public error code,
+details, and recovery guidance together.
+
 ## Pagination
 
 Process one page when latency and a fixed result cap matter:
@@ -55,6 +103,12 @@ for result in page.auto_paging_iter():
 Set an application maximum for rows, pages, elapsed time, and context tokens.
 Preserve the last cursor and request ID when stopping early or after a partial
 failure.
+
+For a text query, retain the same text, configuration, filters, limit, spending
+preference, and query key when continuing manually with `cursor`. The SDK's
+automatic iterator preserves that identity. Context ranked responses are typed
+envelopes rather than cursor pages; pagination applies to legacy retrieval and
+the documented administrative listings.
 
 ## Typed results
 
@@ -93,3 +147,10 @@ Cover empty pages, malformed JSON payloads, missing fields, invalid dimensions,
 NaN and infinity, whitespace-only and fuzzy text, bad directions, depth and
 limit boundaries, 401, 403, 404, 429, 5xx, network errors, timeout after
 retries, multi-page cursors, and partial iteration failure.
+
+For query generation, also verify exactly one semantic input, unchanged vector
+payloads for older Runtimes, text capability checks, `query()` fallback,
+Joint's separate semantic and lexical inputs, plan construction without HTTP,
+and one idempotency key across retries and pages. Test quota errors separately
+from temporary rate limits. A mocked provider verifies SDK request behavior;
+use an authorized integration test to verify model selection and accounting.

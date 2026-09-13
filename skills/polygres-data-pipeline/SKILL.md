@@ -60,9 +60,9 @@ To proceed, reply: Set up the recommended Polygres pipeline.
 
 Treat that reply or an equivalent acceptance as setup intent. Carry the
 inspected source, project, outcome, and recommendation into the setup flow
-without repeating discovery unless the evidence is stale. This acceptance
-starts setup; it is not mutation approval. Prepare the implementation and show
-the normal consolidated review before making covered changes.
+without repeating discovery unless the evidence is stale. Carry forward any
+approval already given for the same source, project, processing, and costs.
+Prepare a consolidated review only for material effects that remain undecided.
 
 If the prompt identifies neither a source or inspectable context nor a desired
 outcome, do not inspect, design, scaffold, or configure yet. Ask one short
@@ -136,12 +136,12 @@ contextual or detailed requests.
   selected retrieval inputs.
 - Start with relational or text retrieval when it satisfies the outcome. Add
   pgContext for meaning, similarity, natural-language recall, or agent memory.
-- Follow an established embedding deployment preference. If it is unknown,
-  silently rank one compatible local recommendation and one hosted alternative
-  and put both in the existing consolidated review. Device feasibility does not
-  imply a local preference. Do not create a separate model questionnaire or a
-  second approval after the user selects a fully reviewed option. Polygres does
-  not generate embeddings.
+- Follow an established embedding preference: Polygres managed generation,
+  local, external provider, or existing vectors. When the user has no preference,
+  inspect Polygres configurations and its available model catalog first. Choose
+  the simplest compatible path and include a useful alternative in the same
+  review when needed. Managed generation uses Polygres provider connections and
+  allowances; local device checks apply only to a possible local path.
 - Recommend pgGraph when validated relationships improve the requested
   retrieval. A single memory table does not by itself justify graph, but
   self-references or reliably derived relationships may. Omit graph when it
@@ -187,9 +187,9 @@ retrieval commands when selected, and include focused tests.
 
 Use the public interface appropriate to each workload:
 
-- synced project: keep the source database authoritative, hand sync creation
-  and configuration to the dashboard, and use the Runtime API key only for
-  supported retrieval and retrieval configuration;
+- synced project: keep the source database authoritative, use discovered MCP
+  tools or the supported CLI/dashboard setup, and use the Runtime API key for
+  supported retrieval, embedding generation, and search configuration;
 - dataset or bounded backfill: reviewed CLI import is normally sufficient;
 - one JSON object or runtime event: use the rows surface when the target and
   workload pass its read-only validation and deployed limits;
@@ -210,10 +210,12 @@ does not contain that endpoint version, mark capture `upgrade-required`, give th
 upgrade requirement, and continue all unaffected setup work. Never infer the
 endpoint or disguise a bulk import as per-turn capture.
 
-When a bulk import feeds a selected Context collection, reconcile the imported
-source rows into Context before declaring semantic retrieval operational. The
-rows API does not delete records; route deletion through an approved source-row
-deletion path and remove the corresponding Context, text, and graph evidence.
+For application-owned vectors, reconcile imported rows into their Context
+collection. For managed embeddings, write source text without Context options
+and let Polygres generate embeddings and reconcile the managed output. Read the
+Context handoff to configure that output collection; its row keys differ from
+the original source keys. Verify both generation and search readiness. Route
+deletions through the source system and verify cleanup of each selected surface.
 
 ## Keep one execution record
 
@@ -225,7 +227,8 @@ them into user questions. Never make the user read or edit the plan. Use
 the source-specific runtime. Render the single review with
 `scripts/render_pipeline_review.py`.
 
-Follow `references/security-and-approvals.md`. One approval covers the reviewed
+Follow `references/security-and-approvals.md`. Existing authorization remains
+valid for the same material effects. One approval covers the reviewed
 setup while project, source scope, data egress, destructive effects, and paid
 processing remain unchanged. Implementation details and harmless local files
 do not invalidate it. Credentials are always local environment-variable values; inspect

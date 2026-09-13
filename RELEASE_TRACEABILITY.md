@@ -1,60 +1,78 @@
 # Polygres Agent Skills release traceability
 
-Date: 2026-09-05
+Date: 2026-09-13
 
-Scope: connect Agent Skills `0.6.0` to Polygres MCP catalog `1.0` while
-preserving the existing CLI `0.4.x` and SDK `0.4.x` workflows.
+Scope: update all five Agent Skills for Polygres embedding generation and
+CLI/SDK `0.5.0`, preserving existing `0.4.x` vector workflows.
 
 ## Release identity
 
-Canonical version: `0.6.0`
+Canonical version: `0.7.0`
 
-Release record: `releases/0.6.0.json`
+Release record: `releases/0.7.0.json`
 
-The release payload records a deterministic digest. Live marketplace and OAuth
-qualification remain release gates until the deployed MCP service and public
-skills package are available together.
+The release record binds the plugin payload and standalone skill mirrors with
+a deterministic digest. The skills package has its own version, independent
+of the CLI and SDK releases.
 
 ## Implemented behavior
 
-- Interpret MCP vector and hybrid readiness as legacy compatibility evidence,
-  not Context readiness or a recommendation to configure a retired surface.
-- Require Context capabilities, collections, status, verification, and
-  named-vector index evidence before reporting semantic retrieval unavailable.
-- Install the production Streamable HTTP MCP connection with the Codex plugin.
-- Start MCP-aware work from discovery, `whoami`, connection targeting, project
-  mode, and current project state.
-- Prefer discovered compatible MCP tools for interactive work.
-- Preserve CLI, SDK, Dashboard, source PostgreSQL, and legacy retrieval
-  workflows for operations outside the MCP catalog.
-- Use one canonical MCP contract and generated hash-bound copies in all five
-  skills.
-- Cover all 91 catalog tools and the eight feature groups.
-- Preserve action-bound confirmation, idempotency keys, operation IDs, request
-  IDs, provenance, and bounded result handling.
-- Route synchronized source credentials and Dashboard-started imports through
-  their secure browser workflows.
-- Add focused playbooks for the eight launch outcomes.
+- Configure embedding generation through discovered MCP tools, CLI commands,
+  or the Dashboard, using the live model catalog and preview before setup.
+- Use the SDK's existing Context and hybrid query methods for text and vector
+  queries. Embedding generation configuration stays outside the SDK.
+- Resolve query models through the selected collection vector and its saved
+  embedding configuration.
+- Record separate generation and query allowances, monetary model pricing,
+  project spending permission, and request-level credit opt-in.
+- Support managed embedding output for synchronized text while keeping source
+  row writes in the source PostgreSQL database.
+- Keep local and external embedding workflows available, including existing
+  vectors and clients that predate text query generation.
+- Verify generation progress and Context collection/index readiness separately.
+- Preserve idempotency keys and distinguish transient errors, funding issues,
+  and provider outcomes that need reconciliation.
+- Keep one canonical MCP reference and identical generated copies in all five
+  skills, covering the current catalog's 102 tools.
+- Correct the MCP configuration-update description to list the settings its
+  public schema accepts, with batch sizing managed by Polygres.
 
 ## Acceptance mapping
 
 | Acceptance criterion | Implementation | Verification |
 | --- | --- | --- |
-| Codex loads Polygres MCP with the skills | `.codex-plugin/plugin.json` and `.mcp.json` | Manifest and package validation |
-| Skills understand every launch tool | Canonical MCP tool contract | Server-policy catalog coverage test |
-| Installed skills remain self-contained | Generated contract copies | SHA-256 copy validation |
-| Fixed and multi-project calls stay distinct | Shared contract and all skill entrypoints | Routing tests |
-| Mutations use user approval and server confirmation | Shared contract and focused playbooks | Confirmation behavior assertions |
-| Existing operational surfaces remain available | CLI, SDK, Dashboard, and pipeline fallbacks | Full skill regression suite |
-| Public docs support MCP users | MCP connection, capability, action, and workflow pages | Public docs checks and build |
+| CLI workflows use supported commands and arguments | CLI embedding and Context references | Parser and mocked request checks against CLI `0.5.0` |
+| SDK examples use existing methods | SDK Context, hybrid, and client references | SDK signatures and recorded request payloads |
+| Managed pipelines produce the correct setup pack | Pipeline recommendation, validation, rendering, and scaffolding scripts | Standard and synchronized managed-plan tests alongside local/external regression cases |
+| Retrieval plans include model binding, usage, and readiness | Retrieval-design references and plan template | Per-skill source review and contract checks |
+| Diagnostics select recovery from public evidence | Troubleshooting references | CLI/parser and public error-contract checks |
+| Every MCP tool is documented | Canonical MCP tool contract | Coverage against the server policy catalog |
+| Each installed skill is self-contained | Generated reference copies and exported mirrors | Full-content comparison, skill validation, and temporary export checks |
+| Release metadata matches the shipped files | Version, manifests, release record | Release validation and payload digest |
 
-No live Polygres project was mutated. No dependency was installed. No remote
-repository, marketplace, commit, or deployment was changed by this work.
+## Release verification scope
 
-## Release gates
+Local verification uses source contracts, mocked requests, generated temporary
+setup packs, and package exports. It does not require live project changes,
+embedding provider calls, or spending credits. Installation channel results
+are recorded separately from local validation in the release record.
 
-- Verify clean-machine installation from the public skills repository.
-- Verify Codex plugin loading of `.mcp.json`.
-- Complete browser OAuth against the deployed production MCP endpoint.
-- Exercise fixed-project and organization-wide discovery with representative
+## Local results
+
+- Standard package suite: 181 passed.
+- Cross-package suite in the MCP environment: 17 passed, with no skipped tests.
+- CLI embedding and text-query source tests: 23 passed.
+- MCP embedding and text-query source tests: 26 passed.
+- Ruff, all five skill validators, Codex plugin validation, and Claude plugin
+  and marketplace validation passed.
+- Package and release validation passed for `polygres-skills-v0.7.0`.
+- A temporary public export passed validation with 79 identical mirrored skill
+  files and the same release digest.
+
+## Publication checks
+
+- Verify clean-machine installation from the published skills repository.
+- Verify Codex plugin loading of the production MCP connection.
+- Complete browser OAuth and installation consent against the deployed service.
+- Verify fixed-project and organization-wide discovery with representative
   roles and feature selections.

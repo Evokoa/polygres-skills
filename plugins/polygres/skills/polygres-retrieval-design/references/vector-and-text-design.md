@@ -27,6 +27,14 @@ fallback is safe while required retrieval resources are unavailable.
 Plan tests for duplicate content, deleted rows, filter interactions, empty
 queries, extreme lengths, and model-version compatibility mismatches.
 
+SDK 0.5.0 also accepts `text` through `project.vector.search` and existing
+`project.hybrid.graph_first`, `vector_first`, and `joint` methods. Use this
+option only when the registered vector column resolves to one saved embedding
+configuration with the matching dimensions and confirmed original model.
+Select these resources with `config`; named Context vectors use `vector_name`
+on the Context methods. See `embedding-design.md` for model binding, quota,
+and retry decisions. Existing calls that provide embeddings remain valid.
+
 ## Text retrieval
 
 For TSVector, choose either an existing compatible `tsvector` column or a
@@ -40,6 +48,11 @@ source column changes. Plan diagnostics and reindexing for physical-index
 failure, and state that deleting the configuration does not drop the generated
 table column. Test punctuation, stop words, Unicode, empty input, missing
 columns, null filters, and cursor reuse with changed query inputs.
+
+Keep lexical search independent of query embedding generation. The SDK's
+`project.text.tsvector`, `project.text.fuzzy`, and Context `query_full_text`
+continue to use lexical text inputs. A query-plan `nearest` node can use text
+for semantic ranking; a `full_text` node uses `text_query` for lexical ranking.
 
 For fuzzy retrieval, record normalization, similarity threshold, indexed
 columns, default and maximum limits, metadata and filter columns, stable row

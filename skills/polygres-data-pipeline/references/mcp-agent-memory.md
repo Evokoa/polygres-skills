@@ -10,15 +10,19 @@ unless the user explicitly includes them.
 ## Standard project
 
 Use a stable event key and `validate_row_write`, then `upsert_row` for one
-bounded memory record. Generate embeddings in the caller. Use
-`upsert_context_points` or `reconcile_context_points` when the collection needs
-an explicit mapping update. Preserve the same idempotency key when the write
-result is ambiguous.
+bounded memory record. With Polygres-managed embeddings, write filtered text
+without Context options and let generation update the linked output collection.
+With application-owned vectors, generate the vector first and use the
+Context-backed row operation for its selected collection. Preserve the exact
+payload and idempotency key when that composite result is ambiguous. Use point
+lifecycle tools for existing-row repair, rather than repeating the source write.
 
 ## Synchronized project
 
 Write the memory record to the source PostgreSQL database. Use MCP Context or
 Graph tools for retrieval after synchronization makes the record ready.
+Polygres can generate embeddings from that synchronized text and maintain its
+managed output. Verify sync, generation, and collection readiness separately.
 
 ## Recall
 

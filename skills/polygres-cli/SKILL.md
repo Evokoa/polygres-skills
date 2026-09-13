@@ -51,6 +51,12 @@ CLI command.
 If bundled examples differ from the installed `--help`, follow the installed
 command surface and explain the version mismatch. Never guess a replacement.
 
+Embedding setup and query-text flags require CLI 0.5.0 and a supporting Runtime.
+For text queries, check `query_embedding_generation` in
+`polygres --json context capabilities`. Existing vector inputs keep their
+behavior; retain that workflow for applications using CLI 0.4.x until an
+upgrade is authorized.
+
 ## Route the request
 
 Read only the references needed for the task:
@@ -64,6 +70,7 @@ Read only the references needed for the task:
 | Validate, insert, upsert, or ignore one JSON object or runtime event | `references/rows.md` |
 | Migration list/apply and SQL safety | `references/migrations.md` |
 | Graph, text, existing vector configurations, and general retrieval readiness | `references/retrieval.md` |
+| Generate embeddings from source text, reuse vectors, preview costs, manage processing, and configure search | `references/embeddings.md` |
 | Execute an approved graph plan through MCP or fall back to CLI | `references/mcp-graph-retrieval.md` |
 | Polygres AI Context collections, filters, points, operations, and retrieval | `references/context.md` |
 | JSON output, polling, exit codes, retry and recovery | `references/automation-and-errors.md` |
@@ -97,6 +104,8 @@ Obtain explicit user approval before:
 - reindexing a text configuration;
 - revoking a Runtime API key;
 - deleting existing vector or text configurations;
+- creating an embedding configuration, changing its credit preference, or
+  removing it, including the choice to keep or delete generated output;
 - every durable pgContext mutation, including collection create, update,
   set-default, vector addition, default-vector change, reindex, or delete;
   filter registration; point

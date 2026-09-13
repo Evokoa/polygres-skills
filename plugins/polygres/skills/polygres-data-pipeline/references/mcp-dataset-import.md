@@ -28,8 +28,9 @@ the job and request IDs. Report partial, failed, completed, or nonterminal state
 exactly as returned.
 
 After completion, verify the table and a bounded row sample with `list_tables`
-and `read_table_rows`. Reconcile Context points when the imported table feeds an
-existing collection.
+and `read_table_rows`. For an application-owned vector collection, reconcile
+its source points. For a managed embedding configuration, inspect generation
+progress and the linked output collection; Polygres reconciles that output.
 
 Use `cancel_import` only for an eligible job after the user approves the exact
 destructive action. Use the CLI import workflow when MCP import tools are absent.

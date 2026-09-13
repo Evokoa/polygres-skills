@@ -59,11 +59,12 @@ not diagnose ordinary create as a same-column bridge.
 
 For ranked retrieval, resolve the exact collection and selected vector first.
 When `vector_name` was omitted, record the collection's
-`default_vector_name`. Compare the embedding model and length with that
-vector's dimensions, metric, and index status. A Ready sibling vector does not
-make the selected vector Ready, and a failure in one vector does not prove the
-whole collection is corrupt. Before diagnosing vector addition, inspect the
-durable operation and confirm whether the requested mode was `existing` or
+`default_vector_name`. For application-supplied vectors, compare the embedding
+model and length with that vector's dimensions, metric, and index status. For
+text input, inspect the `query_embedding_generation` capability and the selected
+vector's saved model binding using [embedding diagnostics](embeddings.md).
+Inspect each vector's readiness independently. Before diagnosing vector
+addition, inspect the durable operation and confirm whether the requested mode was `existing` or
 `add_column` and whether it requested a default-vector change.
 
 Point status is saved last-known operational metadata, not a live source-table
@@ -86,3 +87,9 @@ collection IDs, operation IDs, request IDs, CLI or SDK version, and observed
 status. Never include embeddings, source payloads, API keys, or authorization
 headers unless the minimum reproduction explicitly requires non-sensitive
 sample data.
+
+For managed output, inspect generation progress separately from collection
+readiness. Its worker follows generated rows with Context point reconciliation;
+the original text table has a separate source identity. Attach inline Context
+reconciliation to a row write only when its collection uses the table being
+written.

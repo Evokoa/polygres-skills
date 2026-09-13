@@ -37,6 +37,7 @@ def test_skill_frontmatter_and_required_resources() -> None:
         "context.md",
         "data-imports.md",
         "database-and-keys.md",
+        "embeddings.md",
         "migrations.md",
         "mcp-graph-retrieval.md",
         "mcp-tool-contract.md",
@@ -113,8 +114,12 @@ def test_mcp_contract_matches_server_catalog_and_generated_copies() -> None:
             )
         elif isinstance(names, ast.Name):
             tool_names.update(named_lists.get(names.id, set()))
-    assert len(tool_names) == 91
-    assert all(f"`{name}`" in canonical for name in tool_names)
+    assert {"whoami", "context_search", "create_embedding_configuration"} <= tool_names
+    missing = {name for name in tool_names if f"`{name}`" not in canonical}
+    assert not missing, f"MCP tools missing from shared contract: {sorted(missing)}"
+    assert "search_with_text" not in tool_names
+    assert "`search_with_text`" not in canonical
+    assert "project.embeddings" not in canonical
 
     digest = hashlib.sha256(canonical.encode()).hexdigest()
     expected_header = (
@@ -125,7 +130,7 @@ def test_mcp_contract_matches_server_catalog_and_generated_copies() -> None:
         if not (skill / "SKILL.md").is_file():
             continue
         copied = skill / "references" / "mcp-tool-contract.md"
-        assert copied.read_text(encoding="utf-8").startswith(expected_header)
+        assert copied.read_text(encoding="utf-8") == f"{expected_header}\n\n{canonical}"
 
 
 def test_claude_manifest_and_marketplace_are_consistent() -> None:

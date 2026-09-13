@@ -37,9 +37,11 @@ rotation and replacement in `.env`.
 
 Build and test the local vertical slice first. Then show one compact review
 covering the exact source scope, target project, data leaving the device, local
-or hosted model, credential names, remote mutations, cost, reversibility, and
-verification. Ask once before the first upload or remote mutation. An approval
-of that displayed review covers the setup while its project, source scope, data
+or Polygres/external model, credential names, remote mutations, cost,
+reversibility, and verification. Continue under existing authorization that
+already covers these effects; review unresolved material choices before the
+first upload or remote mutation. An approval covers the setup while its
+project, source scope, data
 egress, destructive effects, and paid processing remain unchanged. Internal
 implementation details may change without duplicate confirmation.
 
@@ -47,8 +49,8 @@ For a synced project, also disclose project mode, source authority, selected
 tables and columns, continuous source-to-Polygres egress, Polygres-owned
 publication and slot, reconfiguration behavior, and any resnapshot effect.
 
-When an unknown embedding deployment preference leaves both local and hosted
-paths feasible, fully describe one recommendation and one alternative inside
+When embedding deployment preference remains open, describe the simplest
+compatible recommendation and a useful managed, local, or external alternative inside
 this review. A response selecting either described option is the one setup
 approval. Do not show a second review unless that selection changes an
 undisclosed material boundary.
@@ -58,7 +60,8 @@ Ensure the review includes any selected action in these categories:
 - accessing additional private history or files;
 - installing or upgrading software;
 - downloading model weights or starting a persistent local service;
-- sending content to a hosted provider;
+- sending filtered source or query text to a provider, including through Polygres;
+- starting initial managed embedding generation or authorizing additional credits;
 - applying SQL or changing schema;
 - importing or backfilling data;
 - creating, updating, reindexing, or deleting Context resources;

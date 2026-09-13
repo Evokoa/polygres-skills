@@ -16,8 +16,8 @@ Separate these boundaries:
 - CLI or dashboard control plane: initial creation, source inspection, and
   selection; dashboard control plane: later lifecycle and reconfiguration;
 - source PostgreSQL: connectivity, privileges, schema, keys, and source writes;
-- Runtime API: supported graph, text, vector, hybrid, Context, catalog, and
-  readiness operations.
+- Runtime API: supported graph, text, vector, hybrid, Context, managed
+  embeddings, catalog, and readiness operations.
 
 ## Diagnose preflight
 
@@ -75,3 +75,9 @@ supported user workflow.
 After sync is healthy, diagnose retrieval readiness separately. A streaming
 sync does not prove a Context collection, graph build, text configuration, or
 existing vector configuration is ready.
+
+Managed embeddings can watch synchronized text and store the generated vectors
+in Polygres. Inspect source freshness, embedding generation progress, and the
+linked Context collection separately with [embedding diagnostics](embeddings.md).
+Source row and schema corrections belong in the source PostgreSQL database;
+Polygres maintains the generated output and its Context point reconciliation.

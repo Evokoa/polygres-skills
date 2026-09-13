@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rank compatible local and hosted embedding choices without prompting or networking."""
+"""Rank discovered Polygres models or local and hosted choices without networking."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import argparse
 import json
 import math
 import sys
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +15,7 @@ SCRIPT_ROOT = Path(__file__).resolve().parent
 SOURCE_CATALOG = SCRIPT_ROOT.parent / "assets" / "embedding-models.json"
 SCAFFOLDED_CATALOG = SCRIPT_ROOT.parent / "embedding-models.json"
 DEFAULT_CATALOG = SCAFFOLDED_CATALOG if SCAFFOLDED_CATALOG.is_file() else SOURCE_CATALOG
-VALID_PREFERENCES = {"unknown", "local", "hosted", "existing"}
+VALID_PREFERENCES = {"unknown", "managed", "local", "hosted", "existing"}
 
 
 def _load_object(path: Path, label: str) -> dict[str, Any]:
@@ -30,7 +31,9 @@ def _load_object(path: Path, label: str) -> dict[str, Any]:
 def _requirements(value: dict[str, Any]) -> dict[str, Any]:
     preference = str(value.get("deployment_preference", "unknown")).casefold()
     if preference not in VALID_PREFERENCES:
-        raise ValueError("deployment_preference must be unknown, local, hosted, or existing")
+        raise ValueError(
+            "deployment_preference must be unknown, managed, local, hosted, or existing"
+        )
     languages = value.get("languages", ["en"])
     if not isinstance(languages, list) or not languages:
         raise ValueError("languages must be a non-empty list")
@@ -50,6 +53,7 @@ def _requirements(value: dict[str, Any]) -> dict[str, Any]:
         "existing_dimensions": dimensions,
         "preferred_runtime": value.get("preferred_runtime"),
         "preferred_provider": value.get("preferred_provider"),
+        "preferred_model_id": value.get("preferred_model_id"),
     }
 
 
@@ -156,6 +160,8 @@ def _hosted_candidates(
         if not _dimension_compatible(model, requirements["existing_dimensions"]):
             continue
         preferred_provider = requirements["preferred_provider"]
+        if preferred_provider and model.get("provider") != preferred_provider:
+            continue
         score = float(model.get("popularity_weight", 0))
         score += 40 if preferred_provider and model.get("provider") == preferred_provider else 0
         score += 30 if requirements["contains_code"] and model.get("id") == "voyage-code-3" else 0
@@ -177,6 +183,60 @@ def _hosted_candidates(
     return sorted(candidates, key=lambda item: (-item["_score"], item["id"]))
 
 
+def _managed_candidates(
+    catalog: dict[str, Any] | None, requirements: dict[str, Any]
+) -> list[dict[str, Any]]:
+    if catalog is None or not requirements["external_processing_allowed"]:
+        return []
+    models = catalog.get("models")
+    if not isinstance(models, list):
+        raise ValueError("managed catalog must contain the models returned by Polygres")
+    candidates = []
+    for raw in models:
+        if not isinstance(raw, dict) or raw.get("enabled") is not True:
+            continue
+        required_fields = ("id", "provider", "model", "revision", "price_version")
+        if any(not raw.get(key) for key in required_fields):
+            raise ValueError(
+                "managed catalog model is missing its pinned identity or price version"
+            )
+        dimensions = raw.get("dimensions")
+        if not isinstance(dimensions, list) or raw.get("default_dimensions") not in dimensions:
+            raise ValueError("managed catalog model has invalid supported dimensions")
+        preferred_id = requirements["preferred_model_id"]
+        if preferred_id and str(raw["id"]) != str(preferred_id):
+            continue
+        provider = requirements["preferred_provider"]
+        if provider and raw["provider"] != provider:
+            continue
+        desired = requirements["existing_dimensions"]
+        if desired is not None and desired not in dimensions:
+            continue
+        if raw.get("max_input_tokens", 0) < requirements["max_chunk_tokens"]:
+            continue
+        try:
+            price = Decimal(str(raw["microcredits_per_token"]))
+        except (KeyError, InvalidOperation) as error:
+            raise ValueError("managed catalog model is missing a valid token price") from error
+        if not price.is_finite() or price < 0:
+            raise ValueError("managed catalog token price must be finite and nonnegative")
+        model = dict(raw)
+        model.update(
+            category="managed",
+            dimensions={"allowed": dimensions, "default": desired or raw["default_dimensions"]},
+            reason="available in Polygres with compatible dimensions and input length",
+            setup_action="preview and configure generation in Polygres",
+            data_egress=(
+                f"filtered source and query text is processed by {raw['provider']} through Polygres"
+            ),
+            paid_processing=False,
+            credit_usage="included allowance first; additional credits require explicit opt-in",
+            _price=price,
+        )
+        candidates.append(model)
+    return sorted(candidates, key=lambda item: (item["_price"], item["id"]))
+
+
 def _public(model: dict[str, Any] | None) -> dict[str, Any] | None:
     if model is None:
         return None
@@ -184,7 +244,10 @@ def _public(model: dict[str, Any] | None) -> dict[str, Any] | None:
 
 
 def recommend(
-    catalog: dict[str, Any], requirements_value: dict[str, Any], device: dict[str, Any]
+    catalog: dict[str, Any],
+    requirements_value: dict[str, Any],
+    device: dict[str, Any] | None = None,
+    managed_catalog: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     requirements = _requirements(requirements_value)
     preference = requirements["deployment_preference"]
@@ -202,53 +265,97 @@ def recommend(
             "blockers": [],
             "warnings": [],
         }
-    local = _local_candidates(catalog, requirements, device)
-    hosted = _hosted_candidates(catalog, requirements)
+    managed = (
+        _managed_candidates(managed_catalog, requirements)
+        if preference in {"managed", "unknown"}
+        else []
+    )
+    local = (
+        _local_candidates(catalog, requirements, device)
+        if preference != "managed" and device is not None
+        else []
+    )
+    hosted = _hosted_candidates(catalog, requirements) if preference != "managed" else []
     recommended: dict[str, Any] | None
     alternative: dict[str, Any] | None
-    if preference == "local":
+    if preference == "managed":
+        recommended = managed[0] if managed else None
+        alternative = None
+    elif preference == "local":
         recommended = local[0] if local else None
         alternative = None
     elif preference == "hosted":
         recommended = hosted[0] if hosted else None
         alternative = None
     else:
-        recommended = local[0] if local else (hosted[0] if hosted else None)
-        alternative = hosted[0] if local and hosted else None
+        recommended = (managed or local or hosted or [None])[0]
+        alternative = local[0] if managed and local else (hosted[0] if local and hosted else None)
     blockers = []
     if recommended is None:
         blockers.append(
             {
-                "code": "no-compatible-embedding-model",
+                "code": (
+                    "managed-catalog-required"
+                    if preference == "managed" and managed_catalog is None
+                    else "no-compatible-embedding-model"
+                ),
                 "message": (
-                    "No catalog model fits the inspected requirements and allowed "
+                    "Read list_embedding_models or embeddings models for this project first."
+                    if preference == "managed" and managed_catalog is None
+                    else "No catalog model fits the inspected requirements and allowed "
                     "processing boundary."
                 ),
             }
         )
     return {
         "status": "ready" if recommended else "blocked",
-        "preference_resolved": preference != "unknown" or not (local and hosted),
-        "catalog_version": catalog.get("version"),
-        "catalog_verified_at": catalog.get("verified_at"),
+        "preference_resolved": preference != "unknown" or alternative is None,
+        "catalog_source": "polygres"
+        if recommended and recommended["category"] == "managed"
+        else "bundled",
+        "catalog_version": None if preference == "managed" or managed else catalog.get("version"),
+        "catalog_verified_at": (
+            managed_catalog.get("observed_at")
+            if managed_catalog and recommended and recommended["category"] == "managed"
+            else catalog.get("verified_at")
+        ),
         "recommended": _public(recommended),
         "alternative": _public(alternative),
         "blockers": blockers,
-        "warnings": [],
+        "warnings": (
+            [
+                {
+                    "code": "verify-model-fit",
+                    "message": (
+                        "Confirm language and code suitability from the selected model "
+                        "documentation and a representative query; the Polygres catalog "
+                        "reports availability and the embedding contract."
+                    ),
+                }
+            ]
+            if recommended and recommended["category"] == "managed"
+            else []
+        ),
     }
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--requirements", required=True, type=Path)
-    parser.add_argument("--device", required=True, type=Path)
+    parser.add_argument("--device", type=Path)
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
+    parser.add_argument("--managed-catalog", type=Path)
     args = parser.parse_args(argv)
     try:
+        requirements = _load_object(args.requirements, "requirements")
         report = recommend(
-            _load_object(args.catalog, "catalog"),
-            _load_object(args.requirements, "requirements"),
-            _load_object(args.device, "device report"),
+            {}
+            if requirements.get("deployment_preference", "unknown").casefold()
+            in {"managed", "existing"}
+            else _load_object(args.catalog, "catalog"),
+            requirements,
+            _load_object(args.device, "device report") if args.device else None,
+            _load_object(args.managed_catalog, "managed catalog") if args.managed_catalog else None,
         )
     except ValueError as error:
         print(f"recommendation failed: {error}", file=sys.stderr)

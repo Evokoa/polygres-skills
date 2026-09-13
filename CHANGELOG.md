@@ -2,6 +2,30 @@
 
 All notable changes to Polygres Agent Skills are documented in this file.
 
+## 0.7.0 - 2026-09-13
+
+### Added
+
+- Added embedding generation setup through MCP, CLI, and the dashboard, with
+  live model selection, preview, progress checks, and search configuration.
+- Added managed embedding plans and setup packs alongside the pipeline skill's
+  existing local and external embedding workflows.
+- Added guidance for generation and query allowances, model pricing, project
+  credit spending, and recovery from generation or query issues.
+
+### Changed
+
+- Updated all five skills for CLI and SDK `0.5.0`, preserving existing `0.4.x`
+  vector workflows.
+- Updated SDK examples to use text in the existing Context and hybrid query
+  methods, with the configured model selected through the collection vector.
+- Kept embedding setup in MCP, CLI, and the dashboard, and application queries
+  in the SDK.
+- Added Polygres embedding generation for synchronized text, while keeping
+  source row writes in the source database.
+- Updated the shared MCP reference and generated copies for the current tools,
+  text query inputs, credit options, and separate generation and search status.
+
 ## 0.6.0 - 2026-09-05
 
 ### Added

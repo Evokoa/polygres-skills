@@ -32,9 +32,10 @@ publication and replication slot only after final admission.
 
 Record `target.project_mode: synced`, `source.system_of_record`, and a
 `sync.mode` of `managed-postgres`. Record only non-secret provider and selected
-table or column scope. Represent initial creation with a `cli` or `dashboard`
-interface. Use `dashboard` for later selection reconfiguration and lifecycle
-actions because those commands are not exposed by CLI 0.4.0.
+table or column scope. Use discovered MCP sync tools after dashboard source connection entry, or a
+`cli` or `dashboard` interface for initial creation. MCP can inspect and control
+synchronization through its visible tools; use the dashboard for lifecycle or
+selection changes beyond that catalog. CLI 0.5.0 supports initial creation.
 
 Do not select or scaffold:
 
@@ -43,17 +44,27 @@ Do not select or scaffold:
 - target database credentials, SQL, or `psql`;
 - a custom CDC worker, backfill writer, or checkpoint ledger.
 
-Use the project Runtime API key only for supported retrieval and retrieval
-configuration. It cannot create or control sync and cannot access rows,
-imports, migrations, or database connection information.
+Use the project Runtime API key for supported retrieval, embedding generation,
+and search configuration. Sync lifecycle and source credentials use the
+control-plane workflow; source writes use the source database.
 
-## Write and enrich at the source
+## Keep source writes and choose embedding generation
 
-Write, update, delete, and generate embeddings in the source database. Managed
-snapshot and logical replication carry eligible changes into Polygres. For a
-Context collection, use an existing synchronized table and column; do not plan
-`new_table` or `add_column` on the target. Polygres does not generate
-embeddings.
+Write, update, and delete application data in the source database. Managed
+snapshot and logical replication carry selected changes into Polygres.
+
+For Polygres embeddings, select the synchronized text and stable key columns,
+preview generation, and create a managed configuration. Both Automatic and
+Manual process the initial text; Manual collects later changes until Run now.
+Use the Context handoff to create an existing-source collection over the
+managed output in Polygres. Its generated `id` is the collection key, and
+`source_key` links results back to the original record. Polygres performs
+generation and output reconciliation while the source schema stays unchanged.
+
+For source-provided vectors, keep generation at the source and create the
+collection over the existing synchronized vector column. Use the original
+model contract for queries. A Context source mode of `new_table` or
+`add_column` remains unavailable on the synchronized target.
 
 Use graph relationships only when both foreign-key endpoint tables are in the
 selected sync scope. Treat exact SQL and transactional joins as source-database

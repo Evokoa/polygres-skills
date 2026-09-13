@@ -1,6 +1,6 @@
 ---
 name: polygres-troubleshooting
-description: Diagnose Polygres MCP, OAuth connections, CLI, Runtime API, projects, jobs, synchronization, migrations, and retrieval through public read-only evidence. Use for scope or project-boundary issues, timeouts, partial failures, readiness, Context operations, graph, vector, text, hybrid, and Joint retrieval.
+description: Diagnose Polygres MCP, OAuth connections, CLI, Runtime API, projects, jobs, synchronization, migrations, embeddings, and retrieval through public read-only evidence. Use for scope or project-boundary issues, timeouts, partial failures, readiness, generation or query allowances, Context operations, and search quality.
 ---
 
 # Polygres Troubleshooting
@@ -35,14 +35,17 @@ version as separate diagnostic layers.
    general readiness failures, use `references/retrieval.md`. For pgContext
    capability, collection, point, operation, recall, or Joint failures, use
    `references/context.md`.
+   For embedding setup, generation, text query models, or usage, use
+   `references/embeddings.md`.
    Use `references/mcp-retrieval-quality.md` for retrieval evaluation through
    MCP and `references/mcp-operation-recovery.md` for MCP operation state.
 7. Classify the fault as CLI/local configuration, control-plane, Runtime API,
    Postgres/database or pooler, or asynchronous job state. Use
    `references/errors-and-escalation.md` for typed SDK errors and escalation.
-8. Re-check status before retry. Recommend a corrective action, but obtain
-   explicit approval and delegate supported mutations to `$polygres-cli` or
-   application changes to `$polygres-sdk`.
+8. Re-check status before retry. Recommend the smallest corrective action and
+   hand off supported mutations to `$polygres-cli` or application changes to
+   `$polygres-sdk`, using the user's existing authorization when it covers the
+   action.
 
 For a single-row write that lost the response after submission, treat the
 commit outcome as ambiguous unless public evidence resolves it. Do not
@@ -61,7 +64,9 @@ choosing a new key.
 - Never log a database password, API key, authorization header, connection
   string containing credentials, or full environment output.
 - Do not retry validation, authentication, permission, or compatibility errors
-  as if they were transient. Bound any retry for a rate limit or timeout.
+  as if they were transient. Classify an embedding failure by its error code:
+  allowance exhaustion and provider throttling both use HTTP 429 but have
+  different recovery steps. Preserve the idempotency key after a query timeout.
 - Do not request approval again for a corrective action already covered by an
   unchanged consolidated pipeline review. Ask again when its project, source
   scope, action set, egress, destructive effect, or plan digest changed.

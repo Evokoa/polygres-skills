@@ -3,6 +3,7 @@
 ## Contents
 
 - [Graph](#graph)
+- [Managed embeddings](#managed-embeddings)
 - [Existing vector configurations](#existing-vector-configurations)
 - [Text](#text)
 - [General readiness](#general-readiness)
@@ -29,6 +30,14 @@ test table has both `relrowsecurity = false` and
 `relforcerowsecurity = false`. If either flag caused the failure, classify it as
 an incompatible test fixture, not a pgGraph product failure. Never disable RLS
 on a pre-existing user table without explicit approval.
+
+## Managed embeddings
+
+To make source text searchable by meaning, use `polygres embeddings` to select
+a source and model, preview generation, and start processing. Then use the
+returned managed table to create a Context collection. Read
+[embeddings.md](embeddings.md) for setup, costs, processing, and removal, and
+[context.md](context.md#choose-retrieval) for text queries.
 
 ## Existing vector configurations
 

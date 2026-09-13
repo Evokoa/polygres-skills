@@ -38,6 +38,25 @@ ordered stable identity used to join results. Preserve provenance: strategy,
 source table, every identity component in order, score, graph path,
 relationship direction, and configuration version where available.
 
+Choose semantic input separately from stage order. The existing Context
+composition methods accept `text` or `embedding`; model selection follows the
+collection and its optional `vector_name`. `project.context.query` and
+`text_hybrid` use their required `query` for lexical ranking and also for
+semantic generation when `embedding` is omitted. Joint keeps semantic `text`
+and lexical `query` separate. See `embedding-design.md` for exact inputs.
+
+For composed query plans, each text-based `nearest` node chooses its own
+named or default vector. Count those nodes when estimating query embedding
+cost and latency. Keep `use_credits` and `idempotency_key` on
+`project.context.execute_query`; child nodes carry the query text and vector
+selection. Full-text nodes remain lexical. Preserve the same plan and root
+key when retrying the same execution.
+
+When Context uses managed chunk embeddings, preserve the returned
+`source_key`, `chunk_index`, and `source_record`. Verify an identity mapping to
+the registered graph node before proposing graph composition. The managed
+chunk's `id` is not automatically a graph node ID for its original source row.
+
 ## Grounding controls
 
 Apply authorization before candidate generation and when resolving final

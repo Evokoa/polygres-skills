@@ -24,7 +24,9 @@ one before Context or graph configuration.
 - Use relational SQL for exact filters, joins, dates, and aggregates.
 - Use text retrieval for words, IDs, names, and error messages.
 - Use pgContext for semantic similarity over compatible source-provided,
-  local, hosted, or application-generated embeddings.
+  Polygres-generated, local, or external-provider embeddings. Managed generation
+  creates its own output table, so the source needs text and a stable key rather
+  than a new vector column.
 - Recommend pgGraph when validated relationships make the requested retrieval
   clearer or more useful than ordinary joins.
 

@@ -32,7 +32,10 @@ approves the exact trigger.
 ## Preserve event correctness
 
 - Deduplicate by source namespace, record ID, and source revision.
-- Checkpoint only after the target write and derived reconciliation are durable.
+- Checkpoint source capture after the target write is durable. For an
+  application-owned vector collection, include its point reconciliation in
+  that recovery state. For managed embeddings, track generation and search
+  readiness separately; Polygres processes the persisted source text.
 - Handle out-of-order events using source revision or authoritative timestamps.
 - Keep per-record partial-batch results.
 - Retry transient source reads and durable-operation polling only. Never
@@ -51,7 +54,8 @@ Retain a deletion checkpoint until propagation is verified.
 
 The rows API has no delete mode. Route target-row deletion through an approved
 database path, then use the documented Context point lifecycle and configured
-text or graph maintenance paths for derived evidence. Do not encode deletion as
+text or graph maintenance paths for application-owned derived evidence. With
+managed embeddings, verify worker cleanup after source deletion. Do not encode deletion as
 `ignore` or assume an upsert removes missing records.
 
 ## Separate source and target credentials

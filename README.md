@@ -10,11 +10,11 @@ User guide: [Polygres Agent Skills](https://docs.polygres.com/agent-skills)
 
 | Skill | Use it for |
 | --- | --- |
-| `polygres-data-pipeline` | Use available MCP tools to choose managed PostgreSQL sync or build ingestion, retrieval, memory, or agent integration. |
-| `polygres-cli` | Use MCP for compatible interactive operations and the CLI for authentication, migrations, keys, imports, and retrieval configuration. |
-| `polygres-sdk` | Use MCP for grounded interactive retrieval and build persistent Python integrations. |
-| `polygres-retrieval-design` | Inspect read-only MCP evidence and produce a retrieval implementation plan. |
-| `polygres-troubleshooting` | Diagnose MCP, CLI, API, PostgreSQL, job, migration, and retrieval failures using read-only evidence. |
+| `polygres-data-pipeline` | Set up ingestion, PostgreSQL sync, embedding generation, retrieval, memory, and agent integration. |
+| `polygres-cli` | Operate projects and configure embeddings and retrieval through MCP and the CLI. |
+| `polygres-sdk` | Build Python integrations with existing vector inputs or text queries that Polygres embeds. |
+| `polygres-retrieval-design` | Inspect project evidence and plan retrieval, embedding models, readiness, and usage. |
+| `polygres-troubleshooting` | Diagnose connection, generation, indexing, quota, and retrieval issues using read-only evidence. |
 
 Compatible agents select the appropriate skill automatically. You can also name the skill in your request when you want a specific workflow.
 
@@ -89,9 +89,10 @@ me set up Polygres`, it first asks one short question about the desired outcome
 and relevant data, then begins inspection. Schema changes, embeddings, graph,
 backfill, continuous capture, retrieval, and agent instructions are optional.
 Sample sizes, retrieval timing,
-and numeric limits are starting defaults that adapt to the user's setup. Before
-remote mutation or changing active agent instructions, it shows one concise
-review and asks once. Internal lint warnings do not become user questions.
+and numeric limits are starting defaults that adapt to the user's setup. It
+prepares a concise review of remote changes and active agent instructions,
+uses existing authorization, and asks when an additional choice or approval
+is needed. Internal lint warnings do not become user questions.
 
 For `What can I do with Polygres?`, the skill performs a bounded, read-only
 scan of the accessible workspace and current Polygres project, then recommends
@@ -130,6 +131,15 @@ dimensions and verify readiness.
 ```
 
 ```text
+Generate embeddings for my articles and keep them up to date as the text changes.
+```
+
+```text
+Update my existing SDK search to accept text and use the model configured for
+my collection.
+```
+
+```text
 Use the Polygres SDK to retrieve similar documents, expand their citations,
 and build deduplicated context with source references.
 ```
@@ -145,31 +155,37 @@ Diagnose why this pgContext collection is blocked. Use read-only evidence and
 recommend the safest next action.
 ```
 
-## What the skills protect
+## How the skills work
 
 The skills follow a few important boundaries:
 
 - They use public Polygres CLI, Runtime API, SDK, and PostgreSQL interfaces.
-- They resolve project mode before choosing a surface. Synced projects keep the
-  source database authoritative and reject target rows, imports, migrations,
-  SQL, database credentials, and `psql`.
-- They hand synced-project creation, source preflight, table selection, and
-  lifecycle work to the dashboard. Source credentials never enter agent chat,
-  generated plans, CLI arguments, Runtime requests, or SDK code.
+- They resolve project mode before choosing a surface. Synced projects keep
+  source writes in PostgreSQL and can use Polygres embedding generation for
+  synchronized text.
+- They use available MCP tools, CLI commands, or the dashboard for synchronized
+  project setup and lifecycle work. Source credentials stay in the secure
+  connection flow.
 - The pipeline skill records separate documented store and retrieve interfaces,
-  selecting CLI, SDK, or Runtime API based on the workload. CLI and SDK 0.4.0
-  provide capability-gated single-row validation, insert, upsert, and ignore.
+  selecting CLI, SDK, or Runtime API based on the workload. CLI and SDK provide
+  capability-gated single-row validation, insert, upsert, and ignore.
   On standard projects, direct Postgres remains an explicitly approved
   compatibility fallback.
-- They ask before imports, migrations, revocations, deletions, and schema changes.
+- They prepare reviewable changes and use the authorization you have already
+  given, asking when an additional choice or approval is needed.
 - They keep database passwords out of command arguments and generated code.
 - They treat Runtime API keys as secrets and warn when a command can expose one in terminal or agent history.
 - They keep authorization in the application. Retrieval filters can narrow results, but they do not replace access control.
 - They preserve request IDs and relevant resource IDs when diagnosing a failure.
-- They honor a known embedding preference. If local versus hosted is unknown,
-  they silently inspect compatibility and include one local recommendation and
-  one hosted alternative in the single setup review. Selecting either reviewed
-  option is the one approval. Polygres does not generate embeddings.
+- They honor your embedding preference and existing vectors. For Polygres
+  generation, they inspect the available models and preview usage before setup.
+  Local and external providers remain available when they fit your workflow.
+- They configure generation through MCP, CLI, or the dashboard. Python
+  applications use the SDK's existing Context and hybrid methods to search
+  with text or vectors. Text queries use the selected collection vector's
+  configured model and dimensions.
+- They distinguish generation allowance from query allowance and show when
+  additional credits need your project spending permission and opt-in.
 - They generate `.env.example`, ensure `.env` is ignored, and tell the user how
   to paste credential values into `.env` without exposing them to the agent.
 
@@ -235,11 +251,19 @@ For Claude Code:
 
 ## Compatibility
 
-Package version: [`0.6.0`](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.6.0). It supports Polygres MCP catalog `1.0`, `polygres-cli 0.4.0` through `0.4.1`, and `polygres-sdk 0.4.0` through `0.4.1`. If an example differs from your installed version, follow discovered MCP tools, installed CLI help, or the SDK method signature.
+Package version: `0.7.0`. It supports Polygres MCP catalog `1.0`,
+`polygres-cli 0.4.0` through `0.5.0`, and `polygres-sdk 0.4.0` through `0.5.0`.
+Embedding setup and text query examples use CLI/SDK `0.5.0` and a service that
+advertises the corresponding tools and capabilities. Existing vector workflows
+remain available on `0.4.x`. Follow discovered MCP tools, installed CLI help,
+and SDK method signatures for the version in use.
 
 ## Changelog
 
-See the [Agent Skills 0.6.0 release notes](https://github.com/Evokoa/polygres-skills/releases/tag/polygres-skills-v0.6.0) for release changes.
+Version `0.7.0` adds embedding generation workflows, text queries through the
+existing SDK methods, and model, usage, and readiness guidance across all five
+skills. Published release notes are available on the
+[releases page](https://github.com/Evokoa/polygres-skills/releases).
 
 ## License
 

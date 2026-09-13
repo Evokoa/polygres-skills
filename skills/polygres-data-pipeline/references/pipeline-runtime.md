@@ -25,8 +25,8 @@ ingestion-only setup does not need retrieval code.
 ## Preserve delivery correctness
 
 Resolve the target project mode first. For a synced project, omit the writer,
-custom CDC worker, target backfill, and checkpoint ledger. Write and enrich at
-the source, then verify managed sync state and retrieval. The standard-project
+custom CDC worker, target backfill, and checkpoint ledger. Write at the source, then verify synchronization. Polygres can generate
+embeddings from the synchronized text and keep its managed output searchable. The standard-project
 rules below do not authorize target mutation on synced projects.
 
 - Emit source namespace, stable ID, revision, timestamp, ownership, and content
@@ -39,7 +39,7 @@ rules below do not authorize target mutation on synced projects.
 - Upsert by a verified stable unique key. Omitting update columns changes every
   submitted writable non-conflict column, so pass an explicit update set when
   the intended mutation is narrower.
-- For a Context-backed target, use one Context-backed rows call with an explicit
+- For an application-owned vector collection, use one Context-backed rows call with an explicit
   collection or exact-one safe resolution. The call writes the row and
   completes or starts point reconciliation. Do not schedule a separate manual
   point command.
@@ -56,8 +56,14 @@ rules below do not authorize target mutation on synced projects.
 - Propagate source deletion through every derived resource.
 - Reconcile periodically to repair missed events.
 
-Use the bundled local embedding and SQLite checkpoint assets as reviewed
-building blocks. Tailor the source adapter and writer to the inspected system;
+For managed generation, write source text without Context reconciliation
+options. Polygres handles embedding generation, updates, deletion cleanup, and
+reconciliation of its output. Keep source-write durability separate from the
+configuration and collection readiness checks. Initial generation starts in
+both modes; Manual collects subsequent changes until Run now.
+
+Use the bundled local embedding adapter only for a selected local path. Keep
+SQLite checkpointing for source capture when that selected workload needs it. Tailor the source adapter and writer to the inspected system;
 do not generate undocumented API calls.
 
 ## Use the deterministic tools
@@ -82,20 +88,24 @@ do not generate undocumented API calls.
 - For a synced project, use `polygres projects create sync` or the dashboard for
   initial creation and table selection. Use the dashboard for later
   reconfiguration and lifecycle actions. Use the project Runtime API key only
-  for supported graph, text, vector, hybrid, Context, catalog, and readiness
-  work. Do not use CLI import, migrations, rows, SDK rows, `connection_info()`,
+  for supported graph, text, vector, hybrid, Context, embedding generation,
+  catalog, and readiness work. Use discovered MCP tools for sync lifecycle
+  operations where available. Do not use CLI import, migrations, rows, SDK rows, `connection_info()`,
   or direct target Postgres.
 
-- Use CLI import for reviewed one-time or bounded CSV backfills. If Context is
-  selected, follow a successful import with approved existing-row point
-  reconciliation and verify it before declaring the backfill durable.
+- Use CLI import for reviewed one-time or bounded CSV backfills. For an
+  application-owned vector collection, follow a successful import with approved existing-row point reconciliation
+  and verify it before declaring search ready. For managed generation, verify
+  that Polygres has processed the imported text and indexed its generated output.
 - Use CLI migrations and configuration for interactive setup.
 - Use SDK `project.rows` or the documented rows Runtime API for supported
   per-record writes into an existing eligible project-owned table. Use
   validation when target ownership, types, constraints, or Context compatibility
   are not already proven. Omit Context options for a generic table. For a
-  selected Context collection, use the same row operation to reconcile the
-  point. Row writes do not generate embeddings or graph edges.
+  application-owned vector collection, use the same row operation to reconcile
+  the point. For managed output, omit Context options and let the configured
+  Polygres worker process source changes. Graph configuration and generation
+  remain separate setup actions.
 - Use SDK methods or documented Runtime API endpoints for application retrieval
   and Context point lifecycle.
 - Use direct Runtime API calls when the application language cannot use the
@@ -111,7 +121,8 @@ do not generate undocumented API calls.
   not fit.
 - Route source-row deletion separately because the rows surface has no delete
   mode. Use an approved database deletion path and delete or invalidate the
-  corresponding Context points, text resources, and graph evidence.
+  corresponding application-owned Context points, text resources, and graph
+  evidence. For managed embeddings, verify worker cleanup after source deletion.
 - For a standard project, use direct Postgres for target-row writes only when no public ingestion
   operation meets the requirement and the user approves that credential path.
 - Record the public interface inside each selected capture or retrieval runtime.
@@ -129,7 +140,12 @@ a persistent or resumable runtime.
 - Interrupted backfill: resume from the last durable checkpoint.
 - Duplicate event: return the prior idempotent result.
 - Partial batch: retry failed records only.
-- Embedding outage: keep source events pending; never write empty vectors.
+- Local or external embedding outage: retain pending source work and retry the
+  provider only when its outcome is known.
+- Managed embedding outage: preserve source data and inspect configuration
+  status. Use eligible retry or reconcile actions. Quota exhaustion needs an
+  allowance renewal or authorized funding; uncertain provider outcomes need
+  the indicated administrator reconciliation before another provider attempt.
 - Polygres outage: queue only with a durable store and report pending status.
 - Context failure after row commit: retain the exact composite idempotency key
   and complete request, add the operation ID when available, mark the Context

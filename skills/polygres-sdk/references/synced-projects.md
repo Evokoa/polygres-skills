@@ -40,15 +40,30 @@ The Runtime returns `PolygresPermissionError` with
 intentional project-mode boundary. Do not retry or probe nearby endpoints.
 Without the local `project_mode` hint, the server remains authoritative.
 
-## Write and embed at the source
+## Source writes and embedding generation
 
-Write, update, delete, and generate embeddings in the source PostgreSQL
-database. Managed snapshot and logical replication carry eligible changes into
-Polygres. Do not treat filters as an authorization boundary.
+Write, update, and delete application data in the source PostgreSQL database.
+Managed snapshot and logical replication carry eligible changes into Polygres.
+Choose the embedding path that fits the application:
 
-For pgContext, create or use a collection over an existing synchronized table
-and embedding column. Do not select `new_table` or `add_column` on a synced
-target. Polygres does not generate embeddings.
+- For Polygres generation, configure the synchronized text through the
+  dashboard, CLI, or MCP. Polygres writes generated records into a separate
+  project-local `polygres_embeddings` table and maintains its Context points.
+  Use the resulting collection from the SDK.
+- For application-generated vectors, write the vectors at the source and use
+  an `existing` collection over the synchronized table and vector column.
+  Collection modes `new_table` and `add_column` are not used to alter a
+  synchronized source table.
+
+SDK 0.5.0 can query either path with text when the selected vector has a saved
+model connection and the Runtime advertises `query_embedding_generation`.
+For existing source vectors, confirm the original model during setup. Existing
+vector calls remain available. Text query generation uses the same retrieval
+allowance and credit controls as other projects.
+
+Keep application writes in the source even when managed generation is enabled.
+Use the selected collection's returned source keys and chunk metadata as
+provenance, and let Polygres reconcile managed output records.
 
 Use graph relationships only when both foreign-key endpoint tables are in the
 sync selection. Preserve synchronized source row IDs as retrieval provenance.

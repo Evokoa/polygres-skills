@@ -1,10 +1,10 @@
-<!-- Generated from ../../../references/mcp-tool-contract.md; source-sha256: 6831cb2ac8aa786370095a31a6e23a5bd204d1c792424d44a9e404acf2541b11 -->
+<!-- Generated from ../../../references/mcp-tool-contract.md; source-sha256: 87db018106c0548238a7bf77d6d932b903efeeaf4c2319825a7954bf5b1f4f4b -->
 
 # Polygres MCP tool contract
 
 Contract version: `1.0`
 
-Skills package compatibility: `0.6.0`
+Skills package compatibility: `0.7.0`
 
 ## Contents
 
@@ -48,10 +48,11 @@ of calling it by name.
 4. Perform the smallest bounded read-only inspection.
 5. Choose the required components and prepare exact arguments and stable
    idempotency keys.
-6. Present one consolidated review for the unchanged mutation set.
+6. Use the user's existing authorization for the prepared mutation set. If a
+   choice or additional approval is needed, present one consolidated review.
 7. Call each selected mutation. When it returns `status: action_required`, show
    `proposed_action` and `confirmation_class` to the user.
-8. After approval, replay the unchanged call with the exact server-returned
+8. With the user's authorization, replay the unchanged call with the exact server-returned
    `action_digest` in `confirmation`.
 9. Preserve resource, request, job, and operation IDs. Observe durable work with
    `wait_for_operation` or the matching status tool.
@@ -108,8 +109,63 @@ start. These tools require a standard project.
 - Destructive confirmation: `resnapshot_synchronization`
 
 Source credentials are entered in the Dashboard. Runtime rows, imports,
-migrations, and target database access are standard-project surfaces. Writes
-for synchronized projects remain in the source PostgreSQL database.
+migrations, and target database access are standard-project surfaces. Source
+row writes for synchronized projects remain in the source PostgreSQL database.
+Polygres can generate embeddings from synchronized text into managed output.
+
+### Embedding generation
+
+These tools use the `context` feature group and support both project modes:
+
+- Read with Context-read scope: `list_embedding_models`, `get_embedding_usage`,
+  `list_embedding_configurations`, `get_embedding_configuration`
+- Read with Context-manage scope: `discover_embedding_sources`,
+  `preview_embeddings`, `get_embedding_context_handoff`
+- Write confirmation: `create_embedding_configuration`,
+  `update_embedding_configuration`, `process_embeddings`
+- Destructive confirmation: `remove_embedding_configuration`
+
+Discover eligible text columns and stable unique keys, inspect the live model
+catalog, and preview the exact proposed configuration. `source_text_column`
+is required, including when reusing an existing vector column. Reuse requires
+confirmation that the existing vectors came from the selected original model.
+Chunking generates new vectors. Preview estimates rows, tokens, storage, and
+additional credit usage without calling the embedding provider.
+
+Creation starts the initial copy and generation in both Automatic and Manual
+modes. Automatic keeps embeddings current as text changes; Manual uses
+`process_embeddings` with `action: run` for later work. Other actions are
+`pause`, `resume`, `retry`, and `reconcile`. Inspect configuration progress for
+generation, failed rows, and provider outcomes awaiting reconciliation.
+
+Use `get_embedding_context_handoff` to obtain the managed source for the
+existing Context collection setup workflow. Generation and Context readiness
+are separate: verify the collection and selected named-vector index before
+reporting that semantic search is ready. A collection over managed output is
+maintained by Polygres; a source-row write only uses Context reconciliation
+when that collection is bound to the row's own source table.
+
+Updates accept `expected_version`, `name`, `mode`, and `use_credits`. Source,
+model, dimensions, and chunk settings belong to creation. Batch size is managed
+by Polygres. Removal requires the current version and an explicit choice to
+retain or delete managed output; linked Context collections must be resolved
+before deleting their output.
+
+Generation and query usage have separate monetary allowances. Use
+`get_embedding_usage` for the current period, included, used, reserved, and
+remaining amounts, per-model token costs, and project credit permissions.
+Model prices come from `list_embedding_models`; quota values are microcredits,
+not token counts. One credit equals 1,000,000 microcredits. Preview's
+`estimated_microcredits` is the additional amount after the available
+generation allowance. Additional spending needs both `use_credits: true` and
+an authorized project grant, available organization credits, and room within
+the project's spending limit. `use_credits` defaults to false. The Dashboard
+manages the project spending permission and billing settings.
+
+Create calls require an idempotency key. Preserve it for the same intended
+creation after an ambiguous response. For provider outcomes awaiting
+reconciliation, retain the configuration and request IDs and follow the
+returned recovery guidance before processing more work.
 
 ### Polygres AI Search
 
@@ -135,7 +191,36 @@ for synchronized projects remain in the source PostgreSQL database.
 - Resource-intensive confirmation: `backfill_context_points`
 
 Hybrid calls that traverse graph require both Context-read and Graph-read
-installation scopes. The caller generates source and query embeddings.
+installation scopes. Existing vector queries continue to accept caller-generated
+embeddings. With query embedding generation available, the existing ranked
+tools accept `text` as an alternative to the query vector:
+
+- `context_search`, `group_context_results`
+- `context_graph_first_search`, `context_first_graph_search`,
+  `context_rank_fusion_search`, `context_joint_search`
+- `context_text_hybrid_search`, whose lexical `query` remains separate
+
+Use `vector_name` to select a collection's named-vector definition when needed.
+Polygres resolves its source to exactly one embedding configuration and uses
+that configuration's saved model version and dimensions. A named vector is a
+collection label, such as `content`, rather than a model name. Text requests
+need a compatible binding; externally generated vectors remain usable through
+the existing vector input.
+
+`search_full_text` accepts a Context query plan. A `nearest` step can contain
+`text` or `embedding`; a `text_query` step remains lexical. Query embedding
+generation occurs when the plan executes. `hybrid_search` takes the options
+inside its selected strategy object. Use the discovered schema for that tool's
+exact nesting.
+
+Text requests optionally accept `use_credits` and `idempotency_key`. These
+belong to query generation, so supply them only with semantic text. Keep the
+same text, options, and key after an ambiguous response, and preserve them
+across cursor pages of the same query. Distinct text branches in a plan may
+each consume query allowance. Tool request timeouts allow at least 130 seconds
+for generation and previews; the bounded operation-wait timeout is separate.
+Read `query_embedding_generation` from Context capabilities before choosing
+this path. Clients and servers predating it continue to use vector inputs.
 
 ### Graph
 
@@ -180,16 +265,22 @@ Inputs reject unknown fields. JSON input and output are bounded to one MiB,
 per string. Page limits are normally 1 through 100. `wait_for_operation` accepts
 1 through 30 seconds and a poll interval from 0.5 through 5 seconds.
 
-Public failures contain a stable error code, retryable flag, and request ID.
-Retry rate limits and temporary network or service failures within the stated
-bound. Resolve validation, authentication, permission, project-boundary,
-project-mode, and compatibility failures before another call.
+Public failures contain an `error` object with `code`, `message`, `retryable`,
+optional `variant` and `details`, plus a top-level `request_id`. Use the code
+and retryable flag to choose recovery. An exhausted embedding allowance can
+return HTTP 429 and require a funding change; the status alone is not a reason
+to retry. Temporary provider or network failures may permit a bounded retry.
+Resolve validation, authentication, permission, project-boundary, project-mode,
+and compatibility failures before another call. An uncertain provider outcome
+needs reconciliation before another chargeable attempt.
 
 ## Complementary surfaces
 
 Use the CLI for migrations, Runtime keys, interactive database access, import
-start, and operations absent from the discovered catalog. Use the Python SDK
-for persistent application integration. Use the Dashboard for source secret
+start, embedding setup through `polygres embeddings`, and operations absent
+from the discovered catalog. Use the Python SDK's existing Context and hybrid
+query methods for persistent application integration; configure embedding
+generation through MCP, CLI, or the Dashboard. Use the Dashboard for source secret
 entry, CSV upload and import start, project deletion, and project pause or
 restore. Keep existing pgvector and legacy hybrid integrations on their public
 CLI, SDK, or Runtime interfaces.

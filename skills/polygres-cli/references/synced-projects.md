@@ -116,9 +116,11 @@ Do not run these commands on a synced project:
 - `polygres migrations ...`.
 
 Do not use rows validation as a capability probe. The Runtime rejects these
-surfaces with `SYNCED_PROJECT_SURFACE_UNAVAILABLE`. This is an intentional
-permission boundary, not a transient failure. Write, update, delete, and create
-embeddings in the source database instead.
+surfaces with `SYNCED_PROJECT_SURFACE_UNAVAILABLE`. Write, update, and delete
+source rows in the source PostgreSQL database. Configure Polygres-managed
+embeddings from synchronized text with `polygres embeddings`; generation writes
+to a separate destination in the Polygres project. Application-generated vectors
+can also be synchronized from the source database. See [embeddings.md](embeddings.md).
 
 The installed CLI may reject `db` and `env` locally before starting a database
 client. Older CLI versions can rely on the server boundary for other
@@ -134,9 +136,10 @@ does not authenticate dashboard or control-plane sync operations and cannot be
 used for rows, imports, migrations, SQL, or database connection information.
 
 Allowed Runtime surfaces are graph, text, existing vector, hybrid, Context,
-retrieval readiness, and the table catalog. Keep Context creation on an
-existing synchronized table and column. Do not choose `add-column` or
-`new-table`; generate and persist embeddings in the source database.
+managed embeddings, retrieval readiness, and the table catalog. Keep Context
+creation on an existing synchronized vector column or a managed embedding
+destination. Do not choose `add-column` or `new-table` on an upstream synchronized
+table; use Polygres embedding generation for the watched text.
 
 ## Interpret sync status
 

@@ -50,6 +50,7 @@ def test_retrieval_design_skill_structure_and_metadata() -> None:
         "polygres-retrieval-design",
         "description: Design and review Polygres retrieval using available read-only MCP",
         {
+            "embedding-design.md",
             "graph-modeling.md",
             "hybrid-and-rag-plan.md",
             "mcp-graph-retrieval.md",
@@ -70,6 +71,7 @@ def test_troubleshooting_skill_structure_and_metadata() -> None:
         {
             "context-and-connectivity.md",
             "context.md",
+            "embeddings.md",
             "errors-and-escalation.md",
             "jobs-and-migrations.md",
             "mcp-operation-recovery.md",

@@ -157,7 +157,9 @@ def test_sdk_skill_preserves_endpoint_and_secret_boundaries() -> None:
     assert "control-plane" in all_text
     assert "legacy pgvector configuration" in all_text
     assert "use `project.context` for new semantic retrieval setup" in all_text
-    assert "does not\ngenerate" in all_text or "does not generate" in all_text
+    normalized = " ".join(all_text.split())
+    assert "Polygres does not generate source or query embeddings" not in normalized
+    assert "project.embeddings" not in all_text
     assert "passwordless" in all_text
     assert "Never log" in all_text or "never log" in all_text
     assert "private endpoint" in all_text or "private route" in all_text

@@ -38,8 +38,10 @@ file. Never place credentials in the row or command arguments.
   set is narrower. Repeated `--update-column` and `--returning` values preserve
   order.
 - Validation is read-only. It does not prove a later write will succeed.
-- Omitting `--context-collection` and `--reconcile-context` guarantees a
-  generic row-only write. Do not infer Context behavior from the table.
+- Omitting `--context-collection` and `--reconcile-context` selects a source row
+  write without synchronous Context reconciliation. A configured embedding
+  watcher still processes changed text according to its Automatic or Manual
+  mode.
 - `--context-collection <uuid>` selects one collection explicitly;
   `--reconcile-context` asks the server to resolve exactly one ready user
   collection for the table and fails when resolution is unsafe.
@@ -53,7 +55,10 @@ file. Never place credentials in the row or command arguments.
   the 24-hour replay window. Persist or deterministically reconstruct the full
   request before dispatch. After `ROW_CONTEXT_IDEMPOTENCY_EXPIRED`, verify both
   the row and Context point before choosing a new key.
-- Row writes do not generate embeddings or update pgGraph.
+- Row writes return before managed embedding generation. For a watched text
+  column, use `embeddings get` to follow generation and search updates. Keep
+  managed output out of `--context-collection`; its records and mappings are
+  maintained by Polygres. pgGraph updates follow the graph workflow separately.
 - An explicit rows command needs no second command-level confirmation. It may
   inherit a still-valid consolidated pipeline approval.
 

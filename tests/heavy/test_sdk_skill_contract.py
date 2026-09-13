@@ -305,6 +305,27 @@ def test_documented_sdk_methods_exist_with_the_expected_parameters() -> None:
         },
     }
 
+    query_options = {"text", "use_credits", "idempotency_key", "timeout"}
+    for namespace, methods in (
+        (VectorNamespace, ("search",)),
+        (HybridNamespace, ("graph_first", "vector_first", "joint")),
+        (
+            ContextNamespace,
+            ("search", "grouped_search", "graph_first", "vector_first", "rank_fusion", "joint"),
+        ),
+    ):
+        for method_name in methods:
+            expected[namespace][method_name] |= query_options
+    expected[ContextNamespace]["text_hybrid"] |= {"use_credits", "idempotency_key"}
+    expected[ContextNamespace].update(
+        {
+            "query": expected[ContextNamespace]["text_hybrid"],
+            "candidate_search": expected[ContextNamespace]["search"] | {"candidate_point_ids"},
+            "query_nearest": {"vector", "text", "limit", "vector_name", "filter"},
+            "execute_query": {"collection", "plan", "use_credits", "idempotency_key", "timeout"},
+        }
+    )
+
     for namespace, methods in expected.items():
         for method_name, parameters in methods.items():
             signature = inspect.signature(getattr(namespace, method_name))
@@ -378,6 +399,31 @@ def test_context_sdk_defaults_and_return_unions_match_the_skill() -> None:
     assert get_type_hints(ContextNamespace.create_collection)["return"] is ContextOperation
     assert get_type_hints(ContextNamespace.add_vector)["return"] is ContextOperation
     assert get_type_hints(ContextNamespace.search)["return"] is RankedResponse
+
+    for method_name in (
+        "search",
+        "candidate_search",
+        "grouped_search",
+        "query",
+        "text_hybrid",
+        "graph_first",
+        "vector_first",
+        "rank_fusion",
+        "joint",
+    ):
+        signature = inspect.signature(getattr(ContextNamespace, method_name))
+        assert signature.parameters["embedding"].default is None
+        assert signature.parameters["use_credits"].default is False
+        assert signature.parameters["idempotency_key"].default is None
+
+    nearest = inspect.signature(ContextNamespace.query_nearest)
+    assert nearest.parameters["vector"].default is None
+    assert nearest.parameters["text"].default is None
+    assert "use_credits" not in nearest.parameters
+    assert "idempotency_key" not in nearest.parameters
+    execute = inspect.signature(ContextNamespace.execute_query)
+    assert execute.parameters["use_credits"].default is False
+    assert "text" not in inspect.signature(ContextNamespace.recall_check).parameters
 
 
 def test_every_python_example_is_syntactically_valid() -> None:

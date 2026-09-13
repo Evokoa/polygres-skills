@@ -51,6 +51,13 @@ polygres import status <job-id>
 JSON errors contain `error.code`, `error.message`, `error.details`, and
 `request_id` when available. Preserve these fields in the result summary.
 
+For embedding errors, use the specific error code and its recovery guidance.
+`EMBEDDING_QUOTA_EXHAUSTED` can use HTTP 429, but progress requires allowance
+renewal or authorized funding rather than repeated requests. Check
+`polygres --json embeddings usage` and follow
+[embeddings.md](embeddings.md#usage-and-recovery). After a text-query timeout,
+reuse the same query and idempotency key to recover its existing attempt.
+
 ## Non-interactive behavior
 
 Commands do not prompt when all inputs are supplied. A destructive command

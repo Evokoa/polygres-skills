@@ -1,8 +1,9 @@
 # pgContext
 
-For a synced project, use an existing synchronized source table and embedding
-column. Do not use a collection mode that creates a target table or column;
-write embeddings to the source PostgreSQL database.
+For a synced project, use a collection over synchronized vectors or a managed
+embedding output collection. Keep application writes in the source PostgreSQL
+database; Polygres can generate embeddings from its synchronized text. See
+`synced-projects.md` for the two setup paths.
 
 ## Contents
 
@@ -11,6 +12,8 @@ write embeddings to the source PostgreSQL database.
 - [Identity and durable operations](#identity-and-durable-operations)
 - [Point lifecycle](#point-lifecycle)
 - [Choose retrieval](#choose-retrieval)
+- [Text queries and model selection](#text-queries-and-model-selection)
+- [Query plans](#query-plans)
 - [Authorization and result handling](#authorization-and-result-handling)
 
 ## Namespace and boundaries
@@ -27,16 +30,18 @@ separate management client. Existing `project.graph`, `project.vector`,
 
 Context collections never accept legacy pgvector configuration IDs. Treat
 `project.vector` as compatibility for previously registered configurations and
-use `project.context` for new semantic retrieval setup. Polygres does not
-generate source or query embeddings. The application owns the embedding model,
-input construction, dimensions, update timing, and protection of any external
-embedding credential. One collection can own multiple named vectors over the
-same source table. Query embeddings must match the selected vector's dimensions
-and metric requirements.
+use `project.context` for new semantic retrieval setup. One collection can own
+multiple named vectors over the same source table. Applications can supply
+compatible query vectors or pass text for Polygres to embed using the selected
+vector's saved embedding configuration.
 
 Use `$polygres-cli` for interactive collection setup and operator workflows.
 Use SDK collection mutations only when the application deliberately owns
 automated provisioning and the caller has the required management authority.
+Set up source embedding generation and its search collection through the
+dashboard, CLI, or MCP. The SDK uses that configuration for queries; creating a
+Context collection or registering a vector alone does not select a generation
+model.
 
 An `existing` Context source may name a compatible `public.vector(n)` column.
 Creating the collection then converts that physical column in place to
@@ -82,6 +87,12 @@ namespace, and later calls validate project-specific limits locally. Calling
 authoritative enforcement boundary and revalidates every request.
 The cache expires after 60 seconds, and unavailable capabilities are refreshed
 on the next attempted call.
+
+Text queries also require `query_embedding_generation`. The SDK checks this
+capability automatically, including for legacy vector and hybrid text queries.
+An unavailable capability raises `PolygresValidationError` with code
+`CONTEXT_CAPABILITY_UNAVAILABLE` before sending the search request. Existing
+vector calls remain available on compatible older Runtimes.
 
 Discover visible candidates, then preflight the exact collection request before
 creating it:
@@ -236,6 +247,14 @@ table and its rows. Do not rely on the summarized deletion plan alone; inspect
 
 ## Point lifecycle
 
+For a managed embedding output collection, write the source text and let
+Polygres generate its records and reconcile their Context points. Source-row
+keys and generated chunk keys can differ, so use the generation workflow for
+that collection's refresh and recovery.
+
+For collections over application-owned vector columns, use the following
+point lifecycle.
+
 Source rows and Context point mappings have separate lifecycles. Upsert known
 keys after out-of-band or legacy inserts, existing-row backfills, or vector
 changes; delete known keys after source deletion; and reconcile after bulk or
@@ -277,8 +296,9 @@ vectors or source payloads. Treat its cursor as opaque.
 | Count matching points | `project.context.count()` |
 | Aggregate a registered filter | `project.context.facets()` |
 | Semantic similarity | `project.context.search()` |
+| Rank a known set of Context point IDs | `project.context.candidate_search()` |
 | Group by a registered filter | `project.context.grouped_search()` |
-| Semantic plus configured full text | `project.context.text_hybrid()` |
+| Semantic plus configured full text | `project.context.query()` or `text_hybrid()` |
 | Expand from a verified graph anchor, then rank | `project.context.graph_first()` |
 | Retrieve semantic seeds, then add graph evidence | `project.context.vector_first()` |
 | Fuse independent Context and graph rankings | `project.context.rank_fusion()` |
@@ -318,9 +338,10 @@ response = project.context.search(
 ```
 
 Every ranked Context method accepts optional `vector_name`. Omit it to use the
-collection's `default_vector_name`; otherwise pass an exact vector name and
-build the query embedding with that vector's model and dimensions. Count and
-facets operate on collection points and do not select a vector.
+collection's `default_vector_name`; otherwise pass its exact registered name.
+For the vector example above, construct `query_embedding` with that vector's
+model and dimensions. Count and facets operate on collection points and do not
+select a vector.
 
 Use `graph_first()` when a verified start entity defines the candidate
 neighborhood. Use `vector_first()` when semantic candidates should supply graph
@@ -332,6 +353,117 @@ configured text column.
 Do not invent graph IDs. Resolve starts from trusted application data or prior
 typed results. Bound Context candidates, graph depth, graph candidates,
 traversal candidates, final results, elapsed time, and application token use.
+
+## Text queries and model selection
+
+With SDK 0.5.0, use the existing search methods with text:
+
+```python
+response = project.context.search(
+    "support_docs",
+    text="How does replication work?",
+    vector_name="content",
+    filter={"must": [{"key": "tenant_id", "match": authorized_tenant_id}]},
+    limit=10,
+    use_credits=False,
+    idempotency_key=query_request_id,
+    timeout=30.0,
+)
+```
+
+`vector_name="content"` names a vector registered on the collection. It is not
+a source column name, a legacy configuration ID, or a model ID. Polygres resolves
+the selected vector's column to one saved embedding configuration and uses that
+configuration's exact model, revision, dimensions, and query settings.
+
+A managed output vector already has this connection. To query existing source
+vectors with text, confirm their original model during embedding setup through
+the dashboard, CLI, or MCP. Equal dimensions alone do not establish model
+compatibility. If the model connection is missing or ambiguous, handle
+`EMBEDDING_SEARCH_NOT_READY` and complete setup before using text. Continue to
+use a compatible application-supplied vector when that is the chosen workflow.
+
+| Methods | Input |
+| --- | --- |
+| `search()`, `candidate_search()`, `grouped_search()` | Exactly one of `text` or `embedding` |
+| `graph_first()`, `vector_first()`, `rank_fusion()`, `joint()` | Exactly one of `text` or `embedding` |
+| `query()`, `text_hybrid()` | `query`; optionally supply an `embedding` |
+| `query_nearest()` | Exactly one of `text` or `vector` |
+
+`candidate_search()` still requires `candidate_point_ids`. Pass IDs obtained
+from Context point mappings or query results. `grouped_search()` requires
+`group_by` naming a registered filter field.
+
+`query()` and `text_hybrid()` combine semantic and configured full-text search.
+When `embedding` is omitted, Polygres embeds their existing `query` argument:
+
+```python
+response = project.context.query(
+    "support_docs",
+    query="replication failures",
+    vector_name="content",
+    idempotency_key=query_request_id,
+)
+```
+
+For `joint()`, `text` is the semantic question and `query` supplies lexical
+terms. A positive lexical weight requires both a query and a configured text
+column:
+
+```python
+response = project.context.joint(
+    "support_docs",
+    text="How do I recover a failed replication stream?",
+    query="replication recovery",
+    vector_name="content",
+    starts=[start],
+    semantic_weight=0.6,
+    lexical_weight=0.2,
+    graph_weight=0.2,
+    max_depth=2,
+    limit=10,
+    idempotency_key=query_request_id,
+)
+```
+
+Recall checks and raw vector search use vectors. Recommendation, discovery,
+sparse, late-interaction, and full-text methods retain their existing inputs.
+Their text or vector arguments are separate from managed query generation.
+
+Generating query embeddings consumes the project's retrieval allowance, valued
+using the input tokens and configured model price. `use_credits` defaults to
+`False`. Set it to `True` for additional organization-credit usage only when
+project spending is enabled, within its cycle limit and available balance.
+Use the returned usage amounts and renewal date from the dashboard, CLI, or MCP;
+there is no fixed token quota to assume. Supplied query vectors skip generation
+and its allowance charge. See `errors-pagination-testing.md` for retry identity,
+timeouts, and funding errors.
+
+## Query plans
+
+Construct nearest branches locally, then execute the plan against a collection:
+
+```python
+plan = project.context.query_nearest(
+    text="How does replication work?",
+    vector_name="content",
+    limit=10,
+)
+response = project.context.execute_query(
+    "support_docs",
+    plan,
+    use_credits=False,
+    idempotency_key=query_request_id,
+    timeout=30.0,
+)
+```
+
+`query_nearest()` sends no request and generates no embedding. Pass spending,
+retry, and timeout options to `execute_query()`. For a plan with multiple nearest
+branches, each text branch uses its selected vector's model and consumes
+retrieval allowance separately. Text and explicit-vector branches can coexist.
+Reuse the same idempotency key when retrying the same plan so completed embedding
+work can be reused.
 
 ## Authorization and result handling
 
@@ -350,3 +482,5 @@ opaque cursors.
 semantic, lexical, and graph evidence, contribution breakdown, fusion metadata,
 trace counts, graph-introduction flag, baseline rank, and rank lift. It is not
 an alias for rank fusion or `project.hybrid.joint()`.
+For the setup tools, see [Embedding generation](mcp-tool-contract.md#embedding-generation)
+in the MCP tool contract.

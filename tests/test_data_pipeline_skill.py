@@ -301,14 +301,12 @@ def test_skill_enforces_fast_path_embedding_and_credential_boundaries() -> None:
         "Ask one concise batch of questions only for critical facts",
         "Do not ask about optional components that are unnecessary",
         "check_embedding_device.py",
-        "Polygres does not generate source or query embeddings",
         "Never read credential values",
         "cp .env.example .env",
         "documented rows Runtime API",
         "Never infer the endpoint",
         "public interface appropriate to each workload",
         "Keep the CLI for operator checks and manual recall",
-        "at most one local recommendation and one hosted alternative",
         "Do not ask for a second approval",
     ):
         assert phrase in text
@@ -392,7 +390,7 @@ def test_capability_question_returns_a_personalized_read_only_recommendation() -
         "To proceed, reply: Set up the recommended Polygres pipeline",
         "Treat that reply or an equivalent acceptance as setup intent",
         "without repeating discovery unless the evidence is stale",
-        "This acceptance starts setup; it is not mutation approval",
+        "Carry forward any approval already given",
     ):
         assert phrase in text
 
@@ -409,19 +407,13 @@ def test_pipeline_guidance_distinguishes_row_only_from_context_replay() -> None:
 def test_pipeline_routes_import_rows_api_context_and_deletion_by_workload() -> None:
     skill = " ".join((SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8").split())
     runtime = " ".join(
-        (SKILL_ROOT / "references" / "pipeline-runtime.md")
-        .read_text(encoding="utf-8")
-        .split()
+        (SKILL_ROOT / "references" / "pipeline-runtime.md").read_text(encoding="utf-8").split()
     )
     context = " ".join(
-        (SKILL_ROOT / "references" / "context-and-retrieval.md")
-        .read_text(encoding="utf-8")
-        .split()
+        (SKILL_ROOT / "references" / "context-and-retrieval.md").read_text(encoding="utf-8").split()
     )
     databases = " ".join(
-        (SKILL_ROOT / "references" / "source-databases.md")
-        .read_text(encoding="utf-8")
-        .split()
+        (SKILL_ROOT / "references" / "source-databases.md").read_text(encoding="utf-8").split()
     )
 
     assert "dataset or bounded backfill" in skill
@@ -482,9 +474,7 @@ def test_plan_linter_warns_without_blocking_incomplete_optional_details() -> Non
 
 
 def test_synced_plan_accepts_cli_creation_and_retrieval_only() -> None:
-    validator = _load_module(
-        "pipeline_synced_validator", SCRIPT_ROOT / "validate_pipeline_plan.py"
-    )
+    validator = _load_module("pipeline_synced_validator", SCRIPT_ROOT / "validate_pipeline_plan.py")
     result = validator.lint_plan(_synced_plan())
     assert result.ok, result.blockers
     boundary = validator.approval_boundary(_synced_plan())
@@ -589,7 +579,7 @@ def test_synced_scaffold_omits_target_writer_schema_and_checkpoint(tmp_path: Pat
     review = (destination / "REVIEW.md").read_text(encoding="utf-8")
     assert "Project mode: `synced`" in review
     assert "Selected sync tables: public.customers, public.orders" in review
-    assert "Write path: mutate the source database" in review
+    assert "Write path: change application data in the source database" in review
 
 
 def test_scaffolder_creates_a_secret_free_setup_pack(tmp_path: Path) -> None:
@@ -1133,3 +1123,600 @@ def test_checkpoint_ledger_is_idempotent_and_detects_revision_reuse(tmp_path: Pa
                 content_hash="different-hash",
             )
         assert ledger.counts()["succeeded"] == 1
+
+
+def _managed_model() -> dict[str, Any]:
+    return {
+        "id": "7aa414b5-a864-40e9-a65b-5a901bdb6dce",
+        "name": "Available model",
+        "provider": "openai",
+        "model": "selected-embedding-model",
+        "revision": "2026-09-12",
+        "dimensions": [768, 1536],
+        "default_dimensions": 1536,
+        "max_input_tokens": 8192,
+        "enabled": True,
+        "price_version": "published-price-1",
+        "microcredits_per_token": "2",
+        "source_settings": {"normalize": True},
+        "query_settings": {"normalize": True},
+    }
+
+
+def _managed_plan(*, synced: bool = False) -> dict[str, Any]:
+    plan = _synced_plan() if synced else _plan()
+    model = _managed_model()
+    settings = {
+        "name": "Articles",
+        "source_schema": "public",
+        "source_table": "articles",
+        "source_key_columns": ["id"],
+        "source_text_column": "content",
+        "model_id": model["id"],
+        "dimensions": 1536,
+        "mode": "manual",
+        "use_credits": False,
+        "chunking": {"enabled": True, "size_tokens": 512, "overlap_tokens": 64},
+    }
+    bucket = {
+        "included_microcredits": "500000000",
+        "used_microcredits": "100000000",
+        "reserved_microcredits": "0",
+        "remaining_microcredits": "400000000",
+    }
+    usage = {
+        "project_id": "project_example",
+        "generation": {"kind": "generation", **bucket},
+        "query": {"kind": "query", **bucket},
+        "models": [],
+        "period_start": "2026-09-01T00:00:00Z",
+        "period_end": "2026-10-01T00:00:00Z",
+        "period_kind": "free",
+        "policy_version": "monetary-1",
+        "credit_spending_enabled": False,
+        "cycle_credit_limit": 0,
+        "charged_microcredits": "0",
+        "reserved_microcredits": "0",
+        "available_credit_microcredits": "100000000",
+    }
+    plan["embedding"] = {
+        "enabled": True,
+        "location": "managed",
+        "settings": settings,
+        "preview_settings": copy.deepcopy(settings),
+        "model": model,
+        "query_use_credits": False,
+        "data_egress": (
+            "filtered source and query text goes to the selected provider through Polygres"
+        ),
+        "preview": {
+            "source_rows": 50,
+            "sampled_rows": 50,
+            "copyable_sample_rows": 0,
+            "missing_sample_rows": 50,
+            "estimated_input_tokens": 25000,
+            "estimated_storage_bytes": 307200,
+            "estimated_microcredits": "0",
+            "estimate_is_sampled": False,
+            "model": copy.deepcopy(model),
+            "usage": usage,
+        },
+    }
+    plan["context"] = {
+        "enabled": True,
+        "source_kind": "managed-output",
+        "source_mode": "existing",
+        "collection": "articles",
+        "source_schema": "polygres_embeddings",
+        "source_table": "e_00000000000000000000000000000001",
+        "source_key_column": "id",
+        "vector_column": "embedding",
+        "vector_name": "content",
+    }
+    if not synced:
+        plan["schema"]["columns"] = [
+            column for column in plan["schema"]["columns"] if column["type"] != "vector"
+        ]
+    plan["actions"].append(
+        {
+            "id": "generate-embeddings",
+            "type": "embedding-create",
+            "effect": "generate embeddings for the selected source text",
+        }
+    )
+    return plan
+
+
+def test_managed_recommender_uses_discovered_catalog_without_device_or_static_catalog(
+    tmp_path: Path,
+) -> None:
+    requirements = tmp_path / "requirements.json"
+    requirements.write_text(json.dumps({"deployment_preference": "managed", "languages": ["en"]}))
+    catalog = tmp_path / "models.json"
+    disabled = _managed_model() | {
+        "id": "disabled-model",
+        "enabled": False,
+        "microcredits_per_token": "0",
+    }
+    catalog.write_text(json.dumps({"models": [disabled, _managed_model()]}))
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_ROOT / "recommend_embedding_models.py"),
+            "--requirements",
+            str(requirements),
+            "--managed-catalog",
+            str(catalog),
+            "--catalog",
+            str(tmp_path / "absent-static-catalog.json"),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    report = json.loads(result.stdout)
+    assert report["catalog_source"] == "polygres"
+    assert report["recommended"]["id"] == _managed_model()["id"]
+    assert report["recommended"]["dimensions"]["default"] == 1536
+    assert report["recommended"]["query_settings"] == {"normalize": True}
+    assert report["alternative"] is None
+
+
+def test_managed_recommender_honors_provider_preferences_and_processing_boundary() -> None:
+    recommender = _load_module(
+        "pipeline_managed_recommender", SCRIPT_ROOT / "recommend_embedding_models.py"
+    )
+    bundled = json.loads(EMBEDDING_CATALOG.read_text())
+    discovered = {"models": [_managed_model()]}
+    for requirements in (
+        {"external_processing_allowed": False},
+        {"preferred_provider": "qwen"},
+        {"preferred_model_id": "different-id"},
+        {"existing_dimensions": 384},
+        {"max_chunk_tokens": 10000},
+    ):
+        report = recommender.recommend(
+            bundled, {"deployment_preference": "managed", **requirements}, None, discovered
+        )
+        assert report["status"] == "blocked"
+        assert report["recommended"] is None
+    missing = recommender.recommend(bundled, {"deployment_preference": "managed"})
+    assert missing["blockers"][0]["code"] == "managed-catalog-required"
+    local = recommender.recommend(
+        bundled, {"deployment_preference": "local"}, _device_report(), discovered
+    )
+    assert local["recommended"]["category"] == "local"
+    hosted = recommender.recommend(bundled, {"deployment_preference": "hosted"}, None, discovered)
+    assert hosted["recommended"]["category"] == "hosted"
+
+
+@pytest.mark.parametrize("synced", [False, True])
+def test_managed_plan_uses_polygres_output_with_standard_or_synchronized_sources(
+    synced: bool,
+) -> None:
+    validator = _load_module(
+        "pipeline_managed_validator", SCRIPT_ROOT / "validate_pipeline_plan.py"
+    )
+    assert validator.lint_plan(_managed_plan(synced=synced)).ok
+
+
+@pytest.mark.parametrize(
+    "path,value",
+    [
+        (("settings",), None),
+        (("model",), []),
+        (("model", "dimensions"), None),
+        (("preview",), []),
+        (("preview", "model"), []),
+        (("preview", "usage"), "missing"),
+        (("preview", "usage", "generation"), []),
+        (("preview", "usage", "query", "remaining_microcredits"), "NaN"),
+        (("preview", "usage", "credit_spending_enabled"), None),
+        (("settings", "chunking"), "invalid"),
+        (("settings", "source_key_columns"), {"id": True}),
+    ],
+)
+def test_managed_plan_reports_malformed_evidence_without_crashing(
+    path: tuple[str, ...], value: Any
+) -> None:
+    validator = _load_module(
+        "pipeline_managed_malformed_validator", SCRIPT_ROOT / "validate_pipeline_plan.py"
+    )
+    plan = _managed_plan()
+    target = plan["embedding"]
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    result = validator.lint_plan(plan)
+    assert not result.ok
+    assert result.blockers
+    validator.approval_digest(plan)
+
+
+def test_managed_preparing_plan_warns_until_preview_is_available() -> None:
+    validator = _load_module(
+        "pipeline_managed_preparing_validator", SCRIPT_ROOT / "validate_pipeline_plan.py"
+    )
+    plan = _managed_plan()
+    plan["state"] = "designing"
+    plan["embedding"].pop("preview")
+    result = validator.lint_plan(plan)
+    assert result.ok
+    assert "managed-preview-missing" in {item["code"] for item in result.warnings}
+    plan["state"] = "ready_for_review"
+    assert not validator.lint_plan(plan).ok
+
+
+@pytest.mark.parametrize(
+    "mutation,code",
+    [
+        ("copy", "managed-original-model-unconfirmed"),
+        ("copy-chunks", "managed-copy-chunk-conflict"),
+        ("model", "managed-model-mismatch"),
+        ("preview-source", "managed-preview-settings-mismatch"),
+        ("credentials", "managed-provider-credentials-unneeded"),
+        ("source-collection", "managed-context-source-mismatch"),
+        ("capture-context", "managed-source-context-reconciliation"),
+        ("sdk-setup", "managed-sdk-configuration-unavailable"),
+        ("update-version", "managed-configuration-version-missing"),
+    ],
+)
+def test_managed_plan_rejects_incompatible_setup(mutation: str, code: str) -> None:
+    validator = _load_module(
+        "pipeline_managed_contract_validator", SCRIPT_ROOT / "validate_pipeline_plan.py"
+    )
+    plan = _managed_plan()
+    embedding = plan["embedding"]
+    if mutation == "copy":
+        embedding["settings"]["existing_vector_column"] = "original_vector"
+    elif mutation == "copy-chunks":
+        embedding["settings"].update(
+            existing_vector_column="original_vector", confirm_original_model=True
+        )
+    elif mutation == "model":
+        embedding["settings"]["dimensions"] = 384
+    elif mutation == "preview-source":
+        embedding["settings"]["source_text_column"] = "title"
+    elif mutation == "credentials":
+        embedding["credential_names"] = ["OPENAI_API_KEY"]
+    elif mutation == "source-collection":
+        plan["context"].update(source_schema="public", source_kind="source")
+    elif mutation == "capture-context":
+        plan["capture_runtime"]["context_collection_id"] = "articles"
+    elif mutation == "sdk-setup":
+        embedding["interface"] = {"surface": "sdk", "operation": "project.embeddings.create"}
+    elif mutation == "update-version":
+        plan["actions"].append({"id": "update", "type": "embedding-update"})
+    assert code in {item["code"] for item in validator.lint_plan(plan).blockers}
+
+
+def test_managed_credit_review_uses_monetary_usage_and_retains_existing_approval() -> None:
+    validator = _load_module("validate_pipeline_plan", SCRIPT_ROOT / "validate_pipeline_plan.py")
+    renderer = _load_module("pipeline_managed_review", SCRIPT_ROOT / "render_pipeline_review.py")
+    plan = _managed_plan()
+    usage = plan["embedding"]["preview"]["usage"]
+    plan["embedding"]["preview"].update(
+        estimated_microcredits="200000000",
+        source_rows=1000000,
+        estimated_input_tokens=300000000,
+        estimate_is_sampled=True,
+    )
+    result = validator.lint_plan(plan)
+    assert "managed-generation-funding-needed" in {item["code"] for item in result.warnings}
+    plan["embedding"]["settings"]["use_credits"] = True
+    plan["embedding"]["preview_settings"]["use_credits"] = True
+    result = validator.lint_plan(plan)
+    codes = {item["code"] for item in result.warnings}
+    assert {
+        "managed-credit-permission-required",
+        "managed-credit-balance-insufficient",
+        "managed-cycle-limit-insufficient",
+    } <= codes
+    usage["credit_spending_enabled"] = True
+    usage["cycle_credit_limit"] = 300
+    usage["available_credit_microcredits"] = "300000000"
+    assert not (
+        {item["code"] for item in validator.lint_plan(plan).warnings}
+        & {code for code in codes if code.startswith("managed-")}
+    )
+    plan["approval"] = {"status": "approved", "boundary_digest": validator.approval_digest(plan)}
+    review = renderer.render_review(plan)
+    assert "Generation allowance available: $4" in review
+    assert "Estimated generation value: $6" in review
+    assert "Estimated additional usage after the generation allowance: $2" in review
+    assert "2026-10-01T00:00:00Z" in review
+    assert "covered by your existing approval" in review
+    assert "Approval digest" not in review
+    usage["query"]["remaining_microcredits"] = "390000000"
+    assert validator.lint_plan(plan).ok
+    plan["embedding"]["query_use_credits"] = True
+    assert "stale-approval" in {item["code"] for item in validator.lint_plan(plan).blockers}
+
+
+@pytest.mark.parametrize("synced", [False, True])
+def test_managed_scaffold_uses_existing_sdk_calls_and_omits_model_artifacts(
+    tmp_path: Path, synced: bool
+) -> None:
+    from types import SimpleNamespace
+
+    plan = _managed_plan(synced=synced)
+    plan_path = tmp_path / "plan.json"
+    plan_path.write_text(json.dumps(plan))
+    destination = tmp_path / "pipeline"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_ROOT / "scaffold_pipeline.py"),
+            str(plan_path),
+            str(destination),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert not (destination / "embedding-models.json").exists()
+    assert not (destination / "scripts" / "check_embedding_device.py").exists()
+    assert not (destination / "lib" / "local_embeddings.py").exists()
+    assert (
+        json.loads((destination / "embedding-configuration.json").read_text())
+        == plan["embedding"]["settings"]
+    )
+    calls = []
+    project = SimpleNamespace(
+        rows=SimpleNamespace(upsert=lambda **kwargs: calls.append(kwargs)),
+        context=SimpleNamespace(
+            search=lambda collection, **kwargs: calls.append({"collection": collection, **kwargs})
+        ),
+    )
+    runtime = _load_module(f"pipeline_managed_io_{synced}", destination / "pipeline_io.py")
+    if synced:
+        assert not hasattr(runtime, "store_filtered_record")
+        assert not (destination / "lib" / "checkpoint_ledger.py").exists()
+    else:
+        runtime.store_filtered_record(
+            project, {"id": "one", "content": "Safe text"}, update_columns=["content"]
+        )
+        write = calls.pop()
+        assert write == {
+            "schema": "public",
+            "table": "articles",
+            "row": {"id": "one", "content": "Safe text"},
+            "conflict_columns": ["id"],
+            "update_columns": ["content"],
+        }
+    runtime.search_authorized_text(
+        project,
+        "How does replication work?",
+        query_filter={"owner_id": "allowed-user"},
+        idempotency_key="query-one",
+    )
+    query = calls.pop()
+    assert query["text"] == "How does replication work?"
+    assert query["vector_name"] == "content"
+    assert query["filter"] == {"owner_id": "allowed-user"}
+    assert query["use_credits"] is False
+    assert query["idempotency_key"] == "query-one"
+    assert query["timeout"] == 130
+    assert "embedding" not in query
+
+
+def test_managed_scaffold_preserves_non_sdk_runtime_selection(tmp_path: Path) -> None:
+    plan = _managed_plan()
+    plan["capture_runtime"]["interface"] = {
+        "surface": "cli",
+        "operation": "polygres rows upsert",
+        "available": True,
+    }
+    plan["retrieval_runtime"]["interface"] = {
+        "surface": "http",
+        "operation": "POST /v1/context/search",
+        "available": True,
+    }
+    plan_path = tmp_path / "plan.json"
+    plan_path.write_text(json.dumps(plan))
+    destination = tmp_path / "pipeline"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_ROOT / "scaffold_pipeline.py"),
+            str(plan_path),
+            str(destination),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert not (destination / "pipeline_io.py").exists()
+    assert "pipeline_io.py" not in (destination / "README.md").read_text()
+
+
+def test_synced_plan_accepts_discovered_mcp_setup_and_lifecycle() -> None:
+    validator = _load_module(
+        "pipeline_managed_mcp_validator", SCRIPT_ROOT / "validate_pipeline_plan.py"
+    )
+    for operation in (
+        "create_synchronized_project",
+        "get_synchronization_status",
+        "pause_synchronization",
+    ):
+        plan = _synced_plan()
+        plan["sync"]["interface"] = {"surface": "mcp", "operation": operation, "available": True}
+        assert validator.lint_plan(plan).ok
+
+
+@pytest.mark.parametrize("field", ["settings", "model", "preview"])
+def test_managed_scaffold_and_review_handle_incomplete_discovery(
+    tmp_path: Path, field: str
+) -> None:
+    validator = _load_module("validate_pipeline_plan", SCRIPT_ROOT / "validate_pipeline_plan.py")
+    renderer = _load_module(
+        "pipeline_managed_incomplete_review", SCRIPT_ROOT / "render_pipeline_review.py"
+    )
+    plan = _managed_plan()
+    plan["state"] = "designing"
+    plan["embedding"][field] = None
+    if field == "model":
+        plan["embedding"].pop("preview")
+    assert validator.lint_plan(plan).ok
+    review = renderer.render_review(plan)
+    assert "None" not in review
+    plan_path = tmp_path / "plan.json"
+    plan_path.write_text(json.dumps(plan))
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_ROOT / "scaffold_pipeline.py"),
+            str(plan_path),
+            str(tmp_path / "pipeline"),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    if field == "settings":
+        assert not (tmp_path / "pipeline" / "embedding-configuration.json").exists()
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("mode", "automatic"),
+        ("model_id", "different-model"),
+        ("source_text_column", "title"),
+        ("chunking", {"enabled": False}),
+    ],
+)
+def test_managed_approval_covers_future_processing_and_source_model_scope(
+    field: str, value: Any
+) -> None:
+    validator = _load_module(
+        "pipeline_managed_scope_validator", SCRIPT_ROOT / "validate_pipeline_plan.py"
+    )
+    plan = _managed_plan()
+    approved_digest = validator.approval_digest(plan)
+    plan["approval"] = {"status": "approved", "boundary_digest": approved_digest}
+    plan["embedding"]["settings"][field] = value
+    assert validator.approval_digest(plan) != approved_digest
+    assert "stale-approval" in {item["code"] for item in validator.lint_plan(plan).blockers}
+
+
+def test_local_plan_approval_boundary_preserves_existing_release_digest() -> None:
+    import hashlib
+
+    validator = _load_module(
+        "pipeline_prior_approval_validator", SCRIPT_ROOT / "validate_pipeline_plan.py"
+    )
+    plan = _plan()
+    prior_boundary = {
+        "project_id": "project_example",
+        "project_mode": None,
+        "source_scope": "selected project conversations",
+        "source_authority": None,
+        "sync_selection": [],
+        "data_egress": ["filtered records go to Polygres"],
+        "destructive_actions": [],
+        "paid_processing": [],
+    }
+    prior_digest = (
+        "sha256:"
+        + hashlib.sha256(
+            json.dumps(prior_boundary, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
+    )
+    assert validator.approval_boundary(plan) == prior_boundary
+    assert validator.approval_digest(plan) == prior_digest
+    plan["approval"] = {"status": "approved", "boundary_digest": prior_digest}
+    assert validator.lint_plan(plan).ok
+
+
+def test_managed_catalog_choices_keep_selected_processing_in_approval_scope() -> None:
+    validator = _load_module(
+        "pipeline_managed_choices_validator", SCRIPT_ROOT / "validate_pipeline_plan.py"
+    )
+    plan = _managed_plan()
+    plan["embedding_options"] = [dict(plan["embedding"]["model"], category="managed")]
+    reviewed_digest = validator.approval_digest(plan)
+    plan["embedding"]["settings"]["mode"] = "automatic"
+    assert validator.approval_digest(plan) != reviewed_digest
+
+
+def test_fully_reviewed_managed_choices_preserve_approval_on_selection() -> None:
+    from copy import deepcopy
+
+    validator = _load_module(
+        "pipeline_managed_selection_validator", SCRIPT_ROOT / "validate_pipeline_plan.py"
+    )
+    plan = _managed_plan()
+    automatic = deepcopy(plan["embedding"])
+    automatic["settings"]["mode"] = "automatic"
+    plan["embedding_options"] = [deepcopy(plan["embedding"]), automatic]
+    reviewed_digest = validator.approval_digest(plan)
+    plan["embedding"] = deepcopy(automatic)
+    assert validator.approval_digest(plan) == reviewed_digest
+
+
+def test_existing_vector_scaffold_recommender_needs_no_model_catalog(tmp_path: Path) -> None:
+    plan = _plan()
+    plan["embedding"]["location"] = "existing"
+    plan_path = tmp_path / "plan.json"
+    plan_path.write_text(json.dumps(plan))
+    destination = tmp_path / "pipeline"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_ROOT / "scaffold_pipeline.py"),
+            str(plan_path),
+            str(destination),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert not (destination / "embedding-models.json").exists()
+    requirements = destination / "requirements.json"
+    requirements.write_text(json.dumps({"deployment_preference": "existing"}))
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(destination / "scripts" / "recommend_embedding_models.py"),
+            "--requirements",
+            str(requirements),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout)["status"] == "reuse-existing"
+
+
+@pytest.mark.parametrize("context", [None, [], "undecided", {}])
+def test_managed_scaffold_waits_for_a_collection_before_generating_search(
+    tmp_path: Path, context: Any
+) -> None:
+    plan = _managed_plan()
+    plan["state"] = "designing"
+    plan["context"] = context
+    plan_path = tmp_path / "plan.json"
+    plan_path.write_text(json.dumps(plan))
+    destination = tmp_path / "pipeline"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_ROOT / "scaffold_pipeline.py"),
+            str(plan_path),
+            str(destination),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    runtime = _load_module("pipeline_without_collection", destination / "pipeline_io.py")
+    assert hasattr(runtime, "store_filtered_record")
+    assert not hasattr(runtime, "search_authorized_text")

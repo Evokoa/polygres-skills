@@ -1,8 +1,9 @@
 # pgContext AI Search
 
 For a synced project, configure Context only from an existing synchronized
-table and column. Do not use `add-column` or `new-table`; generate and persist
-embeddings in the source PostgreSQL database.
+table and column or a managed `polygres_embeddings` output. Do not use
+`add-column` or `new-table` on a synchronized source. Managed generation writes
+only to its separate project-local destination.
 
 ## Contents
 
@@ -22,11 +23,13 @@ pgvector configurations and never accepts a vector configuration ID. Use
 `polygres context capabilities`, not `polygres ready`, to establish effective
 pgContext support and limits.
 
-Polygres does not create embeddings. Confirm who generates embeddings, the
+For externally generated vectors, confirm who generates embeddings, the
 stored vector dimensions, the metric, and how new or changed source rows get
 embedded before configuring a collection. A collection can contain multiple
-named vectors over one source table. Query embeddings must use the model and
-dimensions of the selected vector.
+named vectors over one source table. Query embeddings must use the model,
+revision, dimensions, and settings of the selected vector. For Polygres-managed
+generation, follow [embeddings.md](embeddings.md) to create the configuration
+and obtain its Context source details.
 
 Use collection UUIDs for collection administration, filters, points, and
 operation-linked work. Count, facets, and ranked retrieval accept a UUID or an
@@ -152,6 +155,14 @@ the default vector without collapsing them into one synthetic index.
 
 ## Synchronize points
 
+For a collection over managed embedding output, Polygres maintains its records
+and point mappings as generation completes. Check `embeddings get` for source
+processing and Context progress, then check collection and vector readiness.
+Its point keys identify generated records, including individual chunks. Keep
+source row IDs in source writes; do not submit them as managed collection point
+IDs. The following manual mapping workflow applies to application-owned vector
+tables.
+
 Source rows and pgContext point mappings have separate lifecycles. Point status
 is saved operational metadata, not a live comparison with the source table:
 
@@ -190,11 +201,7 @@ polygres --json context facets support_docs category --limit 10
 key. Both accept a UUID or exact collection name and optional registered-filter
 expressions.
 
-Every ranked command requires a finite query embedding with the selected
-vector's exact dimensions. Omitting `vector_name` selects the collection
-default. The dedicated ranked CLI flags do not expose `--vector-name`; to query
-an exact non-default vector, use `--request` with a JSON request body containing
-that exact `vector_name`. Never silently query another vector or guess a name:
+Use the existing ranked commands with either text or a query vector:
 
 | Need | Command |
 | --- | --- |
@@ -207,10 +214,82 @@ that exact `vector_name`. Never silently query another vector or guess a name:
 | Coupled semantic, lexical, and graph candidates | `context joint` |
 | Compare HNSW with exact retrieval | `context recall-check` |
 
+In CLI 0.5.0, the first seven commands accept one of `--text`, `--text-file`,
+`--embedding-json`, or `--embedding-file`. `--text-file -` reads UTF-8 text from
+stdin. `recall-check` continues to require a finite embedding with the selected
+vector's exact dimensions.
+
+`--vector-name` selects a registered vector by its exact name. Read that name
+from the collection's `vectors`; it is neither a column name nor a model ID.
+Omit the flag to use `default_vector_name`. For text input, the Runtime resolves
+the selected vector's saved embedding configuration and uses its pinned model,
+revision, dimensions, and query settings. Matching dimensions alone does not
+establish model compatibility. Set up the binding through managed generation
+or confirmed reuse of existing vectors before querying with text.
+
+After verifying the collection and selected vector:
+
+```bash
+polygres --json context search support_docs \
+  --text "How does replication work?" \
+  --vector-name content --limit 10
+polygres --json context grouped-search support_docs \
+  --text-file question.txt --group-by category
+polygres --json context search support_docs --text-file -
+```
+
+`text-hybrid` uses `--query` for both semantic and full-text search when no
+separate text or embedding input is supplied. Add `--text` to give its semantic
+side different wording. Joint always takes a semantic input separately from
+its optional lexical `--query`:
+
+```bash
+polygres --json context text-hybrid support_docs \
+  --query "replication recovery"
+polygres --json context joint support_docs \
+  --text "How can I recover replication?" --query "replication recovery" \
+  --semantic-weight 0.6 --lexical-weight 0.2 --graph-weight 0.2
+```
+
 Use real graph row IDs from trusted application data or prior results. Do not
 invent start entities. `rank-fusion` and `joint` are different algorithms;
 neither is an alias for the other. A positive Joint lexical weight requires a
 query and a configured text column.
+
+For JSON input, use `--request query.json` or `--request -`. The positional
+collection supplies the collection name or UUID, so leave `collection` out of
+the JSON object. Keep all body fields in the file, including `text` or
+`embedding`, `vector_name`, `use_credits`, filters, and limits. Combine the file
+only with global flags and transport options `--idempotency-key` and
+`--timeout`, rather than request-body flags. Example `query.json`:
+
+```json
+{
+  "text": "How does replication work?",
+  "vector_name": "content",
+  "use_credits": false,
+  "limit": 10
+}
+```
+
+```bash
+polygres --json context search support_docs --request query.json \
+  --idempotency-key replication-question-1 --timeout 130
+```
+
+Text queries consume the retrieval allowance. `--use-credits` opts this query
+into additional organization credit use after the included allowance, subject
+to the project's spending permission, balance, and cycle limit. Omit it to stay
+within the allowance. These credit and idempotency flags apply to text input;
+existing vector requests keep their earlier payloads and do not generate a
+query embedding.
+
+The text-query deadline defaults to 130 seconds across retries. Supply a stable
+`--idempotency-key` when a retry may span CLI invocations, and replay the same
+query with that key after a timeout. Use a new key for a new query. The CLI
+generates a key when omitted and keeps it across its own retries. See
+[embeddings.md](embeddings.md#usage-and-recovery) for allowance and provider
+recovery.
 
 Ranked retrieval has no cursor. Only collections, operations, and point scroll
 paginate. Preserve server order, warnings, scores, evidence, and request IDs.

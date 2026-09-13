@@ -4,7 +4,8 @@ Choose the smallest strategy that answers the representative questions.
 
 Resolve `project_mode` first. On a synced project, relational SQL and
 transactions run against the source database, while Polygres supplies supported
-graph, text, existing vector, hybrid, Context, catalog, and readiness surfaces.
+graph, text, existing vector, hybrid, Context, managed embeddings, catalog, and
+readiness surfaces.
 Do not include target rows, migrations, imports, or database access in the
 retrieval plan.
 
@@ -12,7 +13,7 @@ retrieval plan.
 | --- | --- | --- |
 | Exact filters, joins, aggregates, ordering, or transactions | relational | indexes, query plan, cardinality, authorization |
 | Traversal through explicit relationships | graph | stable row ID, direction, bounded depth, fan-out, cycles |
-| Semantic similarity for new setup | pgContext dense retrieval | embedding model, dimensions, metric, source mode, filters, reconciliation, reindex policy |
+| Semantic similarity for new setup | pgContext dense retrieval | source and query generation, model binding, dimensions, budget, source mode, filters, reconciliation |
 | Semantic similarity through an existing registered configuration | legacy vector | configuration identity, embedding model, dimensions, metric, filters, compatibility plan |
 | Lexical relevance | TSVector | language configuration, ranking, indexed source columns |
 | Typo-tolerant names or short labels | fuzzy | threshold, normalization, candidate cap, false positives |
@@ -28,6 +29,10 @@ retrieval plan.
    information. For new semantic similarity work, select pgContext dense
    retrieval. Retain the vector surface only when an established configuration
    must remain compatible.
+   Compare managed generation, local or external generation, and existing
+   vectors using `embedding-design.md`. Choose the model and generation owner
+   separately from the retrieval strategy. An existing collection with vectors
+   can keep receiving query vectors as before.
 4. Select TSVector for linguistic ranking and fuzzy retrieval only for
    deliberate typo tolerance. Do not use fuzzy-match schema discovery.
 5. Select hybrid only when a single mode demonstrably misses required

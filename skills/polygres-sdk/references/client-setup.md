@@ -17,6 +17,12 @@ use `client.project(project_mode="synced")` with SDK 0.4.0 or newer and follow
 operational package. Add only the SDK to an application environment and follow
 the repository's dependency-installation policy.
 
+Use SDK 0.5.0 for text input on Context, vector, and hybrid queries. Existing
+0.4.1 vector calls retain their behavior and typed results. Text generation also
+requires the Runtime's `query_embedding_generation` capability and a saved
+embedding configuration for the selected vector. Check those separately from
+the installed package version.
+
 Before a live or end-to-end test, record both installed distribution versions:
 
 ```console
@@ -76,7 +82,8 @@ the SDK object; it does not reroute a Runtime API request to another project.
 
 ## Readiness and connection information
 
-Check readiness before executing retrieval that depends on configured indexes:
+For an application that uses both graph and existing vector retrieval, check
+their readiness before querying:
 
 ```python
 readiness = project.readiness()
@@ -86,6 +93,21 @@ if not readiness.graph.get("ready"):
 if not readiness.vector.get("ready"):
     raise RuntimeError("vector retrieval is not ready")
 ```
+
+Check only the readiness surfaces the application uses. Context retrieval uses
+`project.context.get_capabilities()` plus collection status or verification for
+the selected vector. The SDK automatically checks query embedding support when
+text is supplied. Refresh capabilities explicitly after a Runtime upgrade:
+
+```python
+capabilities = project.context.get_capabilities()
+if not capabilities.query_embedding_generation:
+    raise RuntimeError("Text queries require a Runtime with query embedding support")
+```
+
+Set up generation and its collection through the dashboard, CLI, or MCP. Reuse
+that configuration from the SDK rather than adding a provider client or
+provider credentials just to embed query text.
 
 Use connection information only when the application needs safe database
 metadata:

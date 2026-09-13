@@ -13,13 +13,17 @@ fields, freshness, and deletion behavior. Select one initial retrieval mode:
 - `context_text_hybrid_search` for semantic and text evidence
 - graph-first, Context-first, rank fusion, or Joint for connected evidence
 
-The caller owns embedding generation. Record model, revision, dimensions,
-metric, document input, and query input.
+Choose Polygres generation or user-selected local, external, or existing
+vectors. Record the model, revision, dimensions, metric, and document/query
+input settings. Follow `embedding-model-selection.md` for source discovery,
+model selection, generation preview, allowance checks, and setup.
 
 ## Configure
 
-Inspect `get_context_capabilities`, discover the source, and run
-`preflight_context_collection`. Include the collection request, source schema
+Inspect `get_context_capabilities`. For Polygres embeddings, read
+`get_embedding_context_handoff` and use its managed output as the collection
+source. For application-owned vectors, discover their source table. Run
+`preflight_context_collection` with the matching source. Include the collection request, source schema
 effects, filters, point work, egress, and rollback in one review. After approval,
 complete each server-issued confirmation and wait for durable operations.
 
@@ -28,7 +32,11 @@ to retrieval, use the graph playbook and verify its build independently.
 
 ## Retrieve and answer
 
-Generate the query embedding outside Polygres when the chosen mode needs one.
+For externally generated vectors, generate a compatible query embedding outside
+Polygres. For managed embeddings, pass `text` to `context_search` to use the
+selected vector's configured model. Keep one idempotency key for retries of the
+same query. The query consumes retrieval allowance; additional credits require
+query opt-in and project spending permission.
 Run one explicit retrieval tool with bounded candidates and result count.
 Preserve source keys, scores, stage provenance, and request IDs. Resolve source
 rows only when the current authorization and discovered tools support it.

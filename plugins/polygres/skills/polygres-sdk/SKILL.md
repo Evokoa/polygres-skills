@@ -1,6 +1,6 @@
 ---
 name: polygres-sdk
-description: Use available Polygres MCP tools for interactive grounded retrieval and the Polygres Python SDK for persistent application code, standard-project row writes, AI Search, graph, text, hybrid, pagination, durable operations, and typed error handling.
+description: Use available Polygres MCP tools for interactive grounded retrieval and the Polygres Python SDK for application code, text or vector queries, graph and hybrid retrieval, standard-project row writes, pagination, and typed error handling.
 ---
 
 # Polygres SDK
@@ -42,8 +42,11 @@ backend-owned automation, or an MCP fallback.
    `$polygres-cli` for interactive setup. Use SDK mutations for explicit,
    backend-owned automation, return them immediately, and wait only when the
    application workflow requires a terminal result.
-9. Choose one focused retrieval call. Use real row IDs returned by the SDK or
-   verified application data; never invent graph identifiers.
+9. Choose one focused retrieval call. With SDK 0.5.0, pass text when the selected
+   vector is linked to a saved embedding configuration and the Runtime supports
+   `query_embedding_generation`. Otherwise use an application-supplied vector
+   with the matching model and dimensions. Use real row IDs returned by the SDK
+   or verified application data for graph anchors.
 10. Bound depth, candidate counts, result limits, pagination, and application
    token budget. Apply authorization before retrieval because filters are not
    an authorization boundary.
@@ -61,13 +64,12 @@ backend-owned automation, or an MCP fallback.
   CLI or dashboard control-plane handoff.
 - Read `references/graph-retrieval.md` for graph calls, real row-ID discovery,
   direction, depth, and fan-out limits.
-- Read `references/vector-and-text.md` for existing vector compatibility,
-  TSVector, fuzzy retrieval, filters, thresholds, and dimension checks.
+- Read `references/vector-and-text.md` for text input on existing vector
+  configurations, vector compatibility, TSVector, fuzzy retrieval, and thresholds.
 - Read `references/hybrid-and-rag.md` for graph-first, vector-first, joint
   retrieval, chaining, provenance, deduplication, and context budgets.
-- Read `references/context.md` for pgContext collection identity, multiple
-  named vectors and defaults, explicit operations, point lifecycle, retrieval
-  modes, and Joint versus rank fusion.
+- Read `references/context.md` for pgContext collection identity, named vectors,
+  model selection, text queries and query plans, operations, and point lifecycle.
 - Read `references/rows.md` for validated single-row insert, upsert, ignore,
   retry, ambiguous-commit, and pipeline checkpoint behavior.
 - Read `references/errors-pagination-testing.md` for typed models, cursors,
@@ -88,8 +90,14 @@ backend-owned automation, or an MCP fallback.
   registration from a physical-only index or design new setup around
   vector-configuration creation; use
   `project.context.create_collection()` instead.
-- Do not pass pgvector configuration IDs to pgContext methods or imply that
-  Polygres generates source or query embeddings.
+- Select Context vectors by their registered names. For text queries, Polygres
+  resolves the saved model, version, dimensions, and query settings. Configure
+  generation through the dashboard, CLI, or MCP; the SDK consumes that setup.
+  SDK collection management remains available for application-owned provisioning.
+- Keep caller-supplied vectors compatible with the selected model and dimensions.
+  Existing 0.4.1 vector calls keep their signatures and result types. Use
+  `use_credits=True` only when the application intends additional credit usage
+  and the project has spending permission.
 - Never print headers, environment variables, API keys, or database secrets.
 - Treat `connection_info()` as passwordless metadata. It does not return a
   database password. Never call it for a synced project.

@@ -1,5 +1,12 @@
 # Vector and text retrieval
 
+## Contents
+
+- [Existing vector search](#existing-vector-search)
+- [TSVector search](#tsvector-search)
+- [Fuzzy search](#fuzzy-search)
+- [Filters and authorization](#filters-and-authorization)
+
 ## Existing vector search
 
 Use `project.vector` only when the application already depends on a registered
@@ -12,9 +19,10 @@ legacy SDK/API cannot register or re-enable it. For new semantic retrieval
 setup, use `project.context` and a Polygres AI Context collection instead of
 attempting to create another vector configuration.
 
-The embedding dimension must exactly match the selected configuration. Reject
-empty embeddings, non-numeric values, infinity, and NaN locally. Do not pad,
-truncate, or silently switch configurations.
+For application-supplied vectors, use the original embedding model and exactly
+match the selected configuration's dimensions. Reject empty embeddings,
+non-numeric values, infinity, and NaN locally. Keep the selected configuration
+and vector representation consistent.
 
 ```python
 page = project.vector.search(
@@ -25,6 +33,34 @@ page = project.vector.search(
     limit=20,
 )
 ```
+
+SDK 0.5.0 also accepts text when the configuration's vector column is linked to
+one saved embedding configuration with its original model confirmed:
+
+```python
+page = project.vector.search(
+    text="How does replication work?",
+    config="documents_embedding",
+    filters={"tenant_id": tenant_id},
+    min_similarity=0.75,
+    limit=20,
+    use_credits=False,
+    idempotency_key=query_request_id,
+    timeout=30.0,
+)
+```
+
+Choose `text` or `embedding` for a search. `config` still selects the existing
+vector configuration; it is not a model selector. Polygres resolves the saved
+model, revision, and dimensions through that configuration's column. Text input
+requires Runtime query embedding support and uses the retrieval allowance.
+Equal dimensions alone are insufficient to link an arbitrary vector column to a
+model. Complete model setup through the dashboard, CLI, or MCP.
+
+The response remains `Page[VectorResult]`. Automatic retries and pagination keep
+the same query idempotency key; use a caller-owned key when retrying across
+method calls or resuming manually. See `errors-pagination-testing.md` for the
+spending and recovery rules.
 
 `max_distance` and `min_similarity` are alternative thresholds. Do not send
 both. Evaluate threshold quality on representative data instead of presenting
@@ -40,6 +76,10 @@ page = project.vector.similar_to(
     limit=10,
 )
 ```
+
+`similar_to()` continues to use the stored row vector. It does not generate a
+query embedding. TSVector and fuzzy search also retain their existing behavior
+and use their text configurations directly.
 
 ## TSVector search
 

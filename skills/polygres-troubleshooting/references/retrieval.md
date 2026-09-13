@@ -23,6 +23,12 @@ Ready; an existing `index_kind: none` configuration can be Ready for exact scan
 without HNSW. An unregistered physical pgvector index is not a usable fallback
 and cannot be registered or re-enabled through the retired API.
 
+For text input on an existing vector or hybrid configuration, inspect its
+embedding configuration binding and query-generation capability with
+[embedding diagnostics](embeddings.md). A supplied vector continues to use the
+existing query path directly. TSVector and fuzzy query text stays lexical and
+does not generate an embedding.
+
 For a graph build issue, compare readiness and configuration identity, then
 check `relrowsecurity` and `relforcerowsecurity` for every registered temporary
 test table before attributing the failure to pgGraph. A temporary pgGraph

@@ -1,5 +1,11 @@
 # Hybrid retrieval and RAG
 
+## Contents
+
+- [Choose a strategy](#choose-a-strategy)
+- [Chain retrieval safely](#chain-retrieval-safely)
+- [Build grounded context](#build-grounded-context)
+
 ## Choose a strategy
 
 - Use graph-first when the application has a trusted anchor and wants semantic
@@ -7,6 +13,9 @@
 - Use vector-first when a semantic candidate set should seed graph expansion.
 - Use joint when both a trusted anchor and an embedding contribute directly to
   ranking.
+
+These `project.hybrid` methods use existing vector configurations. For new
+retrieval setup, use the corresponding Context methods in `context.md`.
 
 ```python
 page = project.hybrid.graph_first(
@@ -40,6 +49,38 @@ page = project.hybrid.joint(
     limit=15,
 )
 ```
+
+With SDK 0.5.0, each method can embed query text through the selected vector
+configuration's saved model. The same model connection and Runtime capability
+requirements described in `vector-and-text.md` apply:
+
+```python
+page = project.hybrid.graph_first(
+    start,
+    text="How does replication work?",
+    config="documents_embedding",
+    max_depth=2,
+    limit=15,
+    idempotency_key=query_request_id,
+    use_credits=False,
+    timeout=30.0,
+)
+```
+
+Use `project.hybrid.vector_first(text=question, ...)` for semantic seeds, or
+`project.hybrid.joint(text=question, start=start, ...)` for Joint. With explicit
+vectors, the existing positional forms above remain valid. Legacy Joint still
+requires a `start`; pass it by keyword when omitting `embedding`.
+
+Choose one of `text` or `embedding`. Text queries use the retrieval allowance;
+`use_credits=True` allows additional usage when project spending is enabled and
+funded. These methods keep their existing `Page[HybridResult]` responses,
+ranking options, filters, and pagination. Preserve the query idempotency key
+through retries and manual cursor continuation.
+
+`project.context.joint()` additionally supports lexical ranking through
+`query`. Its `text` input supplies the semantic question. That lexical option
+belongs to Context Joint, so do not add it to `project.hybrid.joint()`.
 
 Keep weights explainable and evaluate them with relevant queries. Limit graph
 depth and vector candidates independently to prevent broad, expensive context.

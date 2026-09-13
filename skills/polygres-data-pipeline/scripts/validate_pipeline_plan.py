@@ -8,6 +8,7 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +26,10 @@ REMOTE_ACTION_TYPES = {
     "sync-table-reconfigure",
     "sync-resnapshot",
     "sync-credential-rotate",
+    "embedding-create",
+    "embedding-update",
+    "embedding-process",
+    "embedding-remove",
 }
 DESTRUCTIVE_ACTION_TYPES = {
     "delete",
@@ -110,6 +115,20 @@ def _is_cli_sync_creation(surface: str, operation: str) -> bool:
     } or normalized.startswith("polygres projects create sync")
 
 
+def _is_mcp_sync_operation(surface: str, operation: str) -> bool:
+    return surface == "mcp" and operation in {
+        "get_synchronized_project_preflight",
+        "list_synchronized_source_tables",
+        "select_synchronized_tables",
+        "create_synchronized_project",
+        "get_synchronization_status",
+        "pause_synchronization",
+        "resume_synchronization",
+        "retry_synchronization",
+        "resnapshot_synchronization",
+    }
+
+
 def _actions(plan: dict[str, Any]) -> list[dict[str, Any]]:
     value = plan.get("actions", [])
     return (
@@ -147,9 +166,7 @@ def approval_boundary(plan: dict[str, Any]) -> dict[str, Any]:
         plan.get("source", {}).get("scope") if isinstance(plan.get("source"), dict) else None
     )
     project_mode = (
-        plan.get("target", {}).get("project_mode")
-        if isinstance(plan.get("target"), dict)
-        else None
+        plan.get("target", {}).get("project_mode") if isinstance(plan.get("target"), dict) else None
     )
     source_authority = (
         plan.get("source", {}).get("system_of_record")
@@ -197,15 +214,51 @@ def approval_boundary(plan: dict[str, Any]) -> dict[str, Any]:
         if (
             isinstance(embedding, dict)
             and embedding.get("enabled")
-            and embedding.get("location") == "hosted"
+            and embedding.get("location") in {"hosted", "managed"}
         ):
             cost = str(embedding.get("cost", "")).strip().casefold()
-            if cost not in {"", "none", "free"}:
+            settings = _object(embedding.get("settings"))
+            if embedding.get("location") == "managed":
+                if settings.get("use_credits", False):
+                    paid.append("embedding:managed-generation-credits")
+                if embedding.get("query_use_credits", False):
+                    paid.append("embedding:managed-query-credits")
+            elif cost not in {"", "none", "free"}:
                 paid.append(f"embedding:{embedding.get('provider', 'hosted')}")
             data_egress = embedding.get("data_egress")
             if data_egress not in (None, "", "none"):
                 egress.append(str(data_egress))
-    return {
+    managed_effects = []
+    managed_options = list(reviewed_options)
+    if isinstance(embedding, dict):
+        managed_options.append(embedding)
+    for option in managed_options:
+        if not embedding_enabled or option.get("location", option.get("category")) != "managed":
+            continue
+        settings = _object(option.get("settings"))
+        model = option.get("model", {})
+        effect = {
+            "source_schema": settings.get("source_schema"),
+            "source_table": settings.get("source_table"),
+            "source_key_columns": settings.get("source_key_columns"),
+            "source_text_column": settings.get("source_text_column"),
+            "model_id": settings.get("model_id", option.get("id")),
+            "revision": model.get("revision")
+            if isinstance(model, dict)
+            else option.get("revision"),
+            "price_version": model.get("price_version")
+            if isinstance(model, dict)
+            else option.get("price_version"),
+            "dimensions": settings.get("dimensions"),
+            "mode": settings.get("mode", "automatic"),
+            "chunking": settings.get("chunking", {"enabled": False}),
+            "existing_vector_column": settings.get("existing_vector_column"),
+            "use_credits": settings.get("use_credits", False),
+            "query_use_credits": option.get("query_use_credits", False),
+        }
+        if effect not in managed_effects:
+            managed_effects.append(effect)
+    boundary = {
         "project_id": project_id,
         "project_mode": project_mode,
         "source_scope": source_scope,
@@ -215,6 +268,9 @@ def approval_boundary(plan: dict[str, Any]) -> dict[str, Any]:
         "destructive_actions": sorted(set(destructive)),
         "paid_processing": sorted(set(paid)),
     }
+    if managed_effects:
+        boundary["managed_embeddings"] = managed_effects
+    return boundary
 
 
 def approval_digest(plan: dict[str, Any]) -> str:
@@ -378,9 +434,7 @@ def _synced_project_blockers(
             )
 
     sync_actions = {
-        action.get("type")
-        for action in actions
-        if str(action.get("type", "")).startswith("sync-")
+        action.get("type") for action in actions if str(action.get("type", "")).startswith("sync-")
     }
     sync_interface = sync.get("interface") if isinstance(sync, dict) else None
     sync_surface = (
@@ -389,13 +443,15 @@ def _synced_project_blockers(
         else ""
     )
     cli_creation_only = sync_actions == {"sync-project-create"} and sync_surface == "cli"
-    if sync_actions and sync_surface != "dashboard" and not cli_creation_only:
+    mcp_sync = isinstance(sync_interface, dict) and _is_mcp_sync_operation(
+        sync_surface, str(sync_interface.get("operation", ""))
+    )
+    if sync_actions and sync_surface != "dashboard" and not cli_creation_only and not mcp_sync:
         blockers.append(
             _issue(
                 "synced-control-plane-handoff-required",
                 "sync.interface",
-                "use CLI or dashboard for initial sync creation and dashboard for later "
-                "control-plane actions",
+                "use discovered MCP tools, CLI initial creation, or the dashboard for sync setup",
             )
         )
     if "sync-credential-rotate" in sync_actions:
@@ -457,16 +513,382 @@ def _synced_project_blockers(
             "sync" in operation
             and surface != "dashboard"
             and not _is_cli_sync_creation(surface, operation)
+            and not _is_mcp_sync_operation(surface, operation)
         ):
             blockers.append(
                 _issue(
                     "synced-control-plane-handoff-required",
                     path,
-                    "use CLI or dashboard for initial sync creation and dashboard for later "
-                    "sync control",
+                    "use discovered MCP sync tools or the dashboard; CLI supports initial creation",
                 )
             )
     return blockers
+
+
+def _object(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _amount(value: Any) -> Decimal | None:
+    try:
+        parsed = Decimal(str(value))
+    except (InvalidOperation, ValueError):
+        return None
+    return parsed if parsed.is_finite() and parsed >= 0 else None
+
+
+def _managed_embedding_issues(
+    plan: dict[str, Any], blockers: list[dict[str, str]], warnings: list[dict[str, str]]
+) -> None:
+    embedding = _object(plan.get("embedding"))
+    if embedding.get("enabled", True) is False or embedding.get("location") != "managed":
+        return
+    ready = plan.get("state") in {"ready_for_review", "operational"}
+    destination = blockers if ready else warnings
+    settings = _object(embedding.get("settings"))
+    if not settings:
+        destination.append(
+            _issue(
+                "managed-settings-missing",
+                "embedding.settings",
+                "record the configuration request after source discovery",
+            )
+        )
+        return
+    required = (
+        "name",
+        "source_schema",
+        "source_table",
+        "source_key_columns",
+        "source_text_column",
+        "model_id",
+        "dimensions",
+    )
+    for key in required:
+        if not settings.get(key):
+            destination.append(
+                _issue(
+                    "managed-setting-missing",
+                    f"embedding.settings.{key}",
+                    "use the discovered source and model contract",
+                )
+            )
+    keys = settings.get("source_key_columns")
+    if not isinstance(keys, list) or not keys or any(not isinstance(key, str) for key in keys):
+        blockers.append(
+            _issue(
+                "managed-key-invalid",
+                "embedding.settings.source_key_columns",
+                "use discovered non-null unique source key columns",
+            )
+        )
+    elif len(keys) != len(set(keys)):
+        blockers.append(
+            _issue(
+                "managed-key-invalid",
+                "embedding.settings.source_key_columns",
+                "source key columns must be distinct",
+            )
+        )
+    if settings.get("existing_vector_column") and not settings.get("confirm_original_model"):
+        blockers.append(
+            _issue(
+                "managed-original-model-unconfirmed",
+                "embedding.settings.confirm_original_model",
+                "confirm the original model and input settings before copying source vectors",
+            )
+        )
+    chunking = _object(settings.get("chunking"))
+    if settings.get("chunking") is not None and not isinstance(settings["chunking"], dict):
+        blockers.append(
+            _issue(
+                "managed-chunking-invalid",
+                "embedding.settings.chunking",
+                "chunking must be an object",
+            )
+        )
+    elif chunking.get("enabled"):
+        size, overlap = chunking.get("size_tokens", 512), chunking.get("overlap_tokens", 64)
+        if (
+            not isinstance(size, int)
+            or not isinstance(overlap, int)
+            or not 32 <= size <= 8192
+            or not 0 <= overlap < size
+            or overlap > 2048
+        ):
+            blockers.append(
+                _issue(
+                    "managed-chunking-invalid",
+                    "embedding.settings.chunking",
+                    "choose a supported chunk size and smaller overlap",
+                )
+            )
+        if settings.get("existing_vector_column"):
+            blockers.append(
+                _issue(
+                    "managed-copy-chunk-conflict",
+                    "embedding.settings",
+                    "generate fresh chunk embeddings instead of copying whole-row vectors",
+                )
+            )
+    model = _object(embedding.get("model"))
+    dimensions = model.get("dimensions")
+    if not model:
+        destination.append(
+            _issue(
+                "managed-model-missing",
+                "embedding.model",
+                "retain the selected model returned by Polygres",
+            )
+        )
+    elif (
+        str(model.get("id")) != str(settings.get("model_id"))
+        or not isinstance(dimensions, list)
+        or settings.get("dimensions") not in dimensions
+    ):
+        blockers.append(
+            _issue(
+                "managed-model-mismatch",
+                "embedding.model",
+                "model ID and dimensions must match the selected Polygres catalog entry",
+            )
+        )
+    if not model.get("revision") or not model.get("price_version"):
+        destination.append(
+            _issue(
+                "managed-model-version-missing",
+                "embedding.model",
+                "retain the pinned model revision and price version",
+            )
+        )
+    if _amount(model.get("microcredits_per_token")) is None:
+        destination.append(
+            _issue(
+                "managed-model-price-missing",
+                "embedding.model.microcredits_per_token",
+                "retain the current per-token price returned by Polygres",
+            )
+        )
+    preview = _object(embedding.get("preview"))
+    if not preview:
+        destination.append(
+            _issue(
+                "managed-preview-missing",
+                "embedding.preview",
+                "preview this configuration before starting generation",
+            )
+        )
+    else:
+        if _object(embedding.get("preview_settings")) != settings:
+            destination.append(
+                _issue(
+                    "managed-preview-settings-mismatch",
+                    "embedding.preview_settings",
+                    "refresh preview after changing the source or configuration request",
+                )
+            )
+        preview_model = _object(preview.get("model"))
+        if any(
+            preview_model.get(key) != model.get(key)
+            for key in ("id", "revision", "price_version", "microcredits_per_token")
+        ):
+            blockers.append(
+                _issue(
+                    "managed-preview-model-mismatch",
+                    "embedding.preview.model",
+                    "refresh preview for the selected model and price version",
+                )
+            )
+        for field in (
+            "source_rows",
+            "sampled_rows",
+            "copyable_sample_rows",
+            "missing_sample_rows",
+            "estimated_input_tokens",
+            "estimated_storage_bytes",
+            "estimated_microcredits",
+        ):
+            if _amount(preview.get(field)) is None:
+                destination.append(
+                    _issue(
+                        "managed-preview-value-missing",
+                        f"embedding.preview.{field}",
+                        "retain the estimate returned by preview",
+                    )
+                )
+        usage = _object(preview.get("usage"))
+        if not usage or usage.get("project_id") != _object(plan.get("target")).get("project_id"):
+            blockers.append(
+                _issue(
+                    "managed-usage-project-mismatch",
+                    "embedding.preview.usage",
+                    "use the usage response from the selected project",
+                )
+            )
+        else:
+            for bucket in ("generation", "query"):
+                value = _object(usage.get(bucket))
+                for field in (
+                    "included_microcredits",
+                    "used_microcredits",
+                    "reserved_microcredits",
+                    "remaining_microcredits",
+                ):
+                    if _amount(value.get(field)) is None:
+                        destination.append(
+                            _issue(
+                                "managed-usage-missing",
+                                f"embedding.preview.usage.{bucket}.{field}",
+                                "retain current monetary allowance amounts from the usage response",
+                            )
+                        )
+            if not usage.get("period_end"):
+                destination.append(
+                    _issue(
+                        "managed-renewal-missing",
+                        "embedding.preview.usage.period_end",
+                        "record the returned allowance renewal date",
+                    )
+                )
+            for field in ("charged_microcredits", "reserved_microcredits", "cycle_credit_limit"):
+                if _amount(usage.get(field)) is None:
+                    destination.append(
+                        _issue(
+                            "managed-credit-evidence-missing",
+                            f"embedding.preview.usage.{field}",
+                            "retain credit spending and cycle limit evidence from usage",
+                        )
+                    )
+            if not isinstance(usage.get("credit_spending_enabled"), bool):
+                destination.append(
+                    _issue(
+                        "managed-credit-evidence-missing",
+                        "embedding.preview.usage.credit_spending_enabled",
+                        "retain the returned project credit spending permission",
+                    )
+                )
+            additional = _amount(preview.get("estimated_microcredits"))
+            opted_in = settings.get("use_credits", False)
+            if (opted_in or embedding.get("query_use_credits", False)) and not usage.get(
+                "credit_spending_enabled"
+            ):
+                warnings.append(
+                    _issue(
+                        "managed-credit-permission-required",
+                        "embedding.preview.usage",
+                        "additional usage needs an owner or administrator "
+                        "to enable project credit spending",
+                    )
+                )
+            if additional is not None and additional > 0:
+                if not opted_in:
+                    warnings.append(
+                        _issue(
+                            "managed-generation-funding-needed",
+                            "embedding.settings.use_credits",
+                            "the preview exceeds the remaining generation allowance; include the "
+                            "expected pause or authorized additional credits in the review",
+                        )
+                    )
+                else:
+                    available = _amount(usage.get("available_credit_microcredits"))
+                    limit = _amount(usage.get("cycle_credit_limit"))
+                    charged = _amount(usage.get("charged_microcredits"))
+                    reserved = _amount(usage.get("reserved_microcredits"))
+                    if available is None:
+                        warnings.append(
+                            _issue(
+                                "managed-credit-balance-unavailable",
+                                "embedding.preview.usage.available_credit_microcredits",
+                                "check organization credit availability before relying "
+                                "on additional generation",
+                            )
+                        )
+                    elif additional > available:
+                        warnings.append(
+                            _issue(
+                                "managed-credit-balance-insufficient",
+                                "embedding.preview.usage.available_credit_microcredits",
+                                "the preview needs more additional credits "
+                                "than currently available",
+                            )
+                        )
+                    if (
+                        limit is not None
+                        and charged is not None
+                        and reserved is not None
+                        and additional > limit * 1000000 - charged - reserved
+                    ):
+                        warnings.append(
+                            _issue(
+                                "managed-cycle-limit-insufficient",
+                                "embedding.preview.usage.cycle_credit_limit",
+                                "the preview exceeds the remaining project credit spending limit",
+                            )
+                        )
+    if embedding.get("credential_names"):
+        blockers.append(
+            _issue(
+                "managed-provider-credentials-unneeded",
+                "embedding.credential_names",
+                "Polygres supplies the provider connection; application code "
+                "only needs Polygres credentials",
+            )
+        )
+    context = _object(plan.get("context"))
+    if context and context.get("enabled", True):
+        if context.get("source_kind") != "managed-output":
+            blockers.append(
+                _issue(
+                    "managed-context-source-mismatch",
+                    "context.source_kind",
+                    "configure the collection from the managed Context handoff",
+                )
+            )
+        if context.get("source_schema") not in (None, "polygres_embeddings"):
+            blockers.append(
+                _issue(
+                    "managed-context-source-mismatch",
+                    "context.source_schema",
+                    "use the generated output schema returned by the Context handoff",
+                )
+            )
+    capture = _object(plan.get("capture_runtime"))
+    if capture.get("enabled", True):
+        if (
+            capture.get("reconcile_context")
+            or capture.get("context_collection")
+            or capture.get("context_collection_id")
+        ):
+            blockers.append(
+                _issue(
+                    "managed-source-context-reconciliation",
+                    "capture_runtime",
+                    "write source text without Context options; "
+                    "Polygres reconciles generated output",
+                )
+            )
+    for index, action in enumerate(_actions(plan)):
+        if action.get("type") in {"embedding-update", "embedding-remove"}:
+            version = action.get("expected_version")
+            if not isinstance(version, int) or version < 1:
+                destination.append(
+                    _issue(
+                        "managed-configuration-version-missing",
+                        f"actions[{index}].expected_version",
+                        "read the current configuration version before updating or removing it",
+                    )
+                )
+    for path, interface in _interfaces(plan):
+        if "project.embeddings" in str(interface.get("operation", "")):
+            blockers.append(
+                _issue(
+                    "managed-sdk-configuration-unavailable",
+                    path,
+                    "configure embeddings through MCP, CLI, or the dashboard; "
+                    "use existing SDK retrieval methods for text queries",
+                )
+            )
 
 
 def lint_plan(plan: Any) -> LintResult:
@@ -477,6 +899,7 @@ def lint_plan(plan: Any) -> LintResult:
 
     actions = _actions(plan)
     blockers.extend(_synced_project_blockers(plan, actions))
+    _managed_embedding_issues(plan, blockers, warnings)
     remote_actions = [action for action in actions if _is_remote(action)]
     target = plan.get("target")
     project_id = target.get("project_id") if isinstance(target, dict) else None

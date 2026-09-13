@@ -60,12 +60,12 @@ starting pattern:
 2. Normalize, filter, and enqueue the event.
 3. Return the chat response without waiting for indexing unless the selected
    user experience requires synchronous capture.
-4. If semantic capture is selected, create document embeddings with the chosen
-   local, hosted, or application-owned contract. For a Context-backed target,
-   use one Context-backed row operation to write the source row and complete or
-   durably start point reconciliation. Mark the checkpoint durable only after
-   every required surface succeeds or a durable per-surface pending record has
-   been saved.
+4. For Polygres embeddings, write filtered text without Context options and let
+   Polygres generate and reconcile its output. Track source persistence and
+   search readiness separately. For local or external vectors, generate the
+   vector first and use one Context-backed row operation for the selected
+   source collection. Mark the checkpoint durable only after the required
+   write succeeds or its recovery state has been saved.
 5. Expose pending count and last error. Do not automatically retry an ambiguous
    row-only write. Resume an ambiguous, pending, or partial Context result only
    by replaying the exact payload and idempotency key through the composite
@@ -80,9 +80,11 @@ per-turn bridge, prefer SDK `0.3.0` `project.rows` or the documented rows
 Runtime API; use CLI `rows ... --file -` for a simple agent command when process
 startup is acceptable. Confirm capability first. If unavailable, name the
 exact upgrade requirement or use approved direct Postgres compatibility access.
-For Context-backed capture, pass the selected collection and a stable
-idempotency key to the row operation. Persist or deterministically reconstruct
-the complete request before dispatch. Do not issue a separate point command.
+For capture into an application-owned vector collection, pass the selected
+collection and a stable idempotency key to the row operation. Persist or
+deterministically reconstruct the complete request before dispatch. For
+Polygres-managed output, keep source writes free of those Context options; the
+generation worker handles output reconciliation.
 
 ## Retrieve before a turn
 
@@ -92,10 +94,11 @@ for each retrieval event:
 
 1. Resolve user, tenant, workspace, and allowed sources.
 2. Decide whether the prompt needs recall under the selected policy.
-3. When semantic retrieval is selected, create the query embedding with the
-   same provider, model, revision, dimensions, normalization, and query input
-   contract used by the stored vector. Hosted query embedding egress and cost
-   must already be covered by the approval.
+3. With Polygres embeddings and SDK 0.5.0, pass `text` to the existing retrieval
+   method and select the collection vector. Polygres uses its saved model
+   contract and retrieval allowance. Otherwise, generate a query vector with
+   the original provider, model, revision, dimensions, and input settings.
+   Query processing and any additional credits follow the existing approval.
 4. Run the selected bounded Context, text, relational, or hybrid retrieval.
 5. Expand graph relationships only when the selected design enables them.
 6. Recheck authorization on resolved source rows.
