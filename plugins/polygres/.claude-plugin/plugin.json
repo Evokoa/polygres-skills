@@ -1,6 +1,6 @@
 {
   "name": "polygres",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Use Polygres MCP, sync PostgreSQL sources, set up data pipelines and embeddings, build retrieval, and troubleshoot through supported dashboard, CLI, SDK, and Runtime API workflows.",
   "author": {
     "name": "Polygres",

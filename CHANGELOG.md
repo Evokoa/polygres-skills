@@ -2,6 +2,13 @@
 
 All notable changes to Polygres Agent Skills are documented in this file.
 
+## 0.8.0 - 2026-09-16
+
+- Document CLI 0.6.0 automatic chunking, selective oversized recovery, internal
+  version handling, opt-in summaries and bounded progress monitoring.
+- Preserve legacy CLI contracts and distinguish generation from search readiness.
+- Explain configuration-local parallel batching and safe recovery of saved results.
+
 ## 0.7.0 - 2026-09-13
 
 ### Added

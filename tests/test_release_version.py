@@ -45,32 +45,32 @@ def _run(package: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
 
 
 def test_release_contract_matches_version_manifests_record_and_digest() -> None:
-    result = _run(PACKAGE_ROOT, "check", "--tag", "polygres-skills-v0.7.0")
+    result = _run(PACKAGE_ROOT, "check", "--tag", "polygres-skills-v0.8.0")
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout == "Skills release version is consistent: 0.7.0\n"
+    assert result.stdout == "Skills release version is consistent: 0.8.0\n"
 
 
 def test_release_targets_mcp_catalog_and_current_clients() -> None:
-    record = json.loads((PACKAGE_ROOT / "releases" / "0.7.0.json").read_text())
+    record = json.loads((PACKAGE_ROOT / "releases" / "0.8.0.json").read_text())
     readme = (PACKAGE_ROOT / "README.md").read_text(encoding="utf-8")
 
-    assert RELEASE.canonical_version(PACKAGE_ROOT) == "0.7.0"
-    assert record["version"] == "0.7.0"
-    assert record["release_date"] == "2026-09-13"
+    assert RELEASE.canonical_version(PACKAGE_ROOT) == "0.8.0"
+    assert record["version"] == "0.8.0"
+    assert record["release_date"] == "2026-09-16"
     assert record["compatibility"]["polygres_mcp"] == {
         "minimum_supported": "1.0.0",
         "maximum_tested": "1.0.0",
     }
     assert record["compatibility"]["polygres_cli"] == {
         "minimum_supported": "0.4.0",
-        "maximum_tested": "0.5.0",
+        "maximum_tested": "0.6.0",
     }
     assert record["compatibility"]["polygres_sdk"] == {
         "minimum_supported": "0.4.0",
         "maximum_tested": "0.5.0",
     }
-    assert "Package version: `0.7.0`" in readme
+    assert "Package version: `0.8.0`" in readme
     assert "MCP catalog `1.0`" in readme
     assert "polygres-cli 0.4.0" in readme
     assert "polygres-sdk 0.4.0" in readme
@@ -127,11 +127,11 @@ def test_release_record_rejects_payload_drift(tmp_path: Path) -> None:
 def test_set_updates_all_machine_readable_version_copies(tmp_path: Path) -> None:
     package = _copy_package(tmp_path)
 
-    RELEASE.set_version("0.7.1", package)
+    RELEASE.set_version("0.8.1", package)
     versions = RELEASE.manifest_versions(package)
 
-    assert set(versions.values()) == {"0.7.1"}
-    assert (package / "VERSION").read_text() == "0.7.1\n"
+    assert set(versions.values()) == {"0.8.1"}
+    assert (package / "VERSION").read_text() == "0.8.1\n"
 
 
 def test_set_rolls_back_every_version_copy_after_a_write_failure(
@@ -179,7 +179,7 @@ def test_payload_change_requires_a_version_increase(tmp_path: Path) -> None:
     with pytest.raises(RELEASE.ReleaseValidationError, match="without increasing VERSION"):
         RELEASE.verify_version_change("HEAD~1", package)
 
-    RELEASE.set_version("0.7.1", package)
+    RELEASE.set_version("0.8.1", package)
     RELEASE.verify_version_change("HEAD~1", package)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "polygres",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Connect to Polygres MCP, set up data pipelines and embeddings, operate projects, build retrieval, and troubleshoot through supported MCP, dashboard, CLI, SDK, and Runtime API workflows.",
   "author": {
     "name": "Polygres",

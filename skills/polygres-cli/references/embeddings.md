@@ -1,6 +1,6 @@
 # Managed embeddings
 
-Use CLI 0.5.0 to generate embeddings from project text, keep them current, and
+Use CLI 0.6.0 to generate embeddings from project text, keep them current, and
 make them available for Context queries. Polygres stores generated records in
 `polygres_embeddings`, preserving the source columns. The same workflow works
 with synchronized text; continue writing source rows in the upstream database.
@@ -65,7 +65,7 @@ model. Replace `MODEL_UUID` and the example dimensions with that model's values:
   "dimensions": 1536,
   "mode": "automatic",
   "use_credits": false,
-  "chunking": {"enabled": false}
+  "chunking": {"mode": "automatic"}
 }
 ```
 
@@ -152,7 +152,8 @@ recent `get` response:
 
 On a version conflict, fetch the configuration and review the intervening
 change before submitting an updated request. Source columns, model,
-dimensions, and chunking are fixed at creation. Batch sizing is managed by
+and dimensions are fixed at creation. Chunking can be enabled through the
+oversized-failure recovery flow below. Batch sizing is managed by
 Polygres and is not a create or update option.
 
 Processing continues after the action response. Follow `embeddings get` for
@@ -232,3 +233,57 @@ deployed OpenAPI contract and [the MCP tool contract](mcp-tool-contract.md) for
 request details. `polygres api request` targets the central API and is not a
 replacement for these Runtime commands. Keep provider credentials, model
 administration, and private operator routes outside a user's project workflow.
+
+## Automatic chunking and selective recovery (CLI 0.6.0)
+
+New generation configurations default to `"chunking": {"mode": "automatic"}`.
+Documents that fit the selected model remain whole. Oversized documents split at
+its token limit, allowing for model prefixes and overlap. Initial generation and
+later text/CDC changes use the same policy. `custom` and `off` remain available.
+Legacy `enabled`/size/overlap payloads and saved configurations retain their meaning.
+Existing-vector copying retains its unchunked default. Queries are not automatically
+chunked; shorten an oversized query.
+
+```bash
+polygres --project <project> embeddings recover-oversized <configuration-uuid> --preview
+polygres --project <project> embeddings recover-oversized <configuration-uuid>
+polygres --json --project <project> embeddings recover-oversized <configuration-uuid> --yes
+polygres --project <project> embeddings get <configuration-uuid> --summary
+polygres --project <project> embeddings list --summary
+polygres --json --project <project> embeddings get <configuration-uuid> --watch --timeout 600
+```
+
+Recovery previews eligible and blocked failures, model limits and sample chunk
+counts. Confirmation enables automatic chunking for future source updates and
+requeues eligible failures. The command handles configuration versions internally.
+Successful documents and unknown provider outcomes stay untouched. A paused
+configuration stays paused. Rows are checked again on submission, so the final
+queued count can differ from the preview. Queued work is not completed generation.
+If there are no eligible rows, no settings change is submitted.
+
+Interactive recovery confirms the displayed changes. A configuration conflict
+refreshes the preview and asks again, at most three submissions. JSON and other
+non-interactive execution require `--yes` to mutate; `--preview` never mutates.
+Scripts exit on a version conflict. An ambiguous submission is never blindly
+repeated: inspect configuration progress and a fresh preview before deciding to retry.
+
+Existing commands retain their JSON output and syntax. `--summary` opts into a
+readable view on get/list/preview/create and processing actions; `--json` takes
+precedence. `get --watch` polls without mutation until generation and search
+publication finish. It stops on timeout, interruption, or generation requiring
+user action. It does not resume paused work. In JSON mode it prints one final
+configuration or a structured error, not a stream of concatenated JSON values.
+Missing progress fields are reported as unknown, not zero.
+
+Batches stay within one configuration, with up to four concurrent provider calls
+subject to shared worker limits. Pause stops new admission while started calls
+can finish. Retry preserves saved results and does not enable chunking. Reconcile
+does not authorize repeating unknown provider consumption. Search indexing and
+usage acknowledgements are separate from generation progress. Batch and worker
+settings are operator-managed and have no CLI tuning flags.
+
+An older server can still accept explicit off/custom chunking in legacy format.
+Automatic chunking and selective recovery require a compatible backend. Precise
+unsupported-field/action responses produce an upgrade message without silently
+disabling chunking or substituting an ordinary retry. Existing login/config files
+and JSON response fields remain compatible.

@@ -74,7 +74,8 @@ created. Automatic processes subsequent text changes; Manual collects them
 until **Run now**. Polygres chooses processing batch sizes. Updates accept
 `name`, `mode`, and `use_credits` with `expected_version`. Read the latest
 configuration before editing after a version conflict. Source, model,
-dimensions, and chunk settings belong to a new configuration.
+and dimensions belong to a new configuration. Definite oversized failures can
+enable automatic chunking through selective recovery without replacing successful rows.
 
 ### Allowances and recovery
 
@@ -129,3 +130,18 @@ input formatting, relevant results, latency, and retry behavior. Keep the same
 model contract for indexed and query vectors. Reuse existing vectors only when
 that original contract is known; a new model needs a separate vector or a
 reviewed reindex.
+
+### Automatic chunking and batched generation
+
+CLI 0.6.0 defaults new generation to automatic oversized-only chunking. Read the
+selected catalog model's input limit rather than hardcoding it. Off and custom
+chunking remain explicit choices; vector copying keeps its unchunked default.
+Text and CDC updates use the saved policy. Batches never mix configurations and
+execute at most four provider calls concurrently within shared admission limits.
+Generation completion does not establish that search publication has finished.
+Use `embeddings get CONFIGURATION --watch --timeout 600` for bounded observation.
+For definite oversized failures, preview `embeddings recover-oversized CONFIGURATION
+--preview`, then confirm recovery within the user's authorized scope. Versions
+are handled internally. Successful rows and unknown outcomes are preserved, and
+paused configurations stay paused. See the CLI embedding reference for scripts,
+conflicts, legacy compatibility and ambiguous-response handling.

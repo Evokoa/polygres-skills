@@ -68,8 +68,9 @@ results back to source rows.
 Automatic mode processes ongoing changes; Manual mode gathers pending work
 for an explicit run. Both modes start initial generation when created. Record
 freshness expectations accordingly. The service manages processing batch
-sizes. Treat source, model, dimension, and chunking changes as a new
-configuration and an explicit retrieval cutover.
+sizes. Treat source, model and dimension changes as a new configuration and an
+explicit retrieval cutover. Definite oversized failures can instead enable
+automatic chunking selectively, preserving successful rows.
 
 ## Query model selection
 
@@ -162,3 +163,12 @@ review the preview and funding, then use **Configure** under **Search
 collection** for the Context collection. **Connect** opens application
 connection details. Plan queries through the existing SDK or MCP retrieval
 tools; the embeddings page is for generation and configuration.
+
+New generation defaults to automatic oversized-only chunking. Retain source keys
+and chunk indices when mixing whole documents and passages; group search results
+by a registered source key where one result per document is required. Existing
+vector copying and explicit legacy policies retain their behavior. Generation
+batches stay within a configuration and allow four concurrent provider calls;
+this does not promise four times end-to-end throughput. Check index readiness
+separately. The CLI recovery workflow requires 0.6.0; SDK queries remain on their
+existing API and do not manage generation configuration.

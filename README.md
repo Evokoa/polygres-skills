@@ -251,8 +251,8 @@ For Claude Code:
 
 ## Compatibility
 
-Package version: `0.7.0`. It supports Polygres MCP catalog `1.0`,
-`polygres-cli 0.4.0` through `0.5.0`, and `polygres-sdk 0.4.0` through `0.5.0`.
+Package version: `0.8.0`. It supports Polygres MCP catalog `1.0`,
+`polygres-cli 0.4.0` through `0.6.0`, and `polygres-sdk 0.4.0` through `0.5.0`.
 Embedding setup and text query examples use CLI/SDK `0.5.0` and a service that
 advertises the corresponding tools and capabilities. Existing vector workflows
 remain available on `0.4.x`. Follow discovered MCP tools, installed CLI help,
@@ -260,7 +260,11 @@ and SDK method signatures for the version in use.
 
 ## Changelog
 
-Version `0.7.0` adds embedding generation workflows, text queries through the
+Version `0.8.0` adds automatic chunking, targeted oversized recovery, and
+readiness monitoring guidance for CLI `0.6.0`. Older command workflows remain
+supported. These new features require a compatible server.
+
+Version `0.7.0` added embedding generation workflows, text queries through the
 existing SDK methods, and model, usage, and readiness guidance across all five
 skills. Published release notes are available on the
 [releases page](https://github.com/Evokoa/polygres-skills/releases).

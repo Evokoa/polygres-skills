@@ -175,3 +175,22 @@ Generation uses configuration status reads rather than generic Context
 operation IDs. A separate Context setup or reconciliation operation has its
 own status. Keep retry, resume, run, reconciliation, settings changes, and
 removal in the authorized operational handoff; diagnosis itself remains read-only.
+
+## Selective oversized recovery and progress (CLI 0.6.0)
+
+For definite oversized failures, use `embeddings recover-oversized CONFIGURATION
+--preview` for read-only diagnosis. Review eligible/blocked rows, token limits and
+sample chunks. Hand off confirmation to the authorized operational workflow;
+`--yes` applies changes and is not a diagnostic action. The CLI handles versions
+internally, preserves successes and uncertainty, and leaves paused work paused.
+A zero-eligible preview makes no changes. Source byte/chunk-count limits may still
+require source correction. Oversized queries must be shortened, not chunked.
+
+Use `embeddings get CONFIGURATION --summary` to distinguish generation, retries,
+recovery and search publication, or `--watch --timeout 600` for bounded observation.
+A current generation status alone does not prove all index updates have completed.
+Batches are configuration-local with up to four simultaneous provider calls;
+ordinary retry reuses saved results and never silently enables chunking. On an
+ambiguous recovery response, inspect current state before another submission.
+An unsupported-feature response requires a backend upgrade; do not substitute
+ordinary retry or disable chunking to hide the mismatch.
