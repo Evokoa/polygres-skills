@@ -9,7 +9,7 @@ Produce a reviewable plan before retrieval configuration or application work.
 This skill is advisory: it must not mutate a project directly.
 
 When Polygres MCP tools are available, read
-`references/mcp-tool-contract.md` and use discovered read tools for bounded
+[`references/mcp-tool-contract.md`](references/mcp-tool-contract.md) and use discovered read tools for bounded
 inspection. Call `whoami`, respect the connection's project boundary, and keep
 this skill read-only even when change tools are visible.
 
@@ -23,20 +23,20 @@ this skill read-only even when change tools are visible.
    existing retrieval configuration. Label missing evidence as unresolved;
    never infer production facts from a table or column name.
 3. Select the smallest sufficient strategy using
-   `references/strategy-selection.md`. Reject an unsupported strategy rather
+   [`references/strategy-selection.md`](references/strategy-selection.md). Reject an unsupported strategy rather
    than inventing a capability.
-4. For semantic retrieval, use `references/embedding-design.md` to compare
+4. For semantic retrieval, use [`references/embedding-design.md`](references/embedding-design.md) to compare
    Polygres generation, local or external generation, and existing vectors.
-   For graph retrieval, apply `references/graph-modeling.md`. For an existing
+   For graph retrieval, apply [`references/graph-modeling.md`](references/graph-modeling.md). For an existing
    vector configuration, TSVector, or fuzzy retrieval, apply
-   `references/vector-and-text-design.md`.
+   [`references/vector-and-text-design.md`](references/vector-and-text-design.md).
    When MCP Graph tools are available, also read
-   `references/mcp-graph-retrieval.md` for evidence and handoff requirements.
+   [`references/mcp-graph-retrieval.md`](references/mcp-graph-retrieval.md) for evidence and handoff requirements.
 5. For pgContext collections, point synchronization, registered filters, or
-   Context retrieval modes, apply `references/context-design.md`.
+   Context retrieval modes, apply [`references/context-design.md`](references/context-design.md).
 6. For multi-stage retrieval or RAG, apply
-   `references/hybrid-and-rag-plan.md`.
-7. Write the result with `references/plan-template.md`. When called by
+   [`references/hybrid-and-rag-plan.md`](references/hybrid-and-rag-plan.md).
+7. Write the result with [`references/plan-template.md`](references/plan-template.md). When called by
    `$polygres-data-pipeline`, return the selected and omitted components plus
    exact public-interface handoffs in a machine-readable section so the caller
    can continue without another interview.

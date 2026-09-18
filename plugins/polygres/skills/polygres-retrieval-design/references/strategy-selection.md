@@ -30,7 +30,7 @@ retrieval plan.
    retrieval. Retain the vector surface only when an established configuration
    must remain compatible.
    Compare managed generation, local or external generation, and existing
-   vectors using `embedding-design.md`. Choose the model and generation owner
+   vectors using [`embedding-design.md`](embedding-design.md). Choose the model and generation owner
    separately from the retrieval strategy. An existing collection with vectors
    can keep receiving query vectors as before.
 4. Select TSVector for linguistic ranking and fuzzy retrieval only for

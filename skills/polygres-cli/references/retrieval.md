@@ -127,7 +127,7 @@ This reports graph, vector, and hybrid readiness. It does not report text
 readiness in the current launch surface. Check text separately.
 
 Polygres AI Context has its own capability, collection, point, operation, and
-retrieval lifecycle. Use it for new semantic retrieval setup. Read `context.md`
+retrieval lifecycle. Use it for new semantic retrieval setup. Read [`context.md`](context.md)
 from this skill when the request mentions Context, pgContext, AI Search,
 collections, Joint retrieval, or point reconciliation. An existing pgvector
 configuration is never itself a pgContext collection, even when its physical

@@ -2,6 +2,16 @@
 
 All notable changes to Polygres Agent Skills are documented in this file.
 
+## 0.9.0 - 2026-09-17
+
+- Add an optional standalone Advisor for navigation of hosted guidance.
+- Generate a deterministic Markdown library, complete catalog, release manifest,
+  and sitemap from the existing five skills at stable current-content URLs.
+- Preserve local resource links and the full plugin's MCP connection.
+- Prepare Cloudflare static hosting and validation-gated publication after public
+  repository synchronization. Restore previous guidance by reverting and republishing.
+- Public hosting activation and remote installation checks are publication steps.
+
 ## 0.8.0 - 2026-09-16
 
 - Document CLI 0.6.0 automatic chunking, selective oversized recovery, internal

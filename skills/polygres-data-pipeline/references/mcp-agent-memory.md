@@ -1,6 +1,6 @@
 # MCP agent memory
 
-Read `mcp-tool-contract.md` first. Define memory policy before creating storage.
+Read [`mcp-tool-contract.md`](mcp-tool-contract.md) first. Define memory policy before creating storage.
 
 Record owner, subject, tenant, source, stable identity, allowed content,
 retention, deletion, freshness, and retrieval authorization. Exclude system

@@ -11,7 +11,7 @@ retrieval. If the project already has a pgvector configuration, decide whether
 to preserve it temporarily for compatibility or replace it with a native
 collection through explicit in-place column migration.
 
-Choose the generation owner with `embedding-design.md`. For a synced project,
+Choose the generation owner with [`embedding-design.md`](embedding-design.md). For a synced project,
 select `existing` Context source mode: either an eligible synchronized vector
 column or the managed output returned by the embedding Context handoff.
 Polygres can generate that output from synchronized text. Source SQL and row
@@ -89,7 +89,7 @@ row IDs, useful relationships, bounded traversal, and a measurable benefit over
 dense or text retrieval. Existing Context methods accept either query
 embeddings or text that Polygres embeds using the selected vector's saved
 model. A positive Joint lexical weight uses the separate `query` value and a
-configured text column. See `embedding-design.md` for each method's inputs.
+configured text column. See [`embedding-design.md`](embedding-design.md) for each method's inputs.
 
 ## Lifecycle and validation
 

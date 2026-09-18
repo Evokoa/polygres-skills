@@ -3,7 +3,7 @@
 For a synced project, use a collection over synchronized vectors or a managed
 embedding output collection. Keep application writes in the source PostgreSQL
 database; Polygres can generate embeddings from its synchronized text. See
-`synced-projects.md` for the two setup paths.
+[`synced-projects.md`](synced-projects.md) for the two setup paths.
 
 ## Contents
 
@@ -436,7 +436,7 @@ using the input tokens and configured model price. `use_credits` defaults to
 project spending is enabled, within its cycle limit and available balance.
 Use the returned usage amounts and renewal date from the dashboard, CLI, or MCP;
 there is no fixed token quota to assume. Supplied query vectors skip generation
-and its allowance charge. See `errors-pagination-testing.md` for retry identity,
+and its allowance charge. See [`errors-pagination-testing.md`](errors-pagination-testing.md) for retry identity,
 timeouts, and funding errors.
 
 ## Query plans

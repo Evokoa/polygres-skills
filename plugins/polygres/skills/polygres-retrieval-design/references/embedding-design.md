@@ -157,7 +157,7 @@ is not a way to resolve an uncertain provider outcome.
 ## Setup handoff
 
 Return the exact discovery, preview, creation, status, and Context handoff
-operations from `mcp-tool-contract.md`. The CLI provides `embeddings` commands
+operations from [`mcp-tool-contract.md`](mcp-tool-contract.md). The CLI provides `embeddings` commands
 for the same workflow. In the dashboard, start with **Generate embeddings**,
 review the preview and funding, then use **Configure** under **Search
 collection** for the Context collection. **Connect** opens application

@@ -1,6 +1,6 @@
 # MCP grounded Context answers
 
-Read `mcp-tool-contract.md` first. Use this playbook for an interactive grounded
+Read [`mcp-tool-contract.md`](mcp-tool-contract.md) first. Use this playbook for an interactive grounded
 answer when compatible MCP Context tools are available. Use the SDK references
 for persistent Python application code.
 
@@ -40,4 +40,4 @@ Text queries consume retrieval allowance. Keep `use_credits` false unless the
 user authorizes additional credit usage and the project has spending permission.
 Keep one retry identity for the same query and use a new one for changed input.
 If generation or model setup is needed, use the embedding-management tools
-listed in `mcp-tool-contract.md` within the user's requested scope.
+listed in [`mcp-tool-contract.md`](mcp-tool-contract.md) within the user's requested scope.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Polygres Advisor"
+  short_description: "Find current Polygres guidance from the hosted library"
+  default_prompt: "Use $polygres-advisor to find the current guidance for my Polygres task."

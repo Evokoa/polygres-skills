@@ -9,7 +9,7 @@ polygres --json --project <project> ready
 
 Read `project_mode` from status before continuing. For a standard project, add
 `polygres --json --project <project> db info`. For a synced project, never run
-`db info`; follow `synced-projects.md` and keep source, control-plane, and
+`db info`; follow [`synced-projects.md`](synced-projects.md) and keep source, control-plane, and
 Runtime evidence separate.
 
 `projects status` can separate provisioning or control-plane state from Runtime

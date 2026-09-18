@@ -59,7 +59,7 @@ model. Complete model setup through the dashboard, CLI, or MCP.
 
 The response remains `Page[VectorResult]`. Automatic retries and pagination keep
 the same query idempotency key; use a caller-owned key when retrying across
-method calls or resuming manually. See `errors-pagination-testing.md` for the
+method calls or resuming manually. See [`errors-pagination-testing.md`](errors-pagination-testing.md) for the
 spending and recovery rules.
 
 `max_distance` and `min_similarity` are alternative thresholds. Do not send

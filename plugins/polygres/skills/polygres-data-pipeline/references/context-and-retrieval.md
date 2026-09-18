@@ -12,7 +12,7 @@
 
 Polygres generates source and query embeddings when a compatible configuration
 is set up. Applications can also supply vectors from a local model, external
-provider, or existing source column. Follow `embedding-model-selection.md` and
+provider, or existing source column. Follow [`embedding-model-selection.md`](embedding-model-selection.md) and
 the user's provider and data-processing preferences. Keep model selection in
 the existing setup review.
 

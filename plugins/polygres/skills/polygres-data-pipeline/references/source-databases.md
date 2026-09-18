@@ -13,7 +13,7 @@ or deterministic source key and explain update and collision limitations.
 ## Choose managed sync or one custom incremental method
 
 For an eligible Supabase, Neon, or PostgreSQL source, first evaluate a managed
-synced project with `synced-projects.md`. Choose it when a new project is
+synced project with [`synced-projects.md`](synced-projects.md). Choose it when a new project is
 acceptable and the source will remain the system of record. Otherwise choose
 one custom method for a standard project:
 

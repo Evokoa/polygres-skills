@@ -3,7 +3,7 @@
 Resolve and retain `project_mode` with the selected project. `projects create`
 is a command group: use `projects create standard` for a managed PostgreSQL
 project and `projects create sync` for a synchronized PostgreSQL project. For
-sync creation and synced-project boundaries, follow `synced-projects.md`.
+sync creation and synced-project boundaries, follow [`synced-projects.md`](synced-projects.md).
 
 ## Authentication
 
@@ -62,6 +62,6 @@ the returned project ID and request ID. Do not invent an ID and do not repeat
 the create request. Use `polygres projects status <project>` to continue
 checking the created project.
 
-For synchronized project creation, read `synced-projects.md`. It covers source
+For synchronized project creation, read [`synced-projects.md`](synced-projects.md). It covers source
 connection input, table selection, confirmation, idempotency, and the remaining
 dashboard-only lifecycle boundary.

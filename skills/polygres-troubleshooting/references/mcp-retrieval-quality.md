@@ -1,6 +1,6 @@
 # MCP retrieval quality diagnosis
 
-Read `mcp-tool-contract.md` first. Keep diagnosis read-only and preserve every
+Read [`mcp-tool-contract.md`](mcp-tool-contract.md) first. Keep diagnosis read-only and preserve every
 request ID.
 
 Use `get_retrieval_readiness`, collection status and verification,

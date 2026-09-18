@@ -32,7 +32,7 @@ SDK 0.5.0 also accepts `text` through `project.vector.search` and existing
 option only when the registered vector column resolves to one saved embedding
 configuration with the matching dimensions and confirmed original model.
 Select these resources with `config`; named Context vectors use `vector_name`
-on the Context methods. See `embedding-design.md` for model binding, quota,
+on the Context methods. See [`embedding-design.md`](embedding-design.md) for model binding, quota,
 and retry decisions. Existing calls that provide embeddings remain valid.
 
 ## Text retrieval

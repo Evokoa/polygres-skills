@@ -10,7 +10,7 @@ failure boundary, and recommend the smallest safe correction. Do not mutate
 while diagnosing.
 
 When Polygres MCP tools are available, read
-`references/mcp-tool-contract.md`, call `whoami`, and use the discovered read
+[`references/mcp-tool-contract.md`](references/mcp-tool-contract.md), call `whoami`, and use the discovered read
 catalog before CLI or SDK fallback. Treat the connection URL restrictions,
 OAuth installation, current scopes, project boundary, project mode, and catalog
 version as separate diagnostic layers.
@@ -20,28 +20,28 @@ version as separate diagnostic layers.
 1. Read the installed `polygres --help` and command-specific help before using
    a command. Installed behavior is the source of truth for CLI compatibility.
 2. Resolve identity, configuration source, and one exact project using
-   `references/context-and-connectivity.md`. Stop on an ambiguous project.
+   [`references/context-and-connectivity.md`](references/context-and-connectivity.md). Stop on an ambiguous project.
 3. Capture the symptom, timestamp, sanitized command or SDK call, exit code or
    exception type, `request_id`, job ID, and whether pagination returned a
    cursor.
    For generated pipelines, also capture the manifest state, plan digest,
    approved action IDs, checkpoint, and last successfully completed stage.
 4. Inspect project and database evidence with
-   `references/projects-and-database.md`.
-5. If `project_mode` is `synced`, use `references/synced-projects.md` and skip
+   [`references/projects-and-database.md`](references/projects-and-database.md).
+5. If `project_mode` is `synced`, use [`references/synced-projects.md`](references/synced-projects.md) and skip
    target database, row, import, and migration checks.
 6. For import job or migration failures, use
-   `references/jobs-and-migrations.md`. For graph, vector, text, hybrid, or
-   general readiness failures, use `references/retrieval.md`. For pgContext
+   [`references/jobs-and-migrations.md`](references/jobs-and-migrations.md). For graph, vector, text, hybrid, or
+   general readiness failures, use [`references/retrieval.md`](references/retrieval.md). For pgContext
    capability, collection, point, operation, recall, or Joint failures, use
-   `references/context.md`.
+   [`references/context.md`](references/context.md).
    For embedding setup, generation, text query models, or usage, use
-   `references/embeddings.md`.
-   Use `references/mcp-retrieval-quality.md` for retrieval evaluation through
-   MCP and `references/mcp-operation-recovery.md` for MCP operation state.
+   [`references/embeddings.md`](references/embeddings.md).
+   Use [`references/mcp-retrieval-quality.md`](references/mcp-retrieval-quality.md) for retrieval evaluation through
+   MCP and [`references/mcp-operation-recovery.md`](references/mcp-operation-recovery.md) for MCP operation state.
 7. Classify the fault as CLI/local configuration, control-plane, Runtime API,
    Postgres/database or pooler, or asynchronous job state. Use
-   `references/errors-and-escalation.md` for typed SDK errors and escalation.
+   [`references/errors-and-escalation.md`](references/errors-and-escalation.md) for typed SDK errors and escalation.
 8. Re-check status before retry. Recommend the smallest corrective action and
    hand off supported mutations to `$polygres-cli` or application changes to
    `$polygres-sdk`, using the user's existing authorization when it covers the

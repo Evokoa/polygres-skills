@@ -1,6 +1,6 @@
 # MCP project setup
 
-Read `mcp-tool-contract.md` first. Use this playbook when the outcome requires a
+Read [`mcp-tool-contract.md`](mcp-tool-contract.md) first. Use this playbook when the outcome requires a
 new standard or synchronized project, provisioning recovery, or a capacity
 change.
 

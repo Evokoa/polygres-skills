@@ -1,6 +1,6 @@
 # MCP operation recovery
 
-Read `mcp-tool-contract.md` first. Preserve the operation kind, operation ID,
+Read [`mcp-tool-contract.md`](mcp-tool-contract.md) first. Preserve the operation kind, operation ID,
 project ID, request ID, last status, progress, error code, retryability, and
 timestamp.
 

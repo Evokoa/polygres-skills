@@ -119,7 +119,7 @@ period, and generation and query monetary allowances separately. Include the
 preview's estimated tokens, included coverage, and additional credit cost.
 State project spending permission, cycle limit, available balance, and each
 configuration or query request's `use_credits` choice. Count text-based nearest
-nodes separately in a composed query plan. Follow `embedding-design.md` for
+nodes separately in a composed query plan. Follow [`embedding-design.md`](embedding-design.md) for
 accounting and request handling.
 
 ## Risks and approvals

@@ -1,6 +1,6 @@
 # MCP dataset import
 
-Read `mcp-tool-contract.md` first. This playbook combines local preparation, a
+Read [`mcp-tool-contract.md`](mcp-tool-contract.md) first. This playbook combines local preparation, a
 Dashboard import, and MCP observation.
 
 ## Prepare locally

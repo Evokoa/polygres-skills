@@ -1,6 +1,6 @@
 # MCP graph retrieval operations
 
-Read `mcp-tool-contract.md` first. Use this playbook after a reviewed graph
+Read [`mcp-tool-contract.md`](mcp-tool-contract.md) first. Use this playbook after a reviewed graph
 design. MCP is the preferred interactive execution surface when its Graph tools
 are discovered.
 

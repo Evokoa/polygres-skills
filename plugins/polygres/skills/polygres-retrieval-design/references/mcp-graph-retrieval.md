@@ -1,6 +1,6 @@
 # MCP graph retrieval design
 
-Read `mcp-tool-contract.md` first. This skill stays read-only. Use discovered MCP
+Read [`mcp-tool-contract.md`](mcp-tool-contract.md) first. This skill stays read-only. Use discovered MCP
 Graph tools to gather evidence, then return a reviewable configuration and
 verification plan.
 

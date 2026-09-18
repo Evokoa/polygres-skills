@@ -10,8 +10,8 @@ project's Runtime API. Use `$polygres-cli` instead for human authentication,
 control-plane project administration, imports, migrations, and API-key management.
 
 For an interactive grounded answer, prefer available Polygres MCP tools. Read
-`references/mcp-tool-contract.md` and
-`references/mcp-grounded-context.md`, then use the discovered read catalog.
+[`references/mcp-tool-contract.md`](references/mcp-tool-contract.md) and
+[`references/mcp-grounded-context.md`](references/mcp-grounded-context.md), then use the discovered read catalog.
 Continue with the SDK workflow for persistent Python application integration,
 backend-owned automation, or an MCP fallback.
 
@@ -32,7 +32,7 @@ backend-owned automation, or an MCP fallback.
    control-plane URL or a direct or pooled Postgres URL.
 6. Resolve project mode before selecting a namespace. For a synced project,
    construct `client.project(project_mode="synced")` and read
-   `references/synced-projects.md`.
+   [`references/synced-projects.md`](references/synced-projects.md).
 7. Check `project.readiness()` before relying on graph, existing vector, or
    legacy hybrid retrieval. For new semantic retrieval, prefer Polygres AI
    Context: call `project.context.get_capabilities()` and then inspect collection
@@ -57,24 +57,24 @@ backend-owned automation, or an MCP fallback.
 
 ## Reference routing
 
-- Read `references/client-setup.md` for installation, environment variables,
+- Read [`references/client-setup.md`](references/client-setup.md) for installation, environment variables,
   endpoint selection, readiness, and passwordless connection information.
-- Read `references/synced-projects.md` for synced-project API-key limits,
+- Read [`references/synced-projects.md`](references/synced-projects.md) for synced-project API-key limits,
   unavailable write and database surfaces, source-authoritative writes, and
   CLI or dashboard control-plane handoff.
-- Read `references/graph-retrieval.md` for graph calls, real row-ID discovery,
+- Read [`references/graph-retrieval.md`](references/graph-retrieval.md) for graph calls, real row-ID discovery,
   direction, depth, and fan-out limits.
-- Read `references/vector-and-text.md` for text input on existing vector
+- Read [`references/vector-and-text.md`](references/vector-and-text.md) for text input on existing vector
   configurations, vector compatibility, TSVector, fuzzy retrieval, and thresholds.
-- Read `references/hybrid-and-rag.md` for graph-first, vector-first, joint
+- Read [`references/hybrid-and-rag.md`](references/hybrid-and-rag.md) for graph-first, vector-first, joint
   retrieval, chaining, provenance, deduplication, and context budgets.
-- Read `references/context.md` for pgContext collection identity, named vectors,
+- Read [`references/context.md`](references/context.md) for pgContext collection identity, named vectors,
   model selection, text queries and query plans, operations, and point lifecycle.
-- Read `references/rows.md` for validated single-row insert, upsert, ignore,
+- Read [`references/rows.md`](references/rows.md) for validated single-row insert, upsert, ignore,
   retry, ambiguous-commit, and pipeline checkpoint behavior.
-- Read `references/errors-pagination-testing.md` for typed models, cursors,
+- Read [`references/errors-pagination-testing.md`](references/errors-pagination-testing.md) for typed models, cursors,
   automatic pagination, exceptions, retries, and mocked tests.
-- Read `references/mcp-grounded-context.md` for interactive grounded answers
+- Read [`references/mcp-grounded-context.md`](references/mcp-grounded-context.md) for interactive grounded answers
   through the available MCP Context tools.
 
 ## Boundaries

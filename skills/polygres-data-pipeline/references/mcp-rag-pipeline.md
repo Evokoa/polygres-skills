@@ -1,6 +1,6 @@
 # MCP RAG pipeline
 
-Read `mcp-tool-contract.md` first. Use MCP for interactive setup and verification;
+Read [`mcp-tool-contract.md`](mcp-tool-contract.md) first. Use MCP for interactive setup and verification;
 use the SDK reference when the user needs persistent application code.
 
 ## Design
@@ -15,7 +15,7 @@ fields, freshness, and deletion behavior. Select one initial retrieval mode:
 
 Choose Polygres generation or user-selected local, external, or existing
 vectors. Record the model, revision, dimensions, metric, and document/query
-input settings. Follow `embedding-model-selection.md` for source discovery,
+input settings. Follow [`embedding-model-selection.md`](embedding-model-selection.md) for source discovery,
 model selection, generation preview, allowance checks, and setup.
 
 ## Configure

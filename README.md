@@ -1,26 +1,54 @@
 # Polygres Agent Skills
 
-Polygres Agent Skills connect coding agents to Polygres MCP, guide PostgreSQL
-sync and data-pipeline setup, operate projects, design retrieval, build
-applications, and diagnose failures through supported Polygres interfaces.
+Polygres Agent Skills help coding agents set up data pipelines, operate projects,
+design retrieval, build applications, and diagnose failures. Install the Advisor
+to load current guidance from [skills.polygres.com](https://skills.polygres.com/index.md),
+or install the full skills package for local guidance and tools.
 
 User guide: [Polygres Agent Skills](https://docs.polygres.com/agent-skills)
 
-## Choose a skill
-
-| Skill | Use it for |
-| --- | --- |
-| `polygres-data-pipeline` | Set up ingestion, PostgreSQL sync, embedding generation, retrieval, memory, and agent integration. |
-| `polygres-cli` | Operate projects and configure embeddings and retrieval through MCP and the CLI. |
-| `polygres-sdk` | Build Python integrations with existing vector inputs or text queries that Polygres embeds. |
-| `polygres-retrieval-design` | Inspect project evidence and plan retrieval, embedding models, readiness, and usage. |
-| `polygres-troubleshooting` | Diagnose connection, generation, indexing, quota, and retrieval issues using read-only evidence. |
-
-Compatible agents select the appropriate skill automatically. You can also name the skill in your request when you want a specific workflow.
-
 ## Install
 
-### Agent Skills installer
+Both options install from this GitHub repository.
+
+| Option | What you get | Choose it when |
+| --- | --- | --- |
+| Advisor only (recommended) | One lightweight skill that fetches relevant hosted guidance. | Your agent has web access and you want current guidance without installing all five skills. |
+| Full skills package | Five local skills, helper scripts, and templates. Plugin marketplace installation also configures the Polygres MCP connection. | You want local guidance and execution resources. |
+
+### Advisor only (recommended)
+
+Install one skill that finds and loads the guidance relevant to your task:
+
+```bash
+npx skills add Evokoa/polygres-skills/meta/polygres-advisor
+```
+
+The Advisor reads the current hosted catalog and follows the skill and reference
+links relevant to your task. It fetches guidance each session, so published
+content updates do not require reinstalling the Advisor. It requires web access. It does not install an MCP
+connection, CLI, SDK, helper scripts, or templates; execution uses the tools you
+already have configured. If the website is unavailable, it can fall back to
+compatible installed guidance when present.
+
+### Without installation: pass the URL
+
+Give a web-capable agent the [catalog URL](https://skills.polygres.com/index.md)
+with your request:
+
+```text
+Use https://skills.polygres.com/index.md to help me choose a retrieval approach.
+```
+
+Include the URL each time you want the agent to consult the hosted guidance.
+
+### Full skills package
+
+Install all five skills locally when you want guidance available without fetching
+the website, along with the helper scripts and templates used in execution.
+Polygres operations still require the appropriate tools and service connection.
+
+Use the Agent Skills installer:
 
 ```bash
 npx skills add Evokoa/polygres-skills
@@ -36,7 +64,10 @@ npx skills add Evokoa/polygres-skills \
   --yes
 ```
 
-### Codex plugin marketplace
+This installs the skills and their resources. To include the Polygres MCP
+connection, use your agent's plugin marketplace instead.
+
+#### Codex
 
 ```bash
 codex plugin marketplace add Evokoa/polygres-skills
@@ -50,7 +81,7 @@ skills. Its base connection covers all accessible projects. Use the Polygres
 Dashboard's project **Connect → MCP** page when you want a fixed-project
 connection.
 
-### Claude Code plugin marketplace
+#### Claude Code
 
 Run these commands inside Claude Code:
 
@@ -60,11 +91,33 @@ Run these commands inside Claude Code:
 /reload-plugins
 ```
 
+## Choose a skill
+
+| Skill | Use it for |
+| --- | --- |
+| `polygres-data-pipeline` | Set up ingestion, PostgreSQL sync, embedding generation, retrieval, memory, and agent integration. |
+| `polygres-cli` | Operate projects and configure embeddings and retrieval through MCP and the CLI. |
+| `polygres-sdk` | Build Python integrations with existing vector inputs or text queries that Polygres embeds. |
+| `polygres-retrieval-design` | Inspect project evidence and plan retrieval, embedding models, readiness, and usage. |
+| `polygres-troubleshooting` | Diagnose connection, generation, indexing, quota, and retrieval issues using read-only evidence. |
+
+These five skills are included in the full package and are also available as
+hosted guidance through the Advisor. Compatible agents can select an installed
+skill automatically, or you can name it in your request. Repository activation
+restrictions continue to apply.
+
 ## Try it
 
-Ask for the outcome you want in one short line or a detailed specification. The
-skill infers the workflow from intent, inspects relevant state, and asks only
-for critical information it cannot safely discover.
+With the Advisor, ask for guidance on the task you are working on:
+
+```text
+Use $polygres-advisor to help me choose a retrieval approach for my application.
+```
+
+For operational requests, configure a Polygres MCP connection or the appropriate
+CLI/SDK first. The skills infer the workflow from your request, inspect relevant
+state through available tools, and ask for critical information they cannot
+safely discover.
 
 ```text
 Use Polygres MCP to inspect this project and recommend the next useful setup step.
@@ -88,8 +141,7 @@ creates runnable source-specific code. For a fully vague request such as `Help
 me set up Polygres`, it first asks one short question about the desired outcome
 and relevant data, then begins inspection. Schema changes, embeddings, graph,
 backfill, continuous capture, retrieval, and agent instructions are optional.
-Sample sizes, retrieval timing,
-and numeric limits are starting defaults that adapt to the user's setup. It
+Sample sizes, retrieval timing, and numeric limits are starting defaults that adapt to the user's setup. It
 prepares a concise review of remote changes and active agent instructions,
 uses existing authorization, and asks when an additional choice or approval
 is needed. Internal lint warnings do not become user questions.
@@ -197,7 +249,14 @@ Export Excel, Parquet, Avro, ORC, XML, YAML, SQL dump, and custom `pg_dump` sour
 
 ## Update
 
-Update an Agent Skills installation:
+The Advisor fetches current hosted guidance in new sessions without needing to
+be reinstalled. Update its installed instructions when the Advisor itself changes:
+
+```bash
+npx skills update polygres-advisor
+```
+
+Update the full package installed through the Agent Skills installer:
 
 ```bash
 npx skills update polygres-data-pipeline
@@ -225,7 +284,15 @@ For Claude Code:
 
 ## Uninstall
 
-Remove a global Agent Skills installation:
+Remove an Advisor installed in the current project:
+
+```bash
+npx skills remove polygres-advisor
+```
+
+Add `--global` if you installed it globally.
+
+Remove a global full-skills installation:
 
 ```bash
 npx skills remove --global polygres-data-pipeline
@@ -251,14 +318,20 @@ For Claude Code:
 
 ## Compatibility
 
-Package version: `0.8.0`. It supports Polygres MCP catalog `1.0`,
+Package version: `0.9.0`. It supports Polygres MCP catalog `1.0`,
 `polygres-cli 0.4.0` through `0.6.0`, and `polygres-sdk 0.4.0` through `0.5.0`.
 Embedding setup and text query examples use CLI/SDK `0.5.0` and a service that
 advertises the corresponding tools and capabilities. Existing vector workflows
 remain available on `0.4.x`. Follow discovered MCP tools, installed CLI help,
 and SDK method signatures for the version in use.
 
+The Advisor and hosted library are introduced in `0.9.0`; they become available
+when this release is published and the website is online.
+
 ## Changelog
+
+Version `0.9.0` adds the optional Advisor and a hosted library of current skills
+and references. The full package retains its local skills and resources.
 
 Version `0.8.0` adds automatic chunking, targeted oversized recovery, and
 readiness monitoring guidance for CLI `0.6.0`. Older command workflows remain
@@ -266,9 +339,8 @@ supported. These new features require a compatible server.
 
 Version `0.7.0` added embedding generation workflows, text queries through the
 existing SDK methods, and model, usage, and readiness guidance across all five
-skills. Published release notes are available on the
-[releases page](https://github.com/Evokoa/polygres-skills/releases).
+skills. See the [changelog](CHANGELOG.md) for the full release history.
 
 ## License
 
-Apache License 2.0. See `LICENSE`.
+Apache License 2.0. See [LICENSE](LICENSE).

@@ -15,7 +15,7 @@
   ranking.
 
 These `project.hybrid` methods use existing vector configurations. For new
-retrieval setup, use the corresponding Context methods in `context.md`.
+retrieval setup, use the corresponding Context methods in [`context.md`](context.md).
 
 ```python
 page = project.hybrid.graph_first(
@@ -52,7 +52,7 @@ page = project.hybrid.joint(
 
 With SDK 0.5.0, each method can embed query text through the selected vector
 configuration's saved model. The same model connection and Runtime capability
-requirements described in `vector-and-text.md` apply:
+requirements described in [`vector-and-text.md`](vector-and-text.md) apply:
 
 ```python
 page = project.hybrid.graph_first(

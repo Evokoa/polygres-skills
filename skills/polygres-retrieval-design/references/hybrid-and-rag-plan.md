@@ -43,7 +43,7 @@ composition methods accept `text` or `embedding`; model selection follows the
 collection and its optional `vector_name`. `project.context.query` and
 `text_hybrid` use their required `query` for lexical ranking and also for
 semantic generation when `embedding` is omitted. Joint keeps semantic `text`
-and lexical `query` separate. See `embedding-design.md` for exact inputs.
+and lexical `query` separate. See [`embedding-design.md`](embedding-design.md) for exact inputs.
 
 For composed query plans, each text-based `nearest` node chooses its own
 named or default vector. Count those nodes when estimating query embedding

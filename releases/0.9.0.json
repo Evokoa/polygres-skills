@@ -1,0 +1,43 @@
+{
+  "$schema": "./schema.json",
+  "version": "0.9.0",
+  "release_date": "2026-09-17",
+  "compatibility": {
+    "polygres_mcp": {
+      "minimum_supported": "1.0.0",
+      "maximum_tested": "1.0.0"
+    },
+    "polygres_cli": {
+      "minimum_supported": "0.4.0",
+      "maximum_tested": "0.6.0"
+    },
+    "polygres_sdk": {
+      "minimum_supported": "0.4.0",
+      "maximum_tested": "0.5.0"
+    },
+    "codex": {
+      "tested": null
+    },
+    "claude_code": {
+      "tested": null
+    },
+    "skills_cli": {
+      "tested": "1.5.25 (local exported Advisor installation into an isolated Codex project)"
+    }
+  },
+  "content_digest": "sha256:4e763494400885f299742f750aa96ebf3ea3b6e40d3429089768edda27b2c76b",
+  "installation_channels_verified": [
+    "skills CLI 1.5.25: local exported Advisor copied into an isolated Codex project; public GitHub installation not yet verified"
+  ],
+  "behavioral_evaluations": [
+    "CLI recovery confirmation, stale versions, ambiguous responses, legacy payloads, and generation/search readiness regression tests",
+    "Command documentation and source contract verification",
+    "Deterministic site export, catalog/link/heading validation, current-content replacement and source restoration regression checks",
+    "Local Cloudflare runtime HTTP checks with Wrangler 4.134.0; actual agent routing trials remain pending"
+  ],
+  "known_limitations": [
+    "New automatic chunking and oversized recovery workflows require CLI 0.6.0 and a compatible server. Existing commands retain older CLI support.",
+    "Public package installation and plugin loading are separate publication checks; no public release is claimed.",
+    "Hosted library and Advisor require publication and supported agent web access; public installation and production hosting verification remain pending."
+  ]
+}

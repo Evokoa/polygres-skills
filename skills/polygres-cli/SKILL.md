@@ -12,7 +12,7 @@ control-plane routes or infer undocumented request payloads.
 ## Prefer an available MCP connection
 
 When Polygres MCP tools are available in the current session, read
-`references/mcp-tool-contract.md` and use the discovered compatible tools for
+[`references/mcp-tool-contract.md`](references/mcp-tool-contract.md) and use the discovered compatible tools for
 interactive project operations. Call `whoami`, respect the fixed-project or
 multi-project boundary, and treat the discovered catalog as authoritative.
 
@@ -44,7 +44,7 @@ CLI command.
    or `polygres projects use <project>`. State the resolved project before a
    destructive, secret-producing, or schema-mutating operation.
 7. Resolve `project_mode`. When it is `synced`, read
-   `references/synced-projects.md` before choosing any command.
+   [`references/synced-projects.md`](references/synced-projects.md) before choosing any command.
 8. Prefer `polygres --json ...` for output the agent must parse. Treat stdout as
    the JSON channel and stderr as diagnostics.
 
@@ -63,17 +63,17 @@ Read only the references needed for the task:
 
 | User intent | Reference |
 | --- | --- |
-| Login, logout, identity, organization, project selection or status | `references/authentication-and-projects.md` |
-| Synced-project creation, capabilities, lifecycle handoff, and permission boundaries | `references/synced-projects.md` |
-| Environment, Postgres metadata, `psql`, Runtime API keys | `references/database-and-keys.md` |
-| Dataset or backfill from CSV, TSV, a JSON array, or JSONL/NDJSON | `references/data-imports.md` |
-| Validate, insert, upsert, or ignore one JSON object or runtime event | `references/rows.md` |
-| Migration list/apply and SQL safety | `references/migrations.md` |
-| Graph, text, existing vector configurations, and general retrieval readiness | `references/retrieval.md` |
-| Generate embeddings from source text, reuse vectors, preview costs, manage processing, and configure search | `references/embeddings.md` |
-| Execute an approved graph plan through MCP or fall back to CLI | `references/mcp-graph-retrieval.md` |
-| Polygres AI Context collections, filters, points, operations, and retrieval | `references/context.md` |
-| JSON output, polling, exit codes, retry and recovery | `references/automation-and-errors.md` |
+| Login, logout, identity, organization, project selection or status | [`references/authentication-and-projects.md`](references/authentication-and-projects.md) |
+| Synced-project creation, capabilities, lifecycle handoff, and permission boundaries | [`references/synced-projects.md`](references/synced-projects.md) |
+| Environment, Postgres metadata, `psql`, Runtime API keys | [`references/database-and-keys.md`](references/database-and-keys.md) |
+| Dataset or backfill from CSV, TSV, a JSON array, or JSONL/NDJSON | [`references/data-imports.md`](references/data-imports.md) |
+| Validate, insert, upsert, or ignore one JSON object or runtime event | [`references/rows.md`](references/rows.md) |
+| Migration list/apply and SQL safety | [`references/migrations.md`](references/migrations.md) |
+| Graph, text, existing vector configurations, and general retrieval readiness | [`references/retrieval.md`](references/retrieval.md) |
+| Generate embeddings from source text, reuse vectors, preview costs, manage processing, and configure search | [`references/embeddings.md`](references/embeddings.md) |
+| Execute an approved graph plan through MCP or fall back to CLI | [`references/mcp-graph-retrieval.md`](references/mcp-graph-retrieval.md) |
+| Polygres AI Context collections, filters, points, operations, and retrieval | [`references/context.md`](references/context.md) |
+| JSON output, polling, exit codes, retry and recovery | [`references/automation-and-errors.md`](references/automation-and-errors.md) |
 
 ## Execute an operation
 
@@ -144,8 +144,8 @@ the preflight DDL, affected schema objects, and ownership boundaries.
 ## Prepare non-CSV data locally
 
 For TSV, JSON arrays, and JSONL/NDJSON datasets, read
-`references/data-imports.md` and use `scripts/prepare_import.py`. Route one JSON
-object intended as an individual write to `references/rows.md` instead. Resolve
+[`references/data-imports.md`](references/data-imports.md) and use `scripts/prepare_import.py`. Route one JSON
+object intended as an individual write to [`references/rows.md`](references/rows.md) instead. Resolve
 the script path from this skill directory instead of assuming the repository
 contains `scripts/`.
 
@@ -160,7 +160,7 @@ the current public CLI.
 
 ## Handle failures
 
-Use `references/automation-and-errors.md` to interpret exit codes. In
+Use [`references/automation-and-errors.md`](references/automation-and-errors.md) to interpret exit codes. In
 particular:
 
 - Fix validation before retrying exit `2`.

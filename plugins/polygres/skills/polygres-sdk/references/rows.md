@@ -2,7 +2,7 @@
 
 Use this namespace only for a standard project. Synced projects reject rows
 validation and mutation; write to the source database and follow
-`synced-projects.md`.
+[`synced-projects.md`](synced-projects.md).
 
 Use `project.rows` for backend-owned per-record capture with SDK `0.3.0` and
 deployed Runtime compatibility metadata or OpenAPI containing the rows

@@ -27,7 +27,7 @@ path before calling it operational.
 ## Choose the execution surface
 
 When Polygres MCP tools are available, read
-`references/mcp-tool-contract.md`, call `whoami`, and prefer discovered
+[`references/mcp-tool-contract.md`](references/mcp-tool-contract.md), call `whoami`, and prefer discovered
 compatible MCP tools for interactive inspection, setup, retrieval, and
 operation tracking. Treat the connection's project boundary, feature selection,
 read-only setting, and visible catalog as authoritative.
@@ -93,7 +93,7 @@ agent integration, continue here.
    for the likely setup. Do not inventory every Polygres surface.
 3. Resolve `target.project_mode` before selecting any write, import, migration,
    database, or retrieval surface. For an existing PostgreSQL source, evaluate
-   managed sync with `references/synced-projects.md` before designing custom
+   managed sync with [`references/synced-projects.md`](references/synced-projects.md) before designing custom
    capture.
 4. Infer reversible defaults. Ask one concise batch of questions only for
    critical facts that inspection cannot resolve safely. Do not ask about
@@ -125,7 +125,7 @@ Critical means the answer changes safety or makes the implementation invalid:
   no safe default.
 
 Group critical unknowns into one short request. Prefer a reversible default and
-state it in the review. Use `references/guided-interview.md` for the initial
+state it in the review. Use [`references/guided-interview.md`](references/guided-interview.md) for the initial
 vague-prompt question or when genuinely blocked; it is not the normal flow for
 contextual or detailed requests.
 
@@ -155,9 +155,9 @@ contextual or detailed requests.
   the managed block to the relevant repository or agent, and do not claim
   guaranteed capture without a tested runtime hook.
 
-Read `references/schema-and-graph.md` for schema and graph decisions and
-`references/context-and-retrieval.md` for text, embedding, Context, and recall.
-For semantic retrieval, follow `references/embedding-model-selection.md` and
+Read [`references/schema-and-graph.md`](references/schema-and-graph.md) for schema and graph decisions and
+[`references/context-and-retrieval.md`](references/context-and-retrieval.md) for text, embedding, Context, and recall.
+For semantic retrieval, follow [`references/embedding-model-selection.md`](references/embedding-model-selection.md) and
 use `scripts/recommend_embedding_models.py` after bounded inspection.
 
 ## Generate a working implementation
@@ -166,21 +166,21 @@ Read only the source reference that matches the inspected input:
 
 | Source | Reference |
 | --- | --- |
-| Agent memory, Codex, Claude Code, or chat export | `references/source-chat-agents.md` |
-| Existing database, polling, outbox, or change stream | `references/source-databases.md` |
-| Managed Supabase, Neon, or PostgreSQL sync project | `references/synced-projects.md` |
-| Files, APIs, webhooks, queues, or mixed input | `references/source-files-and-apis.md` |
+| Agent memory, Codex, Claude Code, or chat export | [`references/source-chat-agents.md`](references/source-chat-agents.md) |
+| Existing database, polling, outbox, or change stream | [`references/source-databases.md`](references/source-databases.md) |
+| Managed Supabase, Neon, or PostgreSQL sync project | [`references/synced-projects.md`](references/synced-projects.md) |
+| Files, APIs, webhooks, queues, or mixed input | [`references/source-files-and-apis.md`](references/source-files-and-apis.md) |
 
 Read the focused MCP playbook that matches the outcome:
 
 | Outcome | Reference |
 | --- | --- |
-| Create or recover a project, onboard sync, or change capacity | `references/mcp-project-setup.md` |
-| Build and verify grounded RAG | `references/mcp-rag-pipeline.md` |
-| Prepare and monitor a dataset import | `references/mcp-dataset-import.md` |
-| Create interactive or application-backed agent memory | `references/mcp-agent-memory.md` |
+| Create or recover a project, onboard sync, or change capacity | [`references/mcp-project-setup.md`](references/mcp-project-setup.md) |
+| Build and verify grounded RAG | [`references/mcp-rag-pipeline.md`](references/mcp-rag-pipeline.md) |
+| Prepare and monitor a dataset import | [`references/mcp-dataset-import.md`](references/mcp-dataset-import.md) |
+| Create interactive or application-backed agent memory | [`references/mcp-agent-memory.md`](references/mcp-agent-memory.md) |
 
-Follow `references/pipeline-runtime.md`. The generated implementation must use
+Follow [`references/pipeline-runtime.md`](references/pipeline-runtime.md). The generated implementation must use
 stable source identities, filter before persistence or embedding, write
 idempotently, checkpoint only after durable success, expose exact capture and
 retrieval commands when selected, and include focused tests.
@@ -219,7 +219,7 @@ deletions through the source system and verify cleanup of each selected surface.
 
 ## Keep one execution record
 
-For multi-step work, use `references/pipeline-plan-contract.md` and quietly lint
+For multi-step work, use [`references/pipeline-plan-contract.md`](references/pipeline-plan-contract.md) and quietly lint
 the internal plan with `scripts/validate_pipeline_plan.py`. Automatically fix
 blockers from available evidence; resolve or accept warnings without turning
 them into user questions. Never make the user read or edit the plan. Use
@@ -227,7 +227,7 @@ them into user questions. Never make the user read or edit the plan. Use
 the source-specific runtime. Render the single review with
 `scripts/render_pipeline_review.py`.
 
-Follow `references/security-and-approvals.md`. Existing authorization remains
+Follow [`references/security-and-approvals.md`](references/security-and-approvals.md). Existing authorization remains
 valid for the same material effects. One approval covers the reviewed
 setup while project, source scope, data egress, destructive effects, and paid
 processing remain unchanged. Implementation details and harmless local files
