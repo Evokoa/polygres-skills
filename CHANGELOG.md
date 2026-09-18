@@ -4,6 +4,9 @@ All notable changes to Polygres Agent Skills are documented in this file.
 
 ## 0.9.0 - 2026-09-17
 
+- Keep deployment configuration, export policy, release verification records,
+  and canonical reference sources private. Installed skills retain their resources.
+- Publish client compatibility without internal evaluation or verification notes.
 - Add an optional standalone Advisor for navigation of hosted guidance.
 - Generate a deterministic Markdown library, complete catalog, release manifest,
   and sitemap from the existing five skills at stable current-content URLs.
